@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "PandaCode Zh Preview",
+  "identifier": "io.github.norecall.pandacode.zhpreview",
+  "bundle": {
+    "targets": ["nsis"],
+    "createUpdaterArtifacts": false,
+    "shortDescription": "PandaCode 简体中文预览版",
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["SimpChinese", "English"],
+        "displayLanguageSelector": true
+      }
+    }
+  },
+  "plugins": {
+    "updater": { "endpoints": [] }
+  }
+}

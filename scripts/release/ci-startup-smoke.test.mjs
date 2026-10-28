@@ -63,6 +63,11 @@ test('only the exact target/version package is launched', () => {
   assert.throws(() => selectPackage(Array(101).fill('PandaCode_1.2.3_amd64.AppImage'), '1.2.3', 'linux-x86_64'), /exactly one/);
 });
 
+test('preview installers use their isolated product name without accepting paths', () => {
+  assert.equal(selectPackage(['PandaCode Zh Preview_1.2.3_x64-setup.exe'], '1.2.3', 'windows-x86_64', 'PandaCode Zh Preview'), 'PandaCode Zh Preview_1.2.3_x64-setup.exe');
+  for (const name of ['../other', 'C:\\other', '', 'bad\nname']) assert.throws(() => selectPackage([], '1.2.3', 'windows-x86_64', name), /product name/);
+});
+
 test('isolated app data and literal NSIS arguments do not inherit credentials', () => {
   const directory = join(tmpdir(), 'startup with spaces');
   const env = smokeEnvironment({ HOME: '/real-user', APPDATA: '/real-data', PATH: 'path', GITHUB_TOKEN: 'secret', ANTHROPIC_API_KEY: 'secret', TAURI_SIGNING_PRIVATE_KEY: 'secret', RUST_LOG: 'info' }, directory);

@@ -15,8 +15,9 @@ export function assertHostedRunner(env, target, platform = process.platform) {
   }
 }
 
-export function selectPackage(names, version, target) {
-  const expected = targetConfig(target).built(version);
+export function selectPackage(names, version, target, productName = 'PandaCode') {
+  if (!/^[A-Za-z0-9][A-Za-z0-9 -]{0,63}$/.test(productName)) throw new Error('Invalid package product name.');
+  const expected = targetConfig(target).built(version).replace(/^PandaCode_/, `${productName}_`);
   if (names.length > 100 || names.filter(name => name === expected).length !== 1) {
     throw new Error(`Expected exactly one built package: ${expected}`);
   }
@@ -142,7 +143,10 @@ async function main() {
   const config = targetConfig(target);
   const { version } = JSON.parse(await readFile(join(root, 'src-tauri/tauri.conf.json'), 'utf8'));
   const bundle = bundleDirectory(target);
-  const installer = join(bundle, selectPackage(await readdir(bundle), version, target));
+  const productName = process.env.PANDACODE_PREVIEW_BUILD === '1'
+    ? JSON.parse(await readFile(join(root, 'src-tauri/tauri.zh-preview.conf.json'), 'utf8')).productName
+    : 'PandaCode';
+  const installer = join(bundle, selectPackage(await readdir(bundle), version, target, productName));
   const size = (await stat(installer)).size;
   console.log(`Packaged installer: ${size} bytes (${(size / 1024 / 1024).toFixed(1)} MiB; release limit 200 MiB).`);
   validatePackageSize(size);
