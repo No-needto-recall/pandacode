@@ -6,12 +6,21 @@
 
 ## 下载位置
 
-[Chinese preview builds](https://github.com/No-needto-recall/pandacode/actions/workflows/zh-preview.yml) 在 `feat/zh-cn-localization` 分支推送后构建，也提供手动触发入口。打开对应提交的成功运行，在 Artifacts 中下载：
+[Chinese preview builds](https://github.com/No-needto-recall/pandacode/actions/workflows/zh-preview.yml) 在 `feat/zh-cn-localization` 分支推送后构建。工作流也声明了手动触发；若 GitHub 尚未显示该入口，需要先将工作流加入默认分支，本次没有自动合并 `main`。打开对应提交的成功运行，在 Artifacts 中下载：
 
 - `PandaCode-zh-CN-Windows-x64`：解压后运行 `PandaCode-zh-CN-Windows-x64-setup.exe`。
 - `PandaCode-zh-CN-Android-arm64`：解压后在手机上安装 `PandaCode-zh-CN-Android-arm64-preview.apk`。
 
 GitHub Actions 下载通常需要登录 GitHub。产物保留 30 天；每个包附带 SHA-256 校验值、构建来源信息和本说明。不创建正式发布标签，不发布到 npm 或应用商店。
+
+## 已验证构建
+
+2026-10-29 已验证 [运行 40751339166](https://github.com/No-needto-recall/pandacode/actions/runs/40751339166)，应用源码提交为 `e21b57a6ffa2c0fd9911c30452cd6df4311a2375`，Windows 与 Android 两个任务均成功：
+
+- [下载 Windows x64 预览包](https://github.com/No-needto-recall/pandacode/actions/runs/40751339166/artifacts/12844312676)
+- [下载 Android ARM64 预览包](https://github.com/No-needto-recall/pandacode/actions/runs/40751339166/artifacts/12844727143)
+
+这两个产物的 Connect 配置均为空：可以安装，但手机不能登录并控制电脑，必须按下文配置后重新构建。Android APK 的 versionCode 为 4；产物过期后需重新构建。
 
 ## Windows
 
@@ -25,7 +34,7 @@ GitHub Actions 下载通常需要登录 GitHub。产物保留 30 天；每个包
 
 - 构建目标为 `arm64-v8a`，适用于小米 17 这类 ARM64 安卓手机。输出是 APK，不是无法直接安装的 AAB。
 - 使用 release 构建变体，内嵌 JavaScript 和资源，**不需要 Expo Go 或电脑上的 Metro 开发服务器**。
-- App 名称为“PandaCode 中文预览”，独立包名 `io.github.norecall.pandacode.zhpreview`，不会覆盖同包名为 `com.aicodeking.pandacode` 的原版。
+- App 名称为“PandaCode 中文预览”，独立包名 `io.github.norecall.pandacode.zhpreview`，不会覆盖包名为 `com.aicodeking.pandacode` 的原版。
 - **仅供个人预览测试**：当前采用 Expo 模板的调试签名证书，不是用于可信生产发行的私有签名。不要将其当作正式商店发行版；正式分发前应配置长期私有签名。改变签名后无法直接覆盖安装旧包，卸载会丢失该应用的本地数据。
 - CI 验证 APK 签名、16 KB ZIP 对齐、包名、非 debuggable 状态、ARM64 原生库以及内嵌 JavaScript；不宣称已经在用户的小米手机上实际启动验证。
 - 安装时可按系统提示，仅为你用于打开 APK 的文件管理器或浏览器授予安装来源权限，不需要关闭系统整体安全保护。
