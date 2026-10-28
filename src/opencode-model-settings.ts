@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 import './opencode-model-settings.css';
 import { call } from './bridge';
 import { icon } from './dom';
@@ -18,14 +20,14 @@ export function mountOpenCodeModels(host: HTMLElement, saved: () => void): () =>
   const rows = new Map<string, HTMLLabelElement>();
   let rowId = 0;
   host.classList.add('opencode-model-settings');
-  host.innerHTML = `<p class="dialog-description">Choose the OpenCode models you want in your model selectors.</p>
-    <div class="opencode-model-toolbar"><label class="opencode-model-search">${icon('search')}<input type="search" aria-label="Search OpenCode models" placeholder="Search models or providers" autocomplete="off" spellcheck="false"></label><button type="button" class="secondary-button" data-refresh aria-label="Refresh models" title="Refresh from OpenCode">${icon('refresh')}</button></div>
+  host.innerHTML = `<p class="dialog-description">${escapeI18n(tr('modules.common.choose_the_opencode_models_you_want_in_your_model_selectors'))}</p>
+    <div class="opencode-model-toolbar"><label class="opencode-model-search">${icon('search')}<input type="search" aria-label="${escapeI18n(tr('modules.common.search_opencode_models'))}" placeholder="${escapeI18n(tr('modules.common.search_models_or_providers'))}" autocomplete="off" spellcheck="false"></label><button type="button" class="secondary-button" data-refresh aria-label="${escapeI18n(tr('modules.common.refresh_models'))}" title="${escapeI18n(tr('modules.common.refresh_from_opencode'))}">${icon('refresh')}</button></div>
     <p class="opencode-model-status" role="status" hidden></p>
-    <div class="opencode-model-list" role="group" aria-label="Available OpenCode models"></div>
-    <button type="button" class="secondary-button opencode-model-more" hidden>Show more models</button>
+    <div class="opencode-model-list" role="group" aria-label="${escapeI18n(tr('modules.common.available_opencode_models'))}"></div>
+    <button type="button" class="secondary-button opencode-model-more" hidden>${escapeI18n(tr('modules.common.show_more_models'))}</button>
     <p class="opencode-model-empty" hidden></p>
-    <div class="opencode-model-footer"><span class="opencode-model-count"></span><button type="button" class="primary-button" data-save>Save models</button></div>
-    <small class="opencode-model-note">Default always uses OpenCode’s own selection. Models and connected providers come from your OpenCode installation.</small>`;
+    <div class="opencode-model-footer"><span class="opencode-model-count"></span><button type="button" class="primary-button" data-save>${escapeI18n(tr('modules.common.save_models'))}</button></div>
+    <small class="opencode-model-note">${escapeI18n(tr('modules.common.default_always_uses_opencode_s_own_selection_models_and_connected_providers_come'))}</small>`;
   const search = host.querySelector<HTMLInputElement>('input')!;
   const list = host.querySelector<HTMLElement>('.opencode-model-list')!;
   const empty = host.querySelector<HTMLElement>('.opencode-model-empty')!;
@@ -41,8 +43,8 @@ export function mountOpenCodeModels(host: HTMLElement, saved: () => void): () =>
   function controls(): void {
     refreshButton.disabled = loading || saving;
     saveButton.disabled = !initialized || saving || !dirty();
-    saveButton.textContent = saving ? 'Saving…' : 'Save models';
-    count.textContent = selected.size === 100 ? '100 selected · limit reached' : `${selected.size} selected`;
+    saveButton.textContent = saving ? tr('modules.common.saving') : tr('modules.common.save_models');
+    count.textContent = selected.size === 100 ? tr('modules.common.100_selected_limit_reached') : tr('modules.models.selectedCount', { count: selected.size });
     for (const input of list.querySelectorAll<HTMLInputElement>('input')) input.disabled = saving || (selected.size >= 100 && !input.checked);
   }
   function render(): void {
@@ -55,7 +57,7 @@ export function mountOpenCodeModels(host: HTMLElement, saved: () => void): () =>
     const matching = items.filter(model => `${model.name} ${model.id}`.toLocaleLowerCase().includes(query));
     const shown = Math.min(visibleLimit, matching.length);
     moreButton.hidden = shown === matching.length;
-    moreButton.textContent = `Show more models · ${matching.length - shown} remaining`;
+    moreButton.textContent = tr('modules.dynamic.moreModels', { count: String(matching.length - shown) });
     for (const [index, model] of matching.slice(0, visibleLimit).entries()) {
       keep.add(model.id);
       let row = rows.get(model.id);
@@ -73,15 +75,15 @@ export function mountOpenCodeModels(host: HTMLElement, saved: () => void): () =>
       checkbox.checked = selected.has(model.id); checkbox.disabled = saving;
       checkbox.setAttribute('aria-label', model.name);
       row.querySelector('strong')!.textContent = model.name;
-      row.querySelector('small')!.textContent = available.has(model.id) ? model.id : `${model.id} · Currently unavailable`;
-      row.querySelector('.opencode-model-context')!.textContent = model.contextWindow ? `${tokenCount(model.contextWindow)} context` : '';
+      row.querySelector('small')!.textContent = available.has(model.id) ? model.id : tr('modules.models.currentlyUnavailable', { model: model.id });
+      row.querySelector('.opencode-model-context')!.textContent = model.contextWindow ? tr('modules.model.contextCapacity', { capacity: tokenCount(model.contextWindow) }) : '';
       row.classList.toggle('selected', checkbox.checked);
       if (list.children[index] !== row) list.insertBefore(row, list.children[index] ?? null);
     }
     for (const [id, row] of rows) if (!keep.has(id)) { row.remove(); rows.delete(id); }
     list.hidden = shown === 0;
     empty.hidden = shown > 0;
-    empty.textContent = loading ? 'Loading models from OpenCode…' : query ? 'No matching models. Try another name or provider.' : 'No models found. Connect a provider in OpenCode, then refresh.';
+    empty.textContent = loading ? tr('modules.common.loading_models_from_opencode') : query ? tr('modules.common.no_matching_models_try_another_name_or_provider') : tr('modules.common.no_models_found_connect_a_provider_in_opencode_then_refresh');
     controls();
   }
   async function refresh(): Promise<void> {
@@ -124,8 +126,16 @@ export function mountOpenCodeModels(host: HTMLElement, saved: () => void): () =>
   refreshButton.addEventListener('click', refresh); saveButton.addEventListener('click', save);
   // Its own dialog starts in the search; embedded in the Settings page, focus stays on the group list.
   void refresh(); if (host.closest('dialog')) search.focus({preventScroll: true});
+  const disposeLocale = onLocaleChange(() => {
+    host.querySelector('.dialog-description')!.textContent = tr('modules.common.choose_the_opencode_models_you_want_in_your_model_selectors');
+    search.setAttribute('aria-label', tr('modules.common.search_opencode_models')); search.placeholder = tr('modules.common.search_models_or_providers');
+    refreshButton.setAttribute('aria-label', tr('modules.common.refresh_models')); refreshButton.title = tr('modules.common.refresh_from_opencode');
+    list.setAttribute('aria-label', tr('modules.common.available_opencode_models'));
+    host.querySelector('.opencode-model-note')!.textContent = tr('modules.common.default_always_uses_opencode_s_own_selection_models_and_connected_providers_come');
+    render();
+  });
   return () => {
-    disposed = true; rows.clear(); search.removeEventListener('input', filter); moreButton.removeEventListener('click', more);
+    disposed = true; disposeLocale(); rows.clear(); search.removeEventListener('input', filter); moreButton.removeEventListener('click', more);
     list.removeEventListener('change', change); refreshButton.removeEventListener('click', refresh); saveButton.removeEventListener('click', save);
   };
 }

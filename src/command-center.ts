@@ -1,3 +1,5 @@
+import { getLocale } from './i18n.ts';
+import { t as tr } from './i18n.ts';
 import './command-center.css';
 import { icon } from './dom';
 import { usageHeatmap } from './usage-heatmap';
@@ -28,7 +30,7 @@ function button(label: string, className = 'secondary-button'): HTMLButtonElemen
   const element = node('button', className, label); element.type = 'button'; return element;
 }
 function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }
-const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
+const number = { format: (value: number) => new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 }).format(value) };
 const goalLabels: Record<GoalState['status'], string> = { active: 'Working toward goal', paused: 'Paused', blocked: 'Needs attention', usageLimited: 'Usage limit reached', budgetLimited: 'Token budget reached', complete: 'Goal completed' };
 function goalUsage(goal: GoalState): string {
   const parts = [`${number.format(goal.tokensUsed)}${goal.tokenBudget === null ? '' : ` / ${number.format(goal.tokenBudget)}`} tokens`];
@@ -41,8 +43,8 @@ function goalUsage(goal: GoalState): string {
 export function createGoalBanner(options: { open(): void; pause(): Promise<void>; resume(): Promise<void> }): {
   element: HTMLElement; update(goal: GoalState | null): void; dispose(): void;
 } {
-  const element = node('section', 'goal-banner'); element.hidden = true; element.setAttribute('aria-label', 'Task goal');
-  const open = button('', 'goal-banner-open'); open.setAttribute('aria-label', 'Manage task goal');
+  const element = node('section', 'goal-banner'); element.hidden = true; element.setAttribute('aria-label', tr('modules.common.task_goal'));
+  const open = button('', 'goal-banner-open'); open.setAttribute('aria-label', tr('modules.common.manage_task_goal'));
   const symbol = node('span', 'goal-banner-symbol'); symbol.innerHTML = icon('spark');
   const copy = node('span', 'goal-banner-copy'), title = node('strong'), status = node('small'); copy.append(title, status); open.append(symbol, copy);
   const control = button('Pause', 'goal-banner-control');
@@ -59,7 +61,7 @@ export function createGoalBanner(options: { open(): void; pause(): Promise<void>
     const summary = `${goalLabels[goal.status]} · ${goalUsage(goal)}`;
     if (status.textContent !== summary) status.textContent = summary;
     control.hidden = !['active', 'paused', 'blocked', 'usageLimited', 'budgetLimited'].includes(goal.status);
-    control.textContent = pending.has(goal.threadId) ? 'Updating…' : goal.status === 'active' ? 'Pause' : 'Resume';
+    control.textContent = pending.has(goal.threadId) ? tr('modules.common.updating') : goal.status === 'active' ? tr('modules.common.pause') : tr('modules.common.resume');
     control.setAttribute('aria-label', goal.status === 'active' ? 'Pause goal' : 'Resume goal'); control.disabled = pending.has(goal.threadId);
   }
   open.addEventListener('click', options.open);
@@ -78,7 +80,7 @@ export function createGoalBanner(options: { open(): void; pause(): Promise<void>
 function shell(dialog: HTMLDialogElement, title: string, description?: string) {
   const host = node('section', 'command-center');
   const header = node('header', 'command-center-heading'); const heading = node('h2', '', title);
-  const close = button('', 'command-center-close'); close.innerHTML = icon('close'); close.setAttribute('aria-label', 'Close');
+  const close = button('', 'command-center-close'); close.innerHTML = icon('close'); close.setAttribute('aria-label', tr('modules.common.close'));
   header.append(heading, close); host.append(header);
   if (description) host.append(node('p', 'command-description', description));
   const content = node('div', 'command-center-content');
@@ -101,13 +103,13 @@ function shell(dialog: HTMLDialogElement, title: string, description?: string) {
 export function showGoalDialog(dialog: HTMLDialogElement, options: GoalOptions): CommandView {
   const view = shell(dialog, 'Goal', 'Keep working across turns until the objective is reached, paused, or a limit is reached.');
   view.host.dataset.taskId = options.taskId;
-  const status = node('div', 'goal-overview'); status.setAttribute('role', 'status'); status.textContent = 'Loading goal…';
+  const status = node('div', 'goal-overview'); status.setAttribute('role', 'status'); status.textContent = tr('modules.common.loading_goal');
   const form = node('form', 'goal-form');
   const fields = node('fieldset', 'command-fields');
   const objectiveLabel = node('label', 'command-field'); objectiveLabel.append(node('span', '', 'Objective'));
-  const objective = node('textarea'); objective.rows = 3; objective.required = true; objective.maxLength = 16384; objective.placeholder = 'What should the agent accomplish?'; objective.setAttribute('aria-label', 'Goal objective'); objective.value = options.initialObjective ?? ''; objectiveLabel.append(objective);
+  const objective = node('textarea'); objective.rows = 3; objective.required = true; objective.maxLength = 16384; objective.placeholder = tr('modules.common.what_should_the_agent_accomplish'); objective.setAttribute('aria-label', tr('modules.common.goal_objective')); objective.value = options.initialObjective ?? ''; objectiveLabel.append(objective);
   const budgetLabel = node('label', 'command-field'); budgetLabel.append(node('span', '', 'Token budget'), node('small', '', 'Optional. Leave blank for no token limit.'));
-  const budget = node('input'); budget.type = 'number'; budget.min = '1'; budget.step = '1'; budget.max = String(Number.MAX_SAFE_INTEGER); budget.inputMode = 'numeric'; budget.placeholder = 'No limit'; budget.setAttribute('aria-label', 'Goal token budget'); budgetLabel.append(budget);
+  const budget = node('input'); budget.type = 'number'; budget.min = '1'; budget.step = '1'; budget.max = String(Number.MAX_SAFE_INTEGER); budget.inputMode = 'numeric'; budget.placeholder = tr('modules.common.no_limit'); budget.setAttribute('aria-label', tr('modules.common.goal_token_budget')); budgetLabel.append(budget);
   fields.append(objectiveLabel, budgetLabel); form.append(fields);
   const actions = node('div', 'goal-actions'), save = button('Start goal', 'primary-button'); save.type = 'submit';
   const pause = button('Pause'), resume = button('Resume'), clear = button('Clear goal', 'command-text-button'); actions.append(clear, pause, resume, save); form.append(actions);
@@ -120,7 +122,7 @@ export function showGoalDialog(dialog: HTMLDialogElement, options: GoalOptions):
     if (goal) status.append(node('small', '', goalUsage(goal)));
     if (fill && !dirty) { objective.value = goal?.objective ?? options.initialObjective ?? ''; budget.value = goal?.tokenBudget == null ? '' : String(goal.tokenBudget); }
     fields.disabled = pending; save.disabled = !loaded || pending; view.refresh.disabled = pending;
-    save.textContent = pending ? 'Updating…' : goal ? 'Save goal' : 'Start goal';
+    save.textContent = pending ? tr('modules.common.updating') : goal ? tr('modules.common.save_goal') : tr('modules.common.start_goal');
     pause.hidden = goal?.status !== 'active'; resume.hidden = !goal || !['paused', 'blocked', 'usageLimited', 'budgetLimited'].includes(goal.status); clear.hidden = !goal;
     for (const control of [pause, resume, clear]) control.disabled = pending || !loaded;
   }
@@ -225,8 +227,8 @@ export function showCommandCenter(dialog: HTMLDialogElement, options: CommandCen
         const valid = typeof window.usedPercent === 'number' && Number.isFinite(window.usedPercent);
         const consumed = valid ? Math.max(0, Math.min(100, window.usedPercent!)) : null;
         header.append(node('strong', '', window.label), node('span', '', consumed === null ? 'Unavailable' : `${number.format(consumed)}% used`)); group.append(header);
-        if (consumed !== null) { const progress = node('progress'); progress.max = 100; progress.value = consumed; progress.setAttribute('aria-label', `${window.label} usage`); group.append(progress); }
-        if (typeof window.resetsAt === 'number' && Number.isFinite(window.resetsAt)) { const when = new Date(window.resetsAt * 1000); if (Number.isFinite(when.getTime())) group.append(node('small', '', `Resets ${when.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`)); }
+        if (consumed !== null) { const progress = node('progress'); progress.max = 100; progress.value = consumed; progress.setAttribute('aria-label', tr('modules.dynamic.namedUsage', { name: String(window.label) })); group.append(progress); }
+        if (typeof window.resetsAt === 'number' && Number.isFinite(window.resetsAt)) { const when = new Date(window.resetsAt * 1000); if (Number.isFinite(when.getTime())) group.append(node('small', '', `Resets ${when.toLocaleString(getLocale(), { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`)); }
         view.content.append(group);
       }
       for (const stat of panel.stats ?? []) { const item = node('div', 'command-row'); item.append(node('span', '', stat.label), node('strong', '', stat.value)); view.content.append(item); }
@@ -240,12 +242,12 @@ export function showCommandCenter(dialog: HTMLDialogElement, options: CommandCen
       for (const job of panel.jobs) {
         const item = node('div', 'command-row command-job'); item.dataset.itemId = job.id;
         item.append(row({ id: job.id, title: job.title, description: job.detail }), node('span', 'command-status', job.status));
-        if (job.canStop) { const stop = button('Stop'); stop.setAttribute('aria-label', `Stop ${job.title}`); stop.addEventListener('click', () => { void execute('stop', { id: job.id }); }); item.append(stop); }
+        if (job.canStop) { const stop = button('Stop'); stop.setAttribute('aria-label', tr('modules.dynamic.stopNamed', { name: String(job.title) })); stop.addEventListener('click', () => { void execute('stop', { id: job.id }); }); item.append(stop); }
         view.content.append(item);
       }
     } else if (panel.kind === 'imports' || panel.kind === 'conversations') {
       const availableIds = new Set(panel.items.map(item => item.id)); for (const id of selected) if (!availableIds.has(id)) selected.delete(id);
-      const search = node('input', 'command-search'); search.type = 'search'; search.placeholder = panel.kind === 'imports' ? 'Search available imports' : 'Search conversations'; search.setAttribute('aria-label', search.placeholder); search.value = searchText;
+      const search = node('input', 'command-search'); search.type = 'search'; search.placeholder = panel.kind === 'imports' ? tr('modules.common.search_available_imports') : tr('modules.common.search_conversations'); search.setAttribute('aria-label', search.placeholder); search.value = searchText;
       const list = node('div', 'command-choice-list'); list.setAttribute('role', 'group'); list.setAttribute('aria-label', panel.kind === 'imports' ? 'Available imports' : 'Available conversations');
       const empty = node('p', 'command-empty', panel.items.length ? 'No matches.' : panel.kind === 'imports' ? 'No importable items were found.' : 'No conversations were found.');
       const label = panel.kind === 'imports' ? 'Import selected' : panel.mode === 'fork' ? 'Fork conversation' : panel.mode === 'import' ? 'Import conversation' : 'Resume conversation';

@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import type { Project } from './types';
 import { escape, icon } from './dom';
 import { showPopover, hidePopover } from './popover-motion';
@@ -18,8 +20,8 @@ export function openProjectPicker(options: ProjectPickerOptions): () => void {
   const panel = document.createElement('section');
   panel.className = 'project-menu floating-menu';
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Choose project');
-  panel.innerHTML = `<div class="project-menu-search">${icon('search')}<input type="search" aria-label="Search projects" placeholder="Search projects…" autocomplete="off" spellcheck="false" maxlength="200"></div><div class="project-menu-list" role="listbox" aria-label="Projects"></div><p class="project-menu-count" role="status" hidden></p><p class="project-menu-empty" role="status" hidden></p><p class="project-menu-error" role="alert" hidden></p><p class="project-menu-pending" role="status" hidden>Opening…</p><div class="project-menu-footer"><button type="button" class="project-menu-open">${icon('plus')}Open project…</button></div>`;
+  panel.setAttribute('aria-label', tr('modules.common.choose_project'));
+  panel.innerHTML = `<div class="project-menu-search">${icon('search')}<input type="search" aria-label="${escapeI18n(tr('modules.common.search_projects'))}" placeholder="${escapeI18n(tr('modules.common.search_projects_b0c5fa'))}" autocomplete="off" spellcheck="false" maxlength="200"></div><div class="project-menu-list" role="listbox" aria-label="${escapeI18n(tr('modules.common.projects'))}"></div><p class="project-menu-count" role="status" hidden></p><p class="project-menu-empty" role="status" hidden></p><p class="project-menu-error" role="alert" hidden></p><p class="project-menu-pending" role="status" hidden>${escapeI18n(tr('modules.common.opening'))}</p><div class="project-menu-footer"><button type="button" class="project-menu-open">${icon('plus')}Open project…</button></div>`;
   const search = panel.querySelector<HTMLInputElement>('input')!;
   const list = panel.querySelector<HTMLElement>('.project-menu-list')!;
   const count = panel.querySelector<HTMLElement>('.project-menu-count')!;
@@ -97,7 +99,7 @@ export function openProjectPicker(options: ProjectPickerOptions): () => void {
     const visible = matches.slice(0, 100);
     list.innerHTML = visible.map(project => `<button type="button" role="option" class="project-menu-option" data-project-id="${escape(project.id)}" aria-label="${escape(project.name + ' — ' + project.path)}" aria-selected="${project.id === currentProjectId}" tabindex="-1" ${pending ? 'disabled' : ''}>${icon('folder')}<span class="project-menu-label"><span class="project-menu-name">${escape(project.name)}</span><span class="project-menu-path" title="${escape(project.path)}">${escape(project.path)}</span></span>${project.id === currentProjectId ? icon('check') : ''}</button>`).join('');
     empty.hidden = visible.length > 0;
-    empty.textContent = projects.length ? 'No matching projects.' : 'No projects yet.';
+    empty.textContent = projects.length ? tr('modules.common.no_matching_projects') : tr('modules.common.no_projects_yet');
     count.hidden = matches.length <= visible.length;
     count.textContent = count.hidden ? '' : `Showing ${visible.length} of ${matches.length} projects. Refine your search.`;
     pendingStatus.hidden = !pending;

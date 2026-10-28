@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import type { ToolActivity } from './types';
 import { escape, icon } from './dom.ts';
 import { brandFor } from './trace-brands.ts';
@@ -38,6 +41,20 @@ const KINDS: Record<TraceKind, [string, string, string, string, string]> = {
 // Summary phrasing: searches read as "Ran 2 searches" like the reference, the rest keep their row verb.
 const SUMMARY_VERB: Partial<Record<TraceKind, [string, string]>> = { search: ['Running', 'Ran'], web: ['Running', 'Ran'] };
 
+const doneVerb: Record<TraceKind, () => string> = {
+  shell: () => tr('modules.trace.verb.shell'),
+  read: () => tr('modules.trace.verb.read'),
+  edit: () => tr('modules.trace.verb.edit'),
+  write: () => tr('modules.trace.verb.write'),
+  search: () => tr('modules.trace.verb.search'),
+  web: () => tr('modules.trace.verb.web'),
+  fetch: () => tr('modules.trace.verb.fetch'),
+  todo: () => tr('modules.trace.verb.todo'),
+  agent: () => tr('modules.trace.verb.agent'),
+  skill: () => tr('modules.trace.verb.skill'),
+  mcp: () => tr('modules.trace.verb.mcp'),
+  tool: () => tr('modules.trace.verb.tool'),
+};
 export function kindIcon(kind: TraceKind): string { return KINDS[kind][2]; }
 
 function clip(value: string, limit = MAX_TEXT): string {
@@ -129,8 +146,8 @@ function mcpParts(name: string): { server: string; tool: string } {
 /** `Dispatched 2 workers`-style verbs for PandaCode's own tools; undefined keeps the generic `Used [server] tool`. */
 function pandacodeTrace(tool: string, fields: Fields): Partial<Trace> | undefined {
   const workers = Array.isArray(fields.workers) ? fields.workers.length : Array.isArray(fields.tasks) ? fields.tasks.length : 0;
-  if (tool === 'dispatch_workers') return { verb: 'Dispatched', object: workers ? `${workers} ${workers === 1 ? 'worker' : 'workers'}` : 'workers' };
-  if (tool === 'title') return { verb: 'Named', object: field(fields, 'title') ? `the task “${clip(field(fields, 'title'), 60)}”` : 'the task' };
+  if (tool === 'dispatch_workers') return { verb: tr('modules.trace.dispatched'), object: workers ? (workers === 1 ? tr('modules.trace.oneWorker', { count: workers }) : tr('modules.trace.workers', { count: workers })) : tr('modules.trace.workerNoun') };
+  if (tool === 'title') return { verb: tr('modules.trace.named'), object: field(fields, 'title') ? tr('modules.trace.taskName', { name: clip(field(fields, 'title'), 60) }) : tr('modules.trace.task') };
   return;
 }
 
@@ -145,7 +162,7 @@ function describeFields(kind: TraceKind, name: string, input: string, fields: Fi
       const path = filePath(input, fields);
       const content = field(fields, 'content', 'contents');
       const count = lines(content).length;
-      return { chip: fileChip(path), object: kind === 'write' && content ? `${count} ${count === 1 ? 'line' : 'lines'}` : '' };
+      return { chip: fileChip(path), object: kind === 'write' && content ? (count === 1 ? tr('modules.trace.oneLine', { count }) : tr('modules.trace.lines', { count })) : '' };
     }
     case 'edit': {
       const path = field(fields, 'file_path', 'path', 'filePath', 'target_file');
@@ -155,24 +172,24 @@ function describeFields(kind: TraceKind, name: string, input: string, fields: Fi
       const where = field(fields, 'path', 'directory', 'target_directory');
       const pattern = field(fields, 'pattern', 'query', 'glob', 'regex');
       const glob = /glob|ls|list/.test(name.toLowerCase());
-      return { chip: { icon: glob ? 'folder' : 'search', label: where ? basename(where) : 'workspace', title: where || 'workspace' }, object: pattern ? `${glob ? 'for files matching' : 'for'} ${clip(pattern, 80)}` : '' };
+      return { chip: { icon: glob ? 'folder' : 'search', label: where ? basename(where) : tr('modules.trace.workspace'), title: where || tr('modules.trace.workspace') }, object: pattern ? (glob ? tr('modules.trace.matchingFiles', { pattern: clip(pattern, 80) }) : tr('modules.trace.query', { query: clip(pattern, 80) })) : '' };
     }
-    case 'web': return { chip: { icon: 'globe', label: 'Web', title: 'Web search' }, object: field(fields, 'query', 'q') ? `for ${clip(field(fields, 'query', 'q'))}` : '' };
+    case 'web': return { chip: { icon: 'globe', label: tr('modules.common.web'), title: tr('modules.common.web_search') }, object: field(fields, 'query', 'q') ? tr('modules.trace.query', { query: clip(field(fields, 'query', 'q')) }) : '' };
     case 'fetch': {
       const url = field(fields, 'url');
       return { chip: url ? { icon: 'globe', label: domain(url), title: url, svg: brandFor(url)?.svg } : undefined, object: clip(field(fields, 'prompt'), 90) };
     }
     case 'todo': {
       const todos = Array.isArray(fields.todos) ? fields.todos.length : Array.isArray(fields.plan) ? fields.plan.length : 0;
-      return { object: todos ? `the plan · ${todos} ${todos === 1 ? 'step' : 'steps'}` : 'the plan' };
+      return { object: todos ? (todos === 1 ? tr('modules.trace.planStep', { count: todos }) : tr('modules.trace.planSteps', { count: todos })) : tr('modules.trace.plan') };
     }
     case 'agent': {
       const type = field(fields, 'subagent_type', 'agent');
-      return { chip: { icon: 'bot', label: type || 'agent', title: type || 'agent' }, object: clip(field(fields, 'description', 'prompt'), 90) };
+      return { chip: { icon: 'bot', label: type || tr('modules.trace.agent'), title: type || tr('modules.trace.agent') }, object: clip(field(fields, 'description', 'prompt'), 90) };
     }
     case 'skill': {
       const skill = field(fields, 'skill', 'name', 'command');
-      return { verb: 'Loaded skill', chip: skill ? { icon: 'spark', label: skill, title: skill } : undefined, object: clip(field(fields, 'args', 'arguments'), 80), mono: true };
+      return { verb: tr('modules.trace.loadedSkill'), chip: skill ? { icon: 'spark', label: skill, title: skill } : undefined, object: clip(field(fields, 'args', 'arguments'), 80), mono: true };
     }
     case 'mcp': {
       const { server, tool } = mcpParts(name);
@@ -182,11 +199,11 @@ function describeFields(kind: TraceKind, name: string, input: string, fields: Fi
       const chip = { icon: 'server', label: brand?.label ?? server, title: name, svg: brand?.svg };
       const action = mcpAction(tool);
       const query = clip(field(fields, 'query', 'q', 'search', 'filter'), 80);
-      if (action === 'search') return { verb: 'Searched', icon: 'search', chip, object: `for ${query || mcpNoun(tool)}` };
-      if (action === 'read') return { verb: 'Read the', icon: 'file', chip, object: query || mcpNoun(tool) };
+      if (action === 'search') return { verb: doneVerb.search(), icon: 'search', chip, object: tr('modules.trace.query', { query: query || mcpNoun(tool) }) };
+      if (action === 'read') return { verb: tr('modules.trace.readThe'), icon: 'file', chip, object: query || mcpNoun(tool) };
       return { chip, object: tool.replace(/_/g, ' ') };
     }
-    default: return { chip: { icon: 'command', label: name || 'Tool', title: name || 'Tool' }, object: inputHint(input) };
+    default: return { chip: { icon: 'command', label: name || tr('modules.common.tool'), title: name || tr('modules.common.tool') }, object: inputHint(input) };
   }
 }
 
@@ -203,7 +220,7 @@ export function describeTool(tool: Tool): Trace {
   const fields = parseFields(tool.input);
   const described = describeFields(kind, tool.name, tool.input, fields);
   // Rows read as finished sentences even while they run, like the reference; the shimmer marks the running step.
-  return { ...described, kind, verb: described.verb ?? KINDS[kind][1] };
+  return { ...described, kind, verb: described.verb ?? doneVerb[kind]() };
 }
 
 /** One escaped sentence for a row's summary: verb, chip, object and edit delta. */
@@ -236,6 +253,30 @@ const SUMMARY_CLAUSES = 2;
  * (a saved record can be stuck at `running`); failures are appended after ` · `. */
 export function summarizeTools(tools: (Tool | undefined)[], options: { live?: boolean } = {}): string {
   const running = Boolean(options.live) && tools.some(tool => tool?.status === 'running');
+  if (getLocale() === 'zh-CN') {
+    const counts = new Map<string, number>();
+    for (const tool of tools) { const part = summaryPart(tool); counts.set(part.key, (counts.get(part.key) ?? 0) + 1); }
+    const descriptions: Record<string, (count: number) => string> = {
+    shell: count => tr('modules.trace.summary.shell', { count }),
+    read: count => tr('modules.trace.summary.read', { count }),
+    edit: count => tr('modules.trace.summary.edit', { count }),
+    write: count => tr('modules.trace.summary.write', { count }),
+    search: count => tr('modules.trace.summary.search', { count }),
+    web: count => tr('modules.trace.summary.web', { count }),
+    fetch: count => tr('modules.trace.summary.fetch', { count }),
+    todo: count => tr('modules.trace.summary.todo', { count }),
+    agent: count => tr('modules.trace.summary.agent', { count }),
+    skill: count => tr('modules.trace.summary.skill', { count }),
+    mcp: count => tr('modules.trace.summary.mcp', { count }),
+    tool: count => tr('modules.trace.summary.tool', { count }),
+    source: count => tr('modules.trace.summary.source', { count }),
+    };
+    const shown = [...counts].slice(0, SUMMARY_CLAUSES);
+    const rest = tools.length - shown.reduce((total, [, count]) => total + count, 0);
+    const summary = shown.map(([kind, count]) => descriptions[kind](count)).join('、');
+    const failures = tools.filter(tool => tool?.status === 'failed').length;
+    return summary + (rest ? tr('modules.trace.moreSteps', { count: rest }) : '') + (running ? '…' : '') + (failures ? tr('modules.trace.failures', { count: failures }) : '');
+  }
   const failed = tools.filter(tool => tool?.status === 'failed').length;
   const clauses = new Map<string, { verb: string; count: number; nouns: [string, string] }>();
   for (const tool of tools) {
@@ -277,7 +318,7 @@ function list(items: { title: string; meta?: string; hint?: string }[], total = 
   if (!items.length) return '';
   const rows = items.slice(0, LIST_ITEMS).map(item => `<li><span class="tool-trace-item-title"${item.hint ? ` title="${escape(item.hint)}"` : ''}>${escape(clip(item.title, 120))}</span>${item.meta ? `<span class="tool-trace-item-meta">${escape(clip(item.meta, 80))}</span>` : ''}</li>`).join('');
   const more = total - Math.min(items.length, LIST_ITEMS);
-  return `<ul class="tool-trace-list">${rows}${more > 0 ? `<li class="tool-trace-more">+${more} more</li>` : ''}</ul>`;
+  return `<ul class="tool-trace-list">${rows}${more > 0 ? `<li class="tool-trace-more">${escape(tr('modules.trace.more', { count: more }))}</li>` : ''}</ul>`;
 }
 
 function exitCode(output: string): { code?: number; body: string } {
@@ -295,11 +336,11 @@ function shellCard(tool: Tool, fields: Fields): string {
   const badge = code !== undefined || tool.status === 'failed'
     ? `<span class="tool-trace-badge${failed ? ' is-failed' : ''}">${escape(code !== undefined ? `exit ${code}` : 'failed')}</span>` : '';
   const tail = lines(body.trimEnd()).slice(-PREVIEW_LINES);
-  return command ? `${head(`<code class="tool-trace-command">${escape(clip(command, 400))}</code>${badge}`)}${linesPre(tail, 'Command output, last lines')}` : '';
+  return command ? `${head(`<code class="tool-trace-command">${escape(clip(command, 400))}</code>${badge}`)}${linesPre(tail, tr('modules.common.command_output_last_lines'))}` : '';
 }
 
 function fileCard(path: string, meta: string, preview: string[]): string {
-  return path ? `${head(`<span class="tool-trace-chip" title="${escape(path)}">${icon('file')}<b>${escape(basename(path))}</b></span>`, meta)}${linesPre(preview, 'File preview')}` : '';
+  return path ? `${head(`<span class="tool-trace-chip" title="${escape(path)}">${icon('file')}<b>${escape(basename(path))}</b></span>`, meta)}${linesPre(preview, tr('modules.trace.filePreview'))}` : '';
 }
 
 function diffCard(tool: Tool, fields: Fields): string {
@@ -312,7 +353,7 @@ function diffCard(tool: Tool, fields: Fields): string {
   const more = rows.length > DIFF_LINES ? `<p class="tool-trace-more">+${rows.length - DIFF_LINES} more lines</p>` : '';
   const path = field(fields, 'file_path', 'path', 'filePath', 'target_file');
   // The row already shows the +/− delta.
-  return (path ? fileCard(path, '', []) : '') + (shown ? `<pre class="tool-trace-diff" tabindex="0" aria-label="Edit preview">${shown}</pre>${more}` : '');
+  return (path ? fileCard(path, '', []) : '') + (shown ? `<pre class="tool-trace-diff" tabindex="0" aria-label="${escapeI18n(tr('modules.common.edit_preview'))}">${shown}</pre>${more}` : '');
 }
 
 function searchCard(output: string): string {
@@ -402,8 +443,8 @@ function shortTime(value: string): string {
   const date = /^\d{9,10}(\.\d+)?$/.test(value) ? new Date(Number(value) * 1000) : /^\d{4}-\d\d-\d\d/.test(value) ? new Date(value) : undefined;
   if (!date || Number.isNaN(date.getTime())) return clip(value, 16);
   return date.toDateString() === new Date().toDateString()
-    ? date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-    : date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    ? date.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' })
+    : date.toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' });
 }
 
 // 16px status marks: GitHub pull requests and Linear-style issue circles.
@@ -451,7 +492,7 @@ export function mcpCard(tool: Tool): string {
   const rows = items.map(item => mcpRow(item, collection, brand?.svg)).filter(Boolean);
   if (!rows.length) return '';
   const more = rows.length - MCP_ROWS;
-  return `<div class="tool-trace-card is-rows" data-trace-kind="mcp"${brand ? ` data-brand="${escape(brand.id)}"` : ''}><ul class="trace-rows">${rows.slice(0, MCP_ROWS).join('')}${more > 0 ? `<li class="tool-trace-more">+${more} more</li>` : ''}</ul></div>`;
+  return `<div class="tool-trace-card is-rows" data-trace-kind="mcp"${brand ? ` data-brand="${escape(brand.id)}"` : ''}><ul class="trace-rows">${rows.slice(0, MCP_ROWS).join('')}${more > 0 ? `<li class="tool-trace-more">${escape(tr('modules.trace.more', { count: more }))}</li>` : ''}</ul></div>`;
 }
 
 function previewBody(kind: TraceKind, tool: Tool, fields: Fields, output: string): string {

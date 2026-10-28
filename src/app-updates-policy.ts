@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /* The updater's decisions, kept free of app imports so they can be tested on their own:
  * how often to check, when a downloaded update may restart PandaCode, and how Settings
  * describes each state. */
@@ -49,10 +50,10 @@ export function updatePrompt(state: UpdateState, installable: boolean, dismissed
     case 'available':
       if (state.version === dismissed) return null;
       return installable
-        ? { label: 'Install and restart', title: `PandaCode ${state.version} is available. Installs when your agents are done.`, later: true }
-        : { label: `${state.version} available`, title: `PandaCode ${state.version} is available. Open GitHub Releases to update this copy.`, later: true };
-    case 'ready': return { label: 'Restart to update', title: `PandaCode ${state.version} is ready. Restart now, or it restarts on its own when your agents are done.`, later: false };
-    case 'installing': return { label: 'Restart to update', title: `Installing ${state.version}…`, later: false };
+        ? { label: tr('modules.common.install_and_restart'), title: tr('modules.updates.availableInstall', { version: state.version }), later: true }
+        : { label: tr('modules.updates.availableVersion', { version: state.version }), title: tr('modules.updates.availableManual', { version: state.version }), later: true };
+    case 'ready': return { label: tr('modules.common.restart_to_update'), title: tr('modules.updates.readyPrompt', { version: state.version }), later: false };
+    case 'installing': return { label: tr('modules.common.restart_to_update'), title: tr('modules.updates.installing', { version: state.version }), later: false };
     default: return null;
   }
 }
@@ -60,14 +61,18 @@ export function updatePrompt(state: UpdateState, installable: boolean, dismissed
 /** One line for Settings → About. */
 export function describeUpdate(state: UpdateState, mode: UpdateMode, now = Date.now(), installable = true): string {
   switch (state.kind) {
-    case 'off': return 'Updates are installed by the desktop app.';
-    case 'checking': return 'Checking GitHub Releases…';
-    case 'current': { const minutes = Math.round((now - state.checkedAt) / 60_000); return `Up to date · checked ${minutes < 1 ? 'just now' : minutes < 60 ? `${minutes}m ago` : `${Math.round(minutes / 60)}h ago`}`; }
-    case 'available': return installable ? `PandaCode ${state.version} is available.` : `PandaCode ${state.version} is available. Updates for this copy are installed by its package or a new AppImage.`;
-    case 'downloading': return `Downloading ${state.version}${state.percent === null ? '…' : ` · ${state.percent}%`}`;
-    case 'ready': return `${state.version} is ready. ${mode === 'automatic' ? 'PandaCode restarts when your agents are done and you step away.' : 'Restart to finish.'}`;
-    case 'installing': return `Installing ${state.version}…`;
-    case 'error': return `Couldn’t check for updates: ${state.message}`;
-    default: return mode === 'off' ? 'Automatic updates are off.' : 'Checks GitHub Releases automatically.';
+    case 'off': return tr('modules.updates.desktop');
+    case 'checking': return tr('modules.updates.checking');
+    case 'current': {
+      const minutes = Math.round((now - state.checkedAt) / 60_000);
+      const time = minutes < 1 ? tr('modules.time.justNow') : minutes < 60 ? tr('modules.time.minutesAgo', { count: minutes }) : tr('modules.time.hoursAgo', { count: Math.round(minutes / 60) });
+      return tr('modules.updates.current', { time });
+    }
+    case 'available': return installable ? tr('modules.updates.available', { version: state.version }) : tr('modules.updates.package', { version: state.version });
+    case 'downloading': return state.percent === null ? tr('modules.updates.downloading', { version: state.version }) : tr('modules.updates.downloadPercent', { version: state.version, percent: state.percent });
+    case 'ready': return mode === 'automatic' ? tr('modules.updates.readyAuto', { version: state.version }) : tr('modules.updates.ready', { version: state.version });
+    case 'installing': return tr('modules.updates.installing', { version: state.version });
+    case 'error': return tr('modules.updates.error', { error: state.message });
+    default: return mode === 'off' ? tr('modules.updates.off') : tr('modules.updates.auto');
   }
 }

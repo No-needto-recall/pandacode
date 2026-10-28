@@ -1,3 +1,5 @@
+import { t as tr } from './i18n.ts';
+import { getLocale } from './i18n.ts';
 import type { ProviderId } from './types';
 import { formatUsd, formatUsdAxis } from './usage-ledger.ts';
 
@@ -6,7 +8,7 @@ export interface CostChartOptions { series: CostSeries[]; buckets: { start: stri
 
 const WIDTH = 600, HEIGHT = 180;
 const SVG = 'http://www.w3.org/2000/svg';
-const shortDay = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+const shortDay = { format: (value: number | Date) => new Intl.DateTimeFormat(getLocale(), { month: 'short', day: 'numeric' }).format(value) };
 
 function localDate(key: string): Date { const [y, m, d] = key.split('-').map(Number); return new Date(y, m - 1, d); }
 function svg<K extends keyof SVGElementTagNameMap>(tag: K, attributes: Record<string, string>): SVGElementTagNameMap[K] {
@@ -82,7 +84,7 @@ export function costChart(options: CostChartOptions): HTMLElement {
   plot.append(chart, cursor);
   const frame = element('div', 'cost-chart-frame'); frame.append(axis, plot, dates);
   frame.tabIndex = 0; frame.setAttribute('role', 'img');
-  frame.setAttribute('aria-label', `Estimated API cost over time. ${series.map(line => `${line.name}: ${formatUsd(line.values.reduce((a, b) => a + b, 0))}`).join('. ')}. Use the arrow keys to read each point.`);
+  frame.setAttribute('aria-label', tr('modules.dynamic.costChart', { description: String(series.map(line => `${line.name}: ${formatUsd(line.values.reduce((a, b) => a + b, 0))}`).join('. ')) }));
   figure.append(readout, frame);
 
   const whole = bucketLabel({ start: buckets[0].start, end: buckets[buckets.length - 1].end });

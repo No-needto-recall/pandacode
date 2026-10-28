@@ -880,6 +880,14 @@ function previewAgentsDock<T>(command: string, args: Record<string, any>): T {
 }
 
 export async function invoke<T>(command: string, args: Record<string, any>): Promise<T> {
+  if (command === 'locale_get') return (localStorage.getItem('pandacode.locale') === 'en' ? 'en' : 'zh-CN') as T;
+  if (command === 'locale_set') {
+    const locale = args.locale;
+    if (locale !== 'en' && locale !== 'zh-CN') throw new Error('Unsupported locale');
+    localStorage.setItem('pandacode.locale', locale);
+    emit('locale-changed', locale);
+    return undefined as T;
+  }
   if (command.startsWith('tray_')) return trayCommand(command, args) as T;
   // An if chain, not a switch: specs patch the first command switch in this file to record calls.
   if (command.startsWith('agents_dock_')) return previewAgentsDock<T>(command, args);

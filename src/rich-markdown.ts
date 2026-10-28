@@ -1,3 +1,4 @@
+import { getLocale } from './i18n.ts';
 import './rich-markdown.css';
 import { markdownHtml } from './dom';
 
@@ -184,7 +185,7 @@ export function chart(value: unknown): HTMLElement {
     for (let i = 0; i <= 4; i++) {
       const v = min + (span * i) / 4, yy = y(v);
       svg.append(el('line', { x1: left, x2: width - right, y1: yy, y2: yy, class: 'rich-chart-grid' }));
-      svg.append(el('text', { x: left - 6, y: yy + 4, 'text-anchor': 'end', class: 'rich-chart-axis' }, Number(v.toFixed(2)).toLocaleString()));
+      svg.append(el('text', { x: left - 6, y: yy + 4, 'text-anchor': 'end', class: 'rich-chart-axis' }, Number(v.toFixed(2)).toLocaleString(getLocale())));
     }
     const step = plotW / labels.length;
     labels.forEach((label, i) => {

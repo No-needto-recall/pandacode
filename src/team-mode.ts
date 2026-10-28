@@ -1,5 +1,6 @@
 /* How the Team button behaves, and named agent teams built in Settings. A named team is a
  * saved team profile whose lead may only orchestrate the models it lists (`rosterOnly`). */
+import { t as tr } from './i18n.ts';
 import type { ModelSelection, TeamConfig, TeamLibrary, TeamProfile, TeamSetup, WorkerProfile } from './architect-types';
 import type { ProviderId, ProviderModel } from './types';
 
@@ -55,7 +56,7 @@ export function teamDetail(profile: TeamProfile, harnessName: (id: ProviderId) =
   const { architect, config } = profile.setup;
   const lead = config.workers.find(worker => worker.provider === architect.provider && worker.model === architect.model);
   const count = config.workers.length;
-  return `${count} model${count === 1 ? '' : 's'} · led by ${lead ? lead.name : `${architect.model || 'Default'} · ${harnessName(architect.provider)}`}`;
+  return tr(count === 1 ? 'finish.panels.teamOne' : 'finish.panels.teamMany', { count, lead: lead ? lead.name : `${architect.model || tr('finish.panels.defaultModel')} · ${harnessName(architect.provider)}` });
 }
 
 /** Whether a task's team is this named team. */

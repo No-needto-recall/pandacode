@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { call } from './bridge';
 import { icon } from './dom';
 import { openChoiceMenu } from './choice-menu';
@@ -17,7 +19,7 @@ export function mountTeamProfiles(host: HTMLElement, options: {
   let selected = library.profiles.find(profile => profile.id === library.activeProfileId && sameTeamSetup(profile.setup, options.read()))?.id
     ?? library.profiles.find(profile => sameTeamSetup(profile.setup, options.read()))?.id ?? null;
   host.className = 'team-library';
-  host.innerHTML = `<div class="team-library-heading"><span>Team profile</span><span class="team-library-state" role="status"></span></div><div class="team-library-row"><button type="button" class="team-library-picker" aria-label="Choose team profile" aria-haspopup="dialog" aria-expanded="false"><span></span>${icon('down')}</button><button type="button" class="icon-button team-library-manage" aria-label="Manage team profile" aria-haspopup="dialog">${icon('more')}</button></div><div class="team-library-actions"><button type="button" class="team-library-create">${icon('plus')} Save as…</button><button type="button" class="team-library-update" hidden>Update profile</button></div><div class="team-library-editor" hidden><label>Profile name<input type="text" maxlength="80" autocomplete="off" aria-label="Profile name"></label><div><button type="button" class="secondary-button team-library-cancel">Cancel</button><button type="button" class="primary-button team-library-confirm">Save profile</button></div></div><p class="team-library-error" role="alert" hidden></p>`;
+  host.innerHTML = `<div class="team-library-heading"><span>${escapeI18n(tr('modules.common.team_profile'))}</span><span class="team-library-state" role="status"></span></div><div class="team-library-row"><button type="button" class="team-library-picker" aria-label="${escapeI18n(tr('modules.common.choose_team_profile'))}" aria-haspopup="dialog" aria-expanded="false"><span></span>${icon('down')}</button><button type="button" class="icon-button team-library-manage" aria-label="${escapeI18n(tr('modules.common.manage_team_profile'))}" aria-haspopup="dialog">${icon('more')}</button></div><div class="team-library-actions"><button type="button" class="team-library-create">${icon('plus')} Save as…</button><button type="button" class="team-library-update" hidden>${escapeI18n(tr('modules.common.update_profile'))}</button></div><div class="team-library-editor" hidden><label>${escapeI18n(tr('modules.common.profile_name'))}<input type="text" maxlength="80" autocomplete="off" aria-label="${escapeI18n(tr('modules.common.profile_name'))}"></label><div><button type="button" class="secondary-button team-library-cancel">${escapeI18n(tr('modules.common.cancel'))}</button><button type="button" class="primary-button team-library-confirm">${escapeI18n(tr('modules.common.save_profile'))}</button></div></div><p class="team-library-error" role="alert" hidden></p>`;
   const picker = host.querySelector<HTMLButtonElement>('.team-library-picker')!;
   const manage = host.querySelector<HTMLButtonElement>('.team-library-manage')!;
   const create = host.querySelector<HTMLButtonElement>('.team-library-create')!;
@@ -33,20 +35,20 @@ export function mountTeamProfiles(host: HTMLElement, options: {
     if (disposed) return;
     const profile = current(), setup = options.read();
     const modified = !!profile && !sameTeamSetup(profile.setup, setup);
-    picker.querySelector('span')!.textContent = profile?.name ?? (library.lastSetup && sameTeamSetup(library.lastSetup, setup) ? 'Last saved setup' : 'Custom setup');
+    picker.querySelector('span')!.textContent = profile?.name ?? (library.lastSetup && sameTeamSetup(library.lastSetup, setup) ? tr('modules.common.last_saved_setup') : tr('modules.common.custom_setup'));
     picker.disabled = pending || (!library.profiles.length && !library.lastSetup);
-    picker.title = 'Choose a saved team';
+    picker.title = tr('modules.common.choose_a_saved_team');
     manage.disabled = pending || !profile;
     create.disabled = pending || library.profiles.length >= 20;
     update.hidden = !modified;
     update.disabled = pending;
-    status.textContent = modified ? 'Modified' : options.pendingSetup && sameTeamSetup(options.pendingSetup, setup) ? 'Pending' : profile ? 'Saved' : '';
+    status.textContent = modified ? tr('modules.common.modified') : options.pendingSetup && sameTeamSetup(options.pendingSetup, setup) ? tr('modules.common.pending') : profile ? tr('modules.common.saved') : '';
   }
   function closeEditor(): void { edit = undefined; editor.hidden = true; error.hidden = true; }
   function editName(mode: 'create' | 'rename'): void {
     edit = mode; editor.hidden = false; error.hidden = true;
     name.value = mode === 'rename' ? current()?.name ?? '' : '';
-    confirm.textContent = mode === 'rename' ? 'Rename profile' : 'Save profile';
+    confirm.textContent = mode === 'rename' ? tr('modules.common.rename_profile') : tr('modules.common.save_profile');
     name.focus(); name.select();
   }
   async function mutate(action: () => Promise<TeamLibrary>, after?: () => void): Promise<void> {
@@ -63,10 +65,10 @@ export function mountTeamProfiles(host: HTMLElement, options: {
     // Named agent teams live in Settings and the model picker, not among classic profiles.
     const profiles = library.profiles.filter(profile => !profile.setup.config.rosterOnly);
     const items = profiles.map(profile => ({ id: profile.id, label: profile.name, provider: profile.setup.architect.provider,
-      description: `${profile.setup.config.workers.length} worker model${profile.setup.config.workers.length === 1 ? '' : 's'} · ${profile.setup.config.maxParallel === 0 ? 'Unlimited at once' : `${profile.setup.config.maxParallel} at once`}`, selected: selected === profile.id }));
-    if (library.lastSetup) items.unshift({ id: 'last-saved', label: 'Last saved setup', provider: library.lastSetup.architect.provider,
-      description: library.enabled ? 'Default for new tasks' : 'Remembered · single agent default', selected: !selected && sameTeamSetup(library.lastSetup, options.read()) });
-    menu = openChoiceMenu({ anchor: picker, title: 'Team profiles', items, width: 310,
+      description: tr((profile.setup.config.workers.length === 1 ? '' : 's') === '' ? 'modules.dynamic.workerModels.one' : 'modules.dynamic.workerModels.many', { count: String(profile.setup.config.workers.length), details: String(profile.setup.config.maxParallel === 0 ? 'Unlimited at once' : `${profile.setup.config.maxParallel} at once`) }), selected: selected === profile.id }));
+    if (library.lastSetup) items.unshift({ id: 'last-saved', label: tr('modules.common.last_saved_setup'), provider: library.lastSetup.architect.provider,
+      description: library.enabled ? tr('modules.common.default_for_new_tasks') : tr('modules.common.remembered_single_agent_default'), selected: !selected && sameTeamSetup(library.lastSetup, options.read()) });
+    menu = openChoiceMenu({ anchor: picker, title: tr('modules.common.team_profiles'), items, width: 310,
       searchPlaceholder: profiles.length > 5 ? 'Search profiles…' : undefined,
       onSelect: id => {
         const setup = id === 'last-saved' ? library.lastSetup : profiles.find(profile => profile.id === id)?.setup;
@@ -100,8 +102,8 @@ export function mountTeamProfiles(host: HTMLElement, options: {
   manage.addEventListener('click', () => {
     if (menu) { menu(); return; }
     const profile = current(); if (!profile) return;
-    menu = openChoiceMenu({ anchor: manage, title: 'Profile actions', actions: true, items: [
-      { id: 'rename', label: 'Rename profile', icon: 'edit' }, { id: 'delete', label: 'Delete profile', icon: 'close' },
+    menu = openChoiceMenu({ anchor: manage, title: tr('modules.common.profile_actions'), actions: true, items: [
+      { id: 'rename', label: tr('modules.common.rename_profile'), icon: 'edit' }, { id: 'delete', label: tr('modules.common.delete_profile'), icon: 'close' },
     ], onSelect: id => {
       if (id === 'rename') { menu?.(); editName('rename'); }
       else void mutate(() => call<TeamLibrary>('architect_delete_profile', { id: profile.id }), () => { selected = null; });

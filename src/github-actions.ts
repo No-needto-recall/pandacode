@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 /* The GitHub view's Actions tab: recent workflow runs with their event, the pull request each
  * belongs to, attempts and duration, filtered by event and pull request (a pull request row's
  * Runs action opens the same filter). A row expands to its jobs and artifacts, read lazily with
@@ -77,17 +79,17 @@ function filters(runs: HubRun[], pulls: HubPull[] | undefined, filter: RunFilter
   const numbers = [...new Set([...runs.map(run => runPull(run, pulls)).filter(Boolean), ...(filter.pull ? [filter.pull] : [])])].sort((a, b) => b - a);
   const option = (value: string | number, label: string, on: boolean) => `<option value="${escape(String(value))}" ${on ? 'selected' : ''}>${escape(label)}</option>`;
   return `<div class="gh-run-filters">
-    <select data-gh-run-filter="event" aria-label="Filter runs by event">${option('', 'All events', !filter.event)}${events.map(event => option(event, eventLabel(event), event === filter.event)).join('')}</select>
-    <select data-gh-run-filter="pull" aria-label="Filter runs by pull request">${option(0, 'All pull requests', !filter.pull)}${numbers.map(n => option(n, `#${n}${pulls?.find(pull => pull.number === n) ? ` ${pulls.find(pull => pull.number === n)!.title}` : ''}`, n === filter.pull)).join('')}</select>
-    <label class="gh-run-latest"><input type="checkbox" data-gh-run-filter="latest" ${filter.latest ? 'checked' : ''}>Latest per pull request</label>
-    ${filter.event || filter.pull || filter.latest ? '<button type="button" class="gh-act" data-gh-run-clear>Clear</button>' : ''}
-    <button type="button" class="gh-act gh-workflow-check" data-gh-workflow-check title="Ask an agent to check .github/workflows for YAML errors, unknown runner labels and missing actions">${icon('spark')}Check workflow files</button></div>`;
+    <select data-gh-run-filter="event" aria-label="${escapeI18n(tr('modules.common.filter_runs_by_event'))}">${option('', 'All events', !filter.event)}${events.map(event => option(event, eventLabel(event), event === filter.event)).join('')}</select>
+    <select data-gh-run-filter="pull" aria-label="${escapeI18n(tr('modules.common.filter_runs_by_pull_request'))}">${option(0, 'All pull requests', !filter.pull)}${numbers.map(n => option(n, `#${n}${pulls?.find(pull => pull.number === n) ? ` ${pulls.find(pull => pull.number === n)!.title}` : ''}`, n === filter.pull)).join('')}</select>
+    <label class="gh-run-latest"><input type="checkbox" data-gh-run-filter="latest" ${filter.latest ? 'checked' : ''}>${escapeI18n(tr('modules.common.latest_per_pull_request'))}</label>
+    ${filter.event || filter.pull || filter.latest ? `<button type="button" class="gh-act" data-gh-run-clear>${escapeI18n(tr('modules.common.clear'))}</button>` : ''}
+    <button type="button" class="gh-act gh-workflow-check" data-gh-workflow-check title="${escapeI18n(tr('modules.common.ask_an_agent_to_check_github_workflows_for_yaml_errors_unknown_runner'))}">${icon('spark')}Check workflow files</button></div>`;
 }
 
 function detailsBody(run: HubRun, load: DetailsLoad | undefined, now: number): string {
   const blocked = run.state === 'not_started'
     ? `<p class="gh-note gh-run-blocked">${icon('alert')}GitHub couldn’t start this run. The workflow file is likely invalid (a YAML or schema error), uses an action or reusable workflow that doesn’t exist, or asks for a runner that isn’t available.</p>` : '';
-  if (!load) return `${blocked}<p class="gh-note" role="status">Loading jobs…</p>`;
+  if (!load) return `${blocked}<p class="gh-note" role="status">${escapeI18n(tr('modules.common.loading_jobs'))}</p>`;
   if (load.error) return `${blocked}<p class="gh-note">Couldn’t load jobs: ${escape(load.error)}</p>`;
   const { jobs, artifacts, attempts = [] } = load.details!;
   const time = (item: { state: string; startedAt: string; completedAt: string }) => escape(item.state === 'queued' ? '' : span(item.startedAt, item.completedAt, item.state === 'in_progress', now));
@@ -96,11 +98,11 @@ function detailsBody(run: HubRun, load: DetailsLoad | undefined, now: number): s
   const job = (item: RunJob) => `<li class="gh-job"><div class="gh-job-head">${statusBadge(item.state)}<span class="gh-row-title">${escape(item.name)}</span><span class="gh-duration">${time(item)}</span>${item.url ? `<button type="button" class="gh-act" data-gh-open="${escape(item.url)}" aria-label="Open job ${escape(item.name)} on GitHub">${icon('external')}</button>` : ''}</div>
     ${item.steps?.length ? `<ol class="gh-steps" aria-label="Steps of ${escape(item.name)}">${item.steps.map(step).join('')}</ol>` : ''}${summary(item)}</li>`;
   const attempt = (item: RunAttempt) => `<li class="gh-attempt-item"><div class="gh-job-head">${statusBadge(item.state)}<span class="gh-row-title">Attempt ${item.attempt}</span><span class="gh-duration">${escape(span(item.startedAt, item.updatedAt, item.state === 'in_progress', now))}</span>${item.url ? `<button type="button" class="gh-act" data-gh-open="${escape(item.url)}" aria-label="Open attempt ${item.attempt} on GitHub">${icon('external')}</button>` : ''}</div>
-    ${item.jobs.length ? `<ul>${item.jobs.map(job).join('')}</ul>` : '<p class="gh-note">No jobs ran.</p>'}</li>`;
+    ${item.jobs.length ? `<ul>${item.jobs.map(job).join('')}</ul>` : `<p class="gh-note">${escapeI18n(tr('modules.common.no_jobs_ran'))}</p>`}</li>`;
   const artifact = (item: RunArtifact) => `<li class="gh-artifact">${icon('download')}<span class="gh-row-title">${escape(item.name)}</span><span class="gh-duration">${item.expired ? 'Expired' : escape(size(item.size))}</span></li>`;
-  return `${blocked}<div class="gh-run-section"><b>Jobs${run.attempt > 1 ? ` · attempt ${run.attempt}` : ''}</b>${jobs.length ? `<ul>${jobs.map(job).join('')}</ul>` : '<p class="gh-note">No jobs ran.</p>'}</div>
-    <div class="gh-run-section"><b>Artifacts</b>${artifacts.length ? `<ul>${artifacts.map(artifact).join('')}</ul>` : '<p class="gh-note">No artifacts uploaded.</p>'}</div>
-    ${attempts.length ? `<div class="gh-run-section gh-attempts"><b>Earlier attempts</b><ul>${attempts.map(attempt).join('')}</ul></div>` : ''}`;
+  return `${blocked}<div class="gh-run-section"><b>Jobs${run.attempt > 1 ? ` · attempt ${run.attempt}` : ''}</b>${jobs.length ? `<ul>${jobs.map(job).join('')}</ul>` : `<p class="gh-note">${escapeI18n(tr('modules.common.no_jobs_ran'))}</p>`}</div>
+    <div class="gh-run-section"><b>${escapeI18n(tr('modules.common.artifacts'))}</b>${artifacts.length ? `<ul>${artifacts.map(artifact).join('')}</ul>` : `<p class="gh-note">${escapeI18n(tr('modules.common.no_artifacts_uploaded'))}</p>`}</div>
+    ${attempts.length ? `<div class="gh-run-section gh-attempts"><b>${escapeI18n(tr('modules.common.earlier_attempts'))}</b><ul>${attempts.map(attempt).join('')}</ul></div>` : ''}`;
 }
 
 export function runsBody(runs: HubRun[], pulls: HubPull[] | undefined, filter: RunFilter, query: string, expanded: Set<number>, details: (run: HubRun) => DetailsLoad | undefined, now = Date.now()): string {
@@ -110,7 +112,7 @@ export function runsBody(runs: HubRun[], pulls: HubPull[] | undefined, filter: R
     const fix = run.state === 'failed' || run.state === 'not_started' ? `<button type="button" class="gh-act gh-primary" data-gh-run-fix>${icon('spark')}Fix</button>` : '';
     return `<div class="gh-run-item"><div class="gh-row gh-run" data-gh-run="${run.id}" tabindex="-1">${statusBadge(run.state)}<span class="gh-workflow">${escape(run.workflow)}</span>
         ${pull ? `<button type="button" class="gh-ref gh-run-pull" data-gh-run-pull="${pull}" title="${escape(run.branch)} · Show runs for #${pull}">${glyph('pull')}#${pull}</button>` : ''}<span class="gh-row-title" title="${escape(run.title)}">${escape(run.title)}</span>
-        <span class="gh-row-meta"><span class="gh-event" data-event="${escape(run.event)}">${escape(eventLabel(run.event))}</span>${pull ? '' : `<span class="gh-ref" title="${escape(run.branch)}">${glyph('pull')}${escape(run.branch)}</span>`}${run.attempt > 1 ? `<span class="gh-attempt" title="Attempt ${run.attempt}">×${run.attempt}</span>` : ''}${time ? `<span class="gh-duration" title="Duration">${escape(time)}</span>` : ''}</span>
+        <span class="gh-row-meta"><span class="gh-event" data-event="${escape(run.event)}">${escape(eventLabel(run.event))}</span>${pull ? '' : `<span class="gh-ref" title="${escape(run.branch)}">${glyph('pull')}${escape(run.branch)}</span>`}${run.attempt > 1 ? `<span class="gh-attempt" title="Attempt ${run.attempt}">×${run.attempt}</span>` : ''}${time ? `<span class="gh-duration" title="${escapeI18n(tr('modules.common.duration'))}">${escape(time)}</span>` : ''}</span>
         <time>${escape(age(run.createdAt))}</time>
         <span class="gh-actions"><button type="button" class="gh-act" data-gh-run-toggle aria-expanded="${open}" aria-controls="gh-run-${run.id}">${icon('chevron')}Details</button><button type="button" class="gh-act" data-gh-open="${escape(run.url)}">${icon('external')}Open</button>${fix}</span></div>
       ${open ? `<div class="gh-run-details" id="gh-run-${run.id}">${detailsBody(run, details(run), now)}</div>` : ''}</div>`;

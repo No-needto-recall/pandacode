@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './subagents.css';
 import { call } from './bridge';
 import { icon } from './dom';
@@ -41,7 +43,7 @@ export class Subagents {
   private renderedTools = '';
 
   constructor(private host: HTMLElement, private panelId = 'subagents-panel', private fileContext?: (sessionId: string) => FileLinkContext | undefined) {
-    host.innerHTML = `<button type="button" class="subagents-trigger" aria-label="Subagents" aria-expanded="false" aria-controls="subagents-panel" title="View subagent work" hidden>${icon('branch')}<span></span>${icon('chevron')}</button>`;
+    host.innerHTML = `<button type="button" class="subagents-trigger" aria-label="${escapeI18n(tr('modules.common.subagents'))}" aria-expanded="false" aria-controls="subagents-panel" title="${escapeI18n(tr('modules.common.view_subagent_work'))}" hidden>${icon('branch')}<span></span>${icon('chevron')}</button>`;
     this.trigger = host.querySelector('button')!;
     this.trigger.setAttribute('aria-controls', panelId);
     this.trigger.addEventListener('click', () => this.panel ? this.close() : this.open());
@@ -155,8 +157,8 @@ export class Subagents {
     if (this.panel || !this.sessionId) return;
     this.selected = ''; this.rows.clear();
     const panel = document.createElement('section');
-    panel.id = this.panelId; panel.className = 'subagents-panel'; panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'Subagents');
-    panel.innerHTML = `<header class="subagents-heading"><button type="button" class="icon-button subagents-back" aria-label="Back to Subagents" hidden>${icon('back')}</button><strong>Subagents</strong><span class="subagents-summary"></span><button type="button" class="icon-button subagents-close" aria-label="Close subagents">${icon('close')}</button></header><div class="subagents-body"><div class="subagents-list"></div><p class="subagents-notice" role="status" hidden></p><button class="secondary-button subagents-retry" hidden>Retry loading subagents</button><div class="subagent-detail" hidden><div class="subagent-detail-meta"><span class="subagent-state"></span><h3 class="subagent-detail-name"></h3><span class="subagent-detail-status"></span></div><p class="subagent-parent" hidden></p><details class="subagent-assignment"><summary>Assignment</summary><p></p></details><div class="subagent-response"></div><p class="subagent-empty muted"></p><div class="subagent-tools"></div></div></div>`;
+    panel.id = this.panelId; panel.className = 'subagents-panel'; panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', tr('modules.common.subagents'));
+    panel.innerHTML = `<header class="subagents-heading"><button type="button" class="icon-button subagents-back" aria-label="${escapeI18n(tr('modules.common.back_to_subagents'))}" hidden>${icon('back')}</button><strong>${escapeI18n(tr('modules.common.subagents'))}</strong><span class="subagents-summary"></span><button type="button" class="icon-button subagents-close" aria-label="${escapeI18n(tr('modules.common.close_subagents'))}">${icon('close')}</button></header><div class="subagents-body"><div class="subagents-list"></div><p class="subagents-notice" role="status" hidden></p><button class="secondary-button subagents-retry" hidden>${escapeI18n(tr('modules.common.retry_loading_subagents'))}</button><div class="subagent-detail" hidden><div class="subagent-detail-meta"><span class="subagent-state"></span><h3 class="subagent-detail-name"></h3><span class="subagent-detail-status"></span></div><p class="subagent-parent" hidden></p><details class="subagent-assignment"><summary>${escapeI18n(tr('modules.common.assignment'))}</summary><p></p></details><div class="subagent-response"></div><p class="subagent-empty muted"></p><div class="subagent-tools"></div></div></div>`;
     this.host.append(panel); this.panel = panel;
     panel.querySelector('.subagent-assignment')!.insertAdjacentHTML('beforeend', '<div class="subagent-assignment-actions"></div>');
     panel.querySelector('.subagent-response')!.insertAdjacentHTML('afterend', '<div class="subagent-response-actions"></div><p class="subagent-action-notice" role="status" hidden></p>');
@@ -184,7 +186,7 @@ export class Subagents {
     const text = this.trigger.querySelector('span')!; if (text.textContent !== label) text.textContent = label;
     this.trigger.classList.toggle('has-running', running > 0);
     dispatchEvent(new Event('pandacode:agents'));
-    this.trigger.title = running ? agents.filter(active).map(a => a.name).join('\n') : 'View subagent work';
+    this.trigger.title = running ? agents.filter(active).map(a => a.name).join('\n') : tr('modules.common.view_subagent_work');
     const panel = this.panel; if (!panel) return;
     const summary = panel.querySelector('.subagents-summary')!;
     if (summary.textContent !== label) summary.textContent = label;

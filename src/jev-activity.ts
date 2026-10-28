@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './jev-activity.css';
 import { call, subscribe } from './bridge';
 import { icon } from './dom';
@@ -11,7 +13,7 @@ export class JevActivity {
   readonly host = document.createElement('div');
   constructor() {
     this.host.className = 'jev-activity'; this.host.hidden = true;
-    this.host.innerHTML = `<button type="button" class="secondary-button" data-action="jev-tests" aria-label="Open Jev browser test reports">${icon('spark')}<span></span>${icon('chevron')}</button>`;
+    this.host.innerHTML = `<button type="button" class="secondary-button" data-action="jev-tests" aria-label="${escapeI18n(tr('modules.common.open_jev_browser_test_reports'))}">${icon('spark')}<span></span>${icon('chevron')}</button>`;
     void subscribe('jev-run', report => {
       if (report.sessionId !== this.task) return;
       this.revision++;

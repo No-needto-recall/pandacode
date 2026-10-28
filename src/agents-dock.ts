@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './agents-dock.css';
 import { call, subscribe } from './bridge';
 import { icon } from './dom';
@@ -43,7 +45,7 @@ export function renderAgentRows(list: HTMLElement, agents: AgentsDockAgent[], re
     if (!list.querySelector(`.${emptyClass}`)) {
       const empty = document.createElement('p');
       empty.className = emptyClass;
-      empty.textContent = 'No agents running';
+      empty.textContent = tr('modules.common.no_agents_running');
       list.append(empty);
     }
     return;
@@ -86,9 +88,9 @@ export function startElapsedTick(root: HTMLElement): () => void {
 /** Eagerly mount the live running-agents button in the workspace header. */
 export function mountAgentsDock(host: HTMLElement, deps: AgentsDockDeps): () => void {
   host.classList.add('agents-dock-host');
-  host.innerHTML = `<button type="button" class="icon-button agents-dock-trigger" aria-label="Running agents" aria-haspopup="dialog" aria-expanded="false" aria-controls="agents-dock-popover" title="Running agents">${icon('bot')}<span class="agents-dock-count" aria-hidden="true" hidden></span></button>
-    <section class="agents-dock-popover" id="agents-dock-popover" role="dialog" aria-label="Running agents" hidden>
-      <header class="agents-dock-head"><div><strong>Running agents</strong><span class="agents-dock-summary"></span></div><button type="button" class="agents-dock-pin icon-button" data-action="pin" aria-label="Pin widget" title="Pin widget">${icon('pin')}</button></header>
+  host.innerHTML = `<button type="button" class="icon-button agents-dock-trigger" aria-label="${escapeI18n(tr('modules.common.running_agents'))}" aria-haspopup="dialog" aria-expanded="false" aria-controls="agents-dock-popover" title="${escapeI18n(tr('modules.common.running_agents'))}">${icon('bot')}<span class="agents-dock-count" aria-hidden="true" hidden></span></button>
+    <section class="agents-dock-popover" id="agents-dock-popover" role="dialog" aria-label="${escapeI18n(tr('modules.common.running_agents'))}" hidden>
+      <header class="agents-dock-head"><div><strong>${escapeI18n(tr('modules.common.running_agents'))}</strong><span class="agents-dock-summary"></span></div><button type="button" class="agents-dock-pin icon-button" data-action="pin" aria-label="${escapeI18n(tr('modules.common.pin_widget'))}" title="${escapeI18n(tr('modules.common.pin_widget'))}">${icon('pin')}</button></header>
       <div class="agents-dock-list"></div>
     </section>`;
   const trigger = host.querySelector<HTMLButtonElement>('.agents-dock-trigger')!;
@@ -123,7 +125,7 @@ export function mountAgentsDock(host: HTMLElement, deps: AgentsDockDeps): () => 
     popover.hidden = !open || !preferences.enabled;
     summary.textContent = agents.length ? `${agents.length} active` : '';
     pin.setAttribute('aria-pressed', String(preferences.pinned));
-    pin.title = preferences.pinned ? 'Widget pinned' : 'Pin widget';
+    pin.title = preferences.pinned ? tr('modules.common.widget_pinned') : tr('modules.common.pin_widget');
     pin.setAttribute('aria-label', preferences.pinned ? 'Widget pinned' : 'Pin widget');
     pin.classList.toggle('is-pinned', preferences.pinned);
     renderAgentRows(list, agents, receivedAt, 'agents-dock-empty');

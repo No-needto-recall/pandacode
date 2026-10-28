@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './vm-panel.css';
 import { escape, icon } from './dom';
 import { cloudName, createOptions, machines, type CloudConnection, type CloudMachine, type Machine } from './vm-machines';
@@ -22,19 +24,19 @@ const KEYS: Record<string, string> = { Enter: 'Return', Backspace: 'backspace', 
 const sleep = (ms: number) => new Promise(resolve => window.setTimeout(resolve, ms));
 
 export function mountVmPanel(root: HTMLElement, host: VmHost) {
-  root.innerHTML = `<div class="vm-stage" tabindex="0" role="application" aria-label="VM screen. Click to use it; type while it is focused.">
-      <canvas class="vm-screen" role="img" aria-label="VM screen" hidden></canvas>
+  root.innerHTML = `<div class="vm-stage" tabindex="0" role="application" aria-label="${escapeI18n(tr('modules.common.vm_screen_click_to_use_it_type_while_it_is_focused'))}">
+      <canvas class="vm-screen" role="img" aria-label="${escapeI18n(tr('modules.common.vm_screen'))}" hidden></canvas>
       <div class="vm-empty"></div>
     </div>
     <p class="vm-status" role="status" hidden></p>
     <div class="vm-dock">
-      <button type="button" class="vm-select" data-vm="select" aria-haspopup="menu" aria-label="Choose VM">${icon('monitor')}<span class="vm-name">Machines</span><small class="vm-detail"></small>${icon('down')}</button>
-      <div class="vm-actions" role="toolbar" aria-label="VM controls">
-        <button type="button" class="icon-button" data-vm="power" aria-label="Start VM" title="Start">${icon('play')}</button>
-        <button type="button" class="icon-button" data-vm="suspend" aria-label="Suspend VM" title="Suspend (frees memory)" hidden>${icon('pause')}</button>
-        <button type="button" class="icon-button" data-vm="desktop" aria-label="Add a desktop" title="Add a desktop for computer use" hidden>${icon('grid')}</button>
-        <button type="button" class="icon-button" data-vm="share" aria-label="Share project read-only at start" title="Share this project read-only when the VM starts" aria-pressed="false">${icon('folder')}</button>
-        <button type="button" class="icon-button" data-vm="new" aria-label="New VM" title="New machine" aria-haspopup="menu">${icon('plus')}</button>
+      <button type="button" class="vm-select" data-vm="select" aria-haspopup="menu" aria-label="${escapeI18n(tr('modules.common.choose_vm'))}">${icon('monitor')}<span class="vm-name">${escapeI18n(tr('modules.common.machines'))}</span><small class="vm-detail"></small>${icon('down')}</button>
+      <div class="vm-actions" role="toolbar" aria-label="${escapeI18n(tr('modules.common.vm_controls'))}">
+        <button type="button" class="icon-button" data-vm="power" aria-label="${escapeI18n(tr('modules.common.start_vm'))}" title="${escapeI18n(tr('modules.common.start'))}">${icon('play')}</button>
+        <button type="button" class="icon-button" data-vm="suspend" aria-label="${escapeI18n(tr('modules.common.suspend_vm'))}" title="${escapeI18n(tr('modules.common.suspend_frees_memory'))}" hidden>${icon('pause')}</button>
+        <button type="button" class="icon-button" data-vm="desktop" aria-label="${escapeI18n(tr('modules.common.add_a_desktop'))}" title="${escapeI18n(tr('modules.common.add_a_desktop_for_computer_use'))}" hidden>${icon('grid')}</button>
+        <button type="button" class="icon-button" data-vm="share" aria-label="${escapeI18n(tr('modules.common.share_project_read_only_at_start'))}" title="${escapeI18n(tr('modules.common.share_this_project_read_only_when_the_vm_starts'))}" aria-pressed="false">${icon('folder')}</button>
+        <button type="button" class="icon-button" data-vm="new" aria-label="${escapeI18n(tr('modules.common.new_vm'))}" title="${escapeI18n(tr('modules.common.new_machine'))}" aria-haspopup="menu">${icon('plus')}</button>
       </div>
     </div>`;
   const stage = root.querySelector<HTMLElement>('.vm-stage')!;
@@ -59,31 +61,31 @@ export function mountVmPanel(root: HTMLElement, host: VmHost) {
   const failure = (error: unknown) => error instanceof Error ? error.message : String(error);
 
   function emptyState(): string {
-    if (!status) return '<p>Loading machines…</p>';
+    if (!status) return `<p>${escapeI18n(tr('modules.common.loading_machines'))}</p>`;
     const vm = current();
     if (!vm) {
-      if (all().length) return '<p>Choose a machine below.</p>';
-      const setup = status.supported && !status.installed ? `<button type="button" class="primary-button" data-vm="setup">Set up VMs</button><small>Downloads Tart from Cirrus Labs and checks Apple's notarization. Free for personal and small-team use.</small>` : '';
+      if (all().length) return `<p>${escapeI18n(tr('modules.common.choose_a_machine_below'))}</p>`;
+      const setup = status.supported && !status.installed ? `<button type="button" class="primary-button" data-vm="setup">${escapeI18n(tr('modules.common.set_up_vms'))}</button><small>${escapeI18n(tr('modules.common.downloads_tart_from_cirrus_labs_and_checks_apple_s_notarization_free_for'))}</small>` : '';
       const options = createOptions(status, connections);
       const local = status.supported ? "PandaCode runs Linux and macOS VMs on Apple's Virtualization framework: headless, and only the memory you give it." : 'Local VMs need a Mac with Apple silicon.';
       return `<strong>${options.length ? 'Create a machine' : 'Run Linux, macOS and Windows machines'}</strong><p>Agents can see, click, type and run commands in an isolated machine. ${local}${anyCloud() ? '' : ' Cloud sandboxes from Daytona, Cloudflare and AWS connect in Settings → Agents.'}</p>${setup}${options.length ? `<div class="vm-images">${options.map(option => `<button type="button" class="secondary-button" data-vm-create="${escape(option.id)}">${escape(option.label)}<small>${escape(option.description)}</small></button>`).join('')}</div>` : ''}`;
     }
-    if (vm.elsewhere) return `<strong>${escape(vm.name)} is running outside PandaCode</strong><p>Stop it, then start it here to see its screen.</p><button type="button" class="secondary-button" data-vm="power">Stop</button>`;
-    if (!vm.running) return `<strong>${escape(vm.name)} is ${vm.os === 'darwin' && !vm.cloud ? 'stopped or suspended' : 'stopped'}</strong><p>${escape(vm.detail)}</p>${vm.canStart ? '<button type="button" class="primary-button" data-vm="power">Start</button>' : ''}`;
+    if (vm.elsewhere) return `<strong>${escape(vm.name)} is running outside PandaCode</strong><p>${escapeI18n(tr('modules.common.stop_it_then_start_it_here_to_see_its_screen'))}</p><button type="button" class="secondary-button" data-vm="power">${escapeI18n(tr('modules.common.stop'))}</button>`;
+    if (!vm.running) return `<strong>${escape(vm.name)} is ${vm.os === 'darwin' && !vm.cloud ? 'stopped or suspended' : 'stopped'}</strong><p>${escape(vm.detail)}</p>${vm.canStart ? `<button type="button" class="primary-button" data-vm="power">${escapeI18n(tr('modules.common.start'))}</button>` : ''}`;
     if (!vm.desktop) return `<strong>${escape(vm.name)} has no screen</strong><p>Agents use it with commands (vm_exec). ${escape(vm.detail)}</p>`;
-    return '<p>Connecting to the screen…</p>';
+    return `<p>${escapeI18n(tr('modules.common.connecting_to_the_screen'))}</p>`;
   }
   function render(): void {
     const vm = current();
     empty.innerHTML = emptyState();
     empty.hidden = live() && painted;
     screen.hidden = !live() || !painted;
-    root.querySelector('.vm-name')!.textContent = vm?.name ?? 'Machines';
+    root.querySelector('.vm-name')!.textContent = vm?.name ?? tr('modules.common.machines');
     root.querySelector('.vm-detail')!.textContent = vm ? vm.detail : '';
     const power = button('power');
     power.disabled = !vm || Boolean(busy) || (!vm.running && !vm.canStart);
     power.innerHTML = icon(vm?.running ? 'stop' : 'play');
-    power.setAttribute('aria-label', vm?.running ? 'Stop VM' : 'Start VM'); power.title = vm?.running ? 'Stop' : 'Start';
+    power.setAttribute('aria-label', vm?.running ? 'Stop VM' : 'Start VM'); power.title = vm?.running ? tr('modules.common.stop') : tr('modules.common.start');
     button('suspend').hidden = !(vm && !vm.cloud && vm.os === 'darwin' && live());
     // Desktops install on their own; the button is only a retry after a failure.
     button('desktop').hidden = !(vm && !vm.cloud && vm.os === 'linux' && live() && vm.local?.desktop === 'failed');
@@ -152,7 +154,7 @@ export function mountVmPanel(root: HTMLElement, host: VmHost) {
   function chooseVm(anchor: HTMLElement): void {
     const vm = current();
     const items: ChoiceItem[] = all().map(machine => ({ id: `vm:${machine.key}`, label: machine.name, description: machine.detail, icon: 'monitor', selected: machine.key === vm?.key }));
-    if (vm) items.push({ id: 'delete', label: `Delete ${vm.name}`, description: vm.cloud ? 'Removes it from your cloud account' : `Frees about ${vm.local?.sizeGb ?? 0} GB`, icon: 'trash' });
+    if (vm) items.push({ id: 'delete', label: tr('modules.dynamic.deleteMachine', { name: String(vm.name) }), description: vm.cloud ? tr('modules.common.removes_it_from_your_cloud_account') : `Frees about ${vm.local?.sizeGb ?? 0} GB`, icon: 'trash' });
     host.choose(anchor, 'Machines', items, id => {
       if (id === 'delete' && vm) void run(`Deleting ${vm.name}…`, () => vm.cloud ? host.call('cloud_power', { id: vm.key, action: 'delete' }) : host.call<VmStatus>('vm_power', { name: vm.key, action: 'delete' }), `${vm.name} is deleted.`);
       else if (id.startsWith('vm:')) void run('', () => host.call<VmStatus>('vm_show', { name: id.slice(3) }));

@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /* Deploy: a header menu that starts an agent task to ship the project to Vercel,
  * Cloudflare, Railway, Netlify, AWS or Google Cloud end to end. The agent deploys with the pandacode_cloud_cli tool,
  * which is already signed in, so no keys appear in prompts. */
@@ -5,12 +6,12 @@ import type { CloudConnection } from './cloud-settings';
 
 export type DeployTarget = 'vercel' | 'cloudflare' | 'railway' | 'netlify' | 'aws' | 'gcloud';
 export const TARGETS: { id: DeployTarget; label: string; description: string }[] = [
-  { id: 'vercel', label: 'Deploy to Vercel', description: 'Preview first, then production' },
-  { id: 'cloudflare', label: 'Deploy to Cloudflare', description: 'Workers, static assets or Pages' },
-  { id: 'railway', label: 'Deploy to Railway', description: 'Servers, containers and databases' },
-  { id: 'netlify', label: 'Deploy to Netlify', description: 'Draft first, then production' },
-  { id: 'aws', label: 'Deploy to AWS', description: 'The simplest fitting AWS service' },
-  { id: 'gcloud', label: 'Deploy to Google Cloud', description: 'Cloud Run or Cloud Storage' },
+  { id: 'vercel', get label() { return tr('modules.common.deploy_to_vercel'); }, get description() { return tr('modules.common.preview_first_then_production'); } },
+  { id: 'cloudflare', get label() { return tr('modules.common.deploy_to_cloudflare'); }, get description() { return tr('modules.common.workers_static_assets_or_pages'); } },
+  { id: 'railway', get label() { return tr('modules.common.deploy_to_railway'); }, get description() { return tr('modules.common.servers_containers_and_databases'); } },
+  { id: 'netlify', get label() { return tr('modules.common.deploy_to_netlify'); }, get description() { return tr('modules.common.draft_first_then_production'); } },
+  { id: 'aws', get label() { return tr('modules.common.deploy_to_aws'); }, get description() { return tr('modules.common.the_simplest_fitting_aws_service'); } },
+  { id: 'gcloud', get label() { return tr('modules.common.deploy_to_google_cloud'); }, get description() { return tr('modules.common.cloud_run_or_cloud_storage'); } },
 ];
 
 const COMMON = `Work end to end and verify the result yourself. Use the pandacode_cloud_cli tool for the CLI below: it is already signed in to my account, so never ask me for tokens and never print or commit secrets. First read the project to understand how it builds and runs, install dependencies and run the build locally, and fix anything that stops it. If the app needs environment variables, list them and ask me for their values before deploying. When the deploy finishes, open the URL (fetch it, or use the browser) and check the main page and one key route really work; fix and redeploy if not. Finish with the live URL, what you changed in the project, and how to redeploy.`;
@@ -32,6 +33,6 @@ export function deployBrief(target: DeployTarget): string {
 export function deployItems(connections: CloudConnection[]) {
   return TARGETS.map(target => {
     const connected = connections.some(c => c.provider === target.id && c.connected);
-    return { id: target.id, label: target.label, description: connected ? target.description : 'Connect it in Settings → Agents → Cloud sandboxes', icon: 'upload', disabled: !connected };
+    return { id: target.id, label: target.label, description: connected ? target.description : tr('modules.common.connect_it_in_settings_agents_cloud_sandboxes'), icon: 'upload', disabled: !connected };
   });
 }

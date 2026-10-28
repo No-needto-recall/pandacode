@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './jev.css';
 import './jev-assist.css';
 import { call } from './bridge';
@@ -23,10 +26,10 @@ type AssistContext = {
 };
 type Request = { kind: AssistKind; changeId?: string; query?: string; rules?: string[]; fingerprint?: string };
 const kinds: Record<AssistKind, { label: string; description: string; action: string }> = {
-  review: { label: 'Work review', description: 'Check whether the saved work and evidence support calling this task finished.', action: 'Review work' },
-  rules: { label: 'Project rules', description: 'Check saved changes against rules written in your own words.', action: 'Check rules' },
-  context: { label: 'Find context', description: 'Find relevant excerpts from this task. Original messages stay intact.', action: 'Find context' },
-  route: { label: 'Choose worker', description: 'Suggest a worker from your configured team for a specific assignment.', action: 'Suggest worker' },
+  get review() { return { label: tr('modules.common.work_review'), description: tr('modules.common.check_whether_the_saved_work_and_evidence_support_calling_this_task_finished'), action: 'Review work' }; },
+  get rules() { return { label: tr('modules.common.project_rules'), description: tr('modules.common.check_saved_changes_against_rules_written_in_your_own_words'), action: 'Check rules' }; },
+  get context() { return { label: tr('modules.common.find_context'), description: tr('modules.common.find_relevant_excerpts_from_this_task_original_messages_stay_intact'), action: 'Find context' }; },
+  get route() { return { label: tr('modules.common.choose_worker'), description: tr('modules.common.suggest_a_worker_from_your_configured_team_for_a_specific_assignment'), action: 'Suggest worker' }; },
 };
 const labels: Record<string, string> = { supported: 'Supported', not_supported: 'Not supported', uncertain: 'Uncertain' };
 const views = new WeakMap<HTMLDialogElement, () => void>();
@@ -51,17 +54,17 @@ export async function showJevAssist(dialog: HTMLDialogElement, context: AssistCo
   const queries: Partial<Record<AssistKind, string>> = { [kind]: context.query ?? '' };
   const host = document.createElement('div');
   host.className = 'jev-view jev-assist-view';
-  host.innerHTML = `<header class="dialog-heading"><div class="jev-heading"><span class="jev-mark">${icon('spark')}</span><h2>Jev assistance</h2><span class="jev-preview-badge">Preview</span></div><button type="button" class="icon-button" data-assist-close aria-label="Close Jev assistance">${icon('close')}</button></header>
-    <div class="jev-assist-tabs" role="tablist" aria-label="Jev assistance tools">${Object.entries(kinds).map(([id, tab]) => `<button type="button" role="tab" id="jev-assist-tab-${id}" data-assist-tab="${id}" aria-controls="jev-assist-panel">${tab.label}</button>`).join('')}</div>
+  host.innerHTML = `<header class="dialog-heading"><div class="jev-heading"><span class="jev-mark">${icon('spark')}</span><h2>${escapeI18n(tr('modules.common.jev_assistance'))}</h2><span class="jev-preview-badge">${escapeI18n(tr('modules.common.preview'))}</span></div><button type="button" class="icon-button" data-assist-close aria-label="${escapeI18n(tr('modules.common.close_jev_assistance'))}">${icon('close')}</button></header>
+    <div class="jev-assist-tabs" role="tablist" aria-label="${escapeI18n(tr('modules.common.jev_assistance_tools'))}">${Object.entries(kinds).map(([id, tab]) => `<button type="button" role="tab" id="jev-assist-tab-${id}" data-assist-tab="${id}" aria-controls="jev-assist-panel">${tab.label}</button>`).join('')}</div>
     <section id="jev-assist-panel" role="tabpanel"><p class="jev-assist-description"></p>
       <form class="jev-assist-form"><div class="jev-assist-query-field"><label for="jev-assist-query"></label><textarea id="jev-assist-query" rows="2" maxlength="4000"></textarea></div>
-        <div class="jev-assist-rules-field" hidden><label for="jev-assist-rules">Rules for this project</label><textarea id="jev-assist-rules" rows="4" maxlength="4008" placeholder="No hardcoded service URLs.\nNew behavior has meaningful validation."></textarea><div class="jev-assist-rules-footer"><small>One rule per line · up to 8 rules</small><button type="button" class="jev-text-button" data-assist-save-rules>Save rules</button></div></div>
+        <div class="jev-assist-rules-field" hidden><label for="jev-assist-rules">${escapeI18n(tr('modules.common.rules_for_this_project'))}</label><textarea id="jev-assist-rules" rows="4" maxlength="4008" placeholder="${escape(tr('modules.jev.rulesExample'))}"></textarea><div class="jev-assist-rules-footer"><small>${escapeI18n(tr('modules.common.one_rule_per_line_up_to_8_rules'))}</small><button type="button" class="jev-text-button" data-assist-save-rules>${escapeI18n(tr('modules.common.save_rules'))}</button></div></div>
         <div class="jev-assist-setup" role="status" hidden><span></span><button type="button" class="jev-text-button" data-assist-settings>Set up Jev ${icon('forward')}</button></div>
         <div class="jev-assist-preview"></div><p class="jev-feedback" role="status" aria-live="polite"></p>
         <div class="jev-assist-run-row"><button type="button" class="secondary-button" data-assist-prepare>${icon('file')}Preview evidence</button><button type="submit" class="primary-button" data-assist-run disabled>${icon('spark')}<span></span></button></div>
-        <p class="jev-assist-disclosure">Optional · selected task evidence is sent to TypeSafe when you run. Provider usage charges apply. PandaCode works without Jev. Advice does not change files, models, or permissions.</p>
+        <p class="jev-assist-disclosure">${escapeI18n(tr('modules.common.optional_selected_task_evidence_is_sent_to_typesafe_when_you_run_provider'))}</p>
       </form>
-    </section><section class="jev-assist-results" aria-label="Saved Jev reports"><div class="jev-assist-history-heading"><h3>Reports</h3><select aria-label="Saved Jev report" hidden></select></div><div class="jev-assist-report"><p class="jev-empty">Your reports will appear here and stay on this device.</p></div></section>`;
+    </section><section class="jev-assist-results" aria-label="${escapeI18n(tr('modules.common.saved_jev_reports'))}"><div class="jev-assist-history-heading"><h3>${escapeI18n(tr('modules.common.reports'))}</h3><select aria-label="${escapeI18n(tr('modules.common.saved_jev_report'))}" hidden></select></div><div class="jev-assist-report"><p class="jev-empty">${escapeI18n(tr('modules.common.your_reports_will_appear_here_and_stay_on_this_device'))}</p></div></section>`;
   dialog.className = 'settings-dialog jev-dialog jev-assist-dialog';
   dialog.replaceChildren(host);
   const el = <T extends HTMLElement = HTMLElement>(selector: string) => host.querySelector<T>(selector)!;
@@ -103,14 +106,14 @@ export async function showJevAssist(dialog: HTMLDialogElement, context: AssistCo
     el('.jev-assist-description').textContent = kinds[kind].description;
     el('.jev-assist-query-field').hidden = kind === 'rules';
     el('.jev-assist-rules-field').hidden = kind !== 'rules';
-    el('.jev-assist-query-field label').textContent = kind === 'context' ? 'What are you looking for?' : kind === 'route' ? 'Assignment for the worker' : 'Review focus (optional)';
-    query.placeholder = kind === 'context' ? 'e.g. Failed approaches to the login bug' : kind === 'route' ? 'e.g. Add keyboard navigation to the settings panel' : 'e.g. Missing tests or unsupported completion claims';
+    el('.jev-assist-query-field label').textContent = kind === 'context' ? tr('modules.common.what_are_you_looking_for') : kind === 'route' ? tr('modules.common.assignment_for_the_worker') : tr('modules.common.review_focus_optional');
+    query.placeholder = kind === 'context' ? tr('modules.common.e_g_failed_approaches_to_the_login_bug') : kind === 'route' ? tr('modules.common.e_g_add_keyboard_navigation_to_the_settings_panel') : tr('modules.common.e_g_missing_tests_or_unsupported_completion_claims');
     query.required = kind === 'context' || kind === 'route';
     el('[data-assist-run] span').textContent = kinds[kind].action;
     invalidate();
   }
   function evidenceHtml(items: AssistEvidence[]): string {
-    return items.map((item, index) => `<details class="jev-assist-evidence"><summary>${icon('file')}<span>${escape(item.label)}</span>${item.truncated ? '<small>Excerpt</small>' : ''}${icon('down')}</summary><pre>${escape(item.text)}</pre>${context.openDiff && item.path && (item.changeId || context.changeId) ? `<button type="button" class="jev-text-button" data-assist-diff="${index}">Open saved diff ${icon('forward')}</button>` : ''}</details>`).join('');
+    return items.map((item, index) => `<details class="jev-assist-evidence"><summary>${icon('file')}<span>${escape(item.label)}</span>${item.truncated ? `<small>${escapeI18n(tr('modules.common.excerpt'))}</small>` : ''}${icon('down')}</summary><pre>${escape(item.text)}</pre>${context.openDiff && item.path && (item.changeId || context.changeId) ? `<button type="button" class="jev-text-button" data-assist-diff="${index}">Open saved diff ${icon('forward')}</button>` : ''}</details>`).join('');
   }
   function bindDiffs(target: HTMLElement, items: AssistEvidence[]) {
     target.querySelectorAll<HTMLButtonElement>('[data-assist-diff]').forEach(button => button.addEventListener('click', () => {
@@ -130,10 +133,10 @@ export async function showJevAssist(dialog: HTMLDialogElement, context: AssistCo
       if (kind === 'rules' && !rulesLoaded && !rulesDirty) { rules.value = result.rules.join('\n'); rulesLoaded = true; payload.rules = [...result.rules]; }
       prepared = { preview: result, request: payload, fingerprint: JSON.stringify(payload) };
       const box = el('.jev-assist-preview');
-      box.innerHTML = `<div class="jev-assist-evidence-heading"><strong>${result.evidence.length} evidence ${result.evidence.length === 1 ? 'item' : 'items'}</strong><span>${bytes(result.inputBytes)} · ${result.candidateCount} ${kind === 'route' ? 'workers' : 'checks'}</span></div>${result.truncated ? '<p class="jev-hint">Some evidence is omitted or shortened. Results only cover what is shown here.</p>' : ''}<div class="jev-assist-evidence-list">${evidenceHtml(result.evidence)}</div>`;
+      box.innerHTML = `<div class="jev-assist-evidence-heading"><strong>${result.evidence.length} evidence ${result.evidence.length === 1 ? 'item' : 'items'}</strong><span>${bytes(result.inputBytes)} · ${result.candidateCount} ${kind === 'route' ? 'workers' : 'checks'}</span></div>${result.truncated ? `<p class="jev-hint">${escapeI18n(tr('modules.common.some_evidence_is_omitted_or_shortened_results_only_cover_what_is_shown'))}</p>` : ''}<div class="jev-assist-evidence-list">${evidenceHtml(result.evidence)}</div>`;
       bindDiffs(box, result.evidence);
       const setup = el('.jev-assist-setup'); setup.hidden = result.enabled && result.keySaved;
-      setup.querySelector('span')!.textContent = !result.enabled ? 'Enable decision assistance to run this check.' : 'Add your TypeSafe key to run this check.';
+      setup.querySelector('span')!.textContent = !result.enabled ? tr('modules.common.enable_decision_assistance_to_run_this_check') : tr('modules.common.add_your_typesafe_key_to_run_this_check');
       el<HTMLButtonElement>('[data-assist-settings]').hidden = !context.settings;
       tell(result.candidateCount ? 'Evidence prepared locally. Run when you’re ready.' : kind === 'route' ? 'Add worker profiles to this task’s team first.' : kind === 'rules' ? 'Add a project rule before checking changes.' : 'No saved evidence is available for this task yet.');
     } catch (error) { if (alive() && ticket === revision) { prepared = undefined; tell(errorText(error), true); } }
@@ -142,7 +145,7 @@ export async function showJevAssist(dialog: HTMLDialogElement, context: AssistCo
   function selectReport(report: AssistReport) {
     selected = report;
     const target = el('.jev-assist-report');
-    target.innerHTML = `<div class="jev-assist-report-title"><h4>${escape(report.title)}</h4><span class="jev-assist-advisory" data-status="${report.status === 'complete' ? 'complete' : 'uncertain'}">${report.status === 'complete' ? 'Advisory' : 'Needs judgment'}</span></div><p class="jev-assist-report-meta">${escape(report.model)} · ${(report.durationMs / 1000).toFixed(1)}s${report.inputTokens != null ? ` · ${report.inputTokens.toLocaleString()} input tokens` : ''}</p><p class="jev-assist-summary">${escape(report.summary)}</p>${report.findings.length ? `<ul class="jev-assist-findings">${report.findings.map(finding => `<li><span>${escape(finding.label)}</span><span class="jev-assist-finding-state" data-result="${finding.result in labels ? finding.result : 'uncertain'}">${labels[finding.result] ?? 'Uncertain'}${Number.isFinite(finding.probability) && finding.probability! >= 0 && finding.probability! <= 1 ? `<small>${Math.round(finding.probability! * 100)}% probability</small>` : ''}</span></li>`).join('')}</ul>` : ''}${report.recommendation ? `<div class="jev-assist-recommendation">${icon('worktree')}<div><strong>${escape(report.recommendation.label)}</strong><p>${escape(report.recommendation.detail)}</p><small>Suggested only. Your configured models stay unchanged.</small></div></div>` : ''}${report.matches.length ? `<div class="jev-assist-matches"><h4>Matching excerpts</h4>${evidenceHtml(report.matches)}</div>` : ''}${report.truncated ? '<p class="jev-hint">Evidence was truncated. Review the original task before deciding.</p>' : ''}<details class="jev-assist-sources"><summary>Evidence used ${icon('down')}</summary>${evidenceHtml(report.evidence)}</details>${context.attach ? `<button type="button" class="secondary-button jev-assist-attach">${icon('attach')}Use report in prompt</button>` : ''}`;
+    target.innerHTML = `<div class="jev-assist-report-title"><h4>${escape(report.title)}</h4><span class="jev-assist-advisory" data-status="${report.status === 'complete' ? 'complete' : 'uncertain'}">${report.status === 'complete' ? 'Advisory' : 'Needs judgment'}</span></div><p class="jev-assist-report-meta">${escape(report.model)} · ${(report.durationMs / 1000).toFixed(1)}s${report.inputTokens != null ? ` · ${report.inputTokens.toLocaleString(getLocale())} input tokens` : ''}</p><p class="jev-assist-summary">${escape(report.summary)}</p>${report.findings.length ? `<ul class="jev-assist-findings">${report.findings.map(finding => `<li><span>${escape(finding.label)}</span><span class="jev-assist-finding-state" data-result="${finding.result in labels ? finding.result : 'uncertain'}">${labels[finding.result] ?? 'Uncertain'}${Number.isFinite(finding.probability) && finding.probability! >= 0 && finding.probability! <= 1 ? `<small>${Math.round(finding.probability! * 100)}% probability</small>` : ''}</span></li>`).join('')}</ul>` : ''}${report.recommendation ? `<div class="jev-assist-recommendation">${icon('worktree')}<div><strong>${escape(report.recommendation.label)}</strong><p>${escape(report.recommendation.detail)}</p><small>${escapeI18n(tr('modules.common.suggested_only_your_configured_models_stay_unchanged'))}</small></div></div>` : ''}${report.matches.length ? `<div class="jev-assist-matches"><h4>${escapeI18n(tr('modules.common.matching_excerpts'))}</h4>${evidenceHtml(report.matches)}</div>` : ''}${report.truncated ? `<p class="jev-hint">${escapeI18n(tr('modules.common.evidence_was_truncated_review_the_original_task_before_deciding'))}</p>` : ''}<details class="jev-assist-sources"><summary>Evidence used ${icon('down')}</summary>${evidenceHtml(report.evidence)}</details>${context.attach ? `<button type="button" class="secondary-button jev-assist-attach">${icon('attach')}Use report in prompt</button>` : ''}`;
     bindDiffs(target.querySelector<HTMLElement>('.jev-assist-matches') ?? document.createElement('div'), report.matches);
     bindDiffs(target.querySelector<HTMLElement>('.jev-assist-sources')!, report.evidence);
     target.querySelector('.jev-assist-attach')?.addEventListener('click', () => { if (alive()) context.attach?.(assistReportText(report)); });
@@ -152,7 +155,7 @@ export async function showJevAssist(dialog: HTMLDialogElement, context: AssistCo
     reports.sort((a, b) => b.createdAt - a.createdAt);
     const select = el<HTMLSelectElement>('.jev-assist-history-heading select');
     select.hidden = !reports.length;
-    select.innerHTML = reports.map(report => `<option value="${escape(report.id)}">${escape(report.title)} · ${new Date(report.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</option>`).join('');
+    select.innerHTML = reports.map(report => `<option value="${escape(report.id)}">${escape(report.title)} · ${new Date(report.createdAt).toLocaleString(getLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</option>`).join('');
     if (selected) select.value = selected.id; else if (reports[0]) selectReport(reports[0]);
   }
   query.addEventListener('input', invalidate);
@@ -191,7 +194,7 @@ export async function showJevAssist(dialog: HTMLDialogElement, context: AssistCo
   });
   tab(kind);
   await Promise.allSettled([
-    call<AssistReport[]>('jev_assist_list', { sessionId: context.sessionId }).then(saved => { if (!alive()) return; const ids = new Set(reports.map(report => report.id)); reports.push(...saved.filter(report => report.sessionId === context.sessionId && !ids.has(report.id))); history(); }).catch(() => { if (alive() && !reports.length) el('.jev-empty').textContent = 'Saved reports could not be loaded. You can still prepare a new check.'; }),
+    call<AssistReport[]>('jev_assist_list', { sessionId: context.sessionId }).then(saved => { if (!alive()) return; const ids = new Set(reports.map(report => report.id)); reports.push(...saved.filter(report => report.sessionId === context.sessionId && !ids.has(report.id))); history(); }).catch(() => { if (alive() && !reports.length) el('.jev-empty').textContent = tr('modules.common.saved_reports_could_not_be_loaded_you_can_still_prepare_a_new'); }),
     kind === 'review' || kind === 'rules' ? prepare() : Promise.resolve(),
   ]);
 }

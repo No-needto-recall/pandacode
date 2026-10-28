@@ -1,6 +1,8 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 /* Settings → Agents → Model routing: Panda Router picks each worker's model for a task. */
 import './model-routing.css';
-import { escape, icon } from './dom';
+import { escape, icon, morph } from './dom';
 import { providerLogo } from './provider-logos';
 import { trackSegment } from './motion';
 import { installedCatalog } from './team-catalog';
@@ -23,34 +25,35 @@ export interface ModelRoutingOptions {
   call<T>(command: string, args?: Record<string, unknown>): Promise<T>;
 }
 
-const MODES: [RoutingMode, string][] = [['cheapest', 'Cheap'], ['balanced', 'Balanced'], ['quality', 'Best']];
+const routingModes = (): [RoutingMode, string][] => [['cheapest', tr('modules.routing.cheap')], ['balanced', tr('modules.routing.balanced')], ['quality', tr('modules.routing.best')]];
 const MIN_P = 30, MAX_P = 90, DEFAULT_P = 50;
-const HELP = 'Panda Router runs locally. For each worker it predicts which of your installed models is likely to succeed and picks one by your mode. Balanced weighs success against cost; Cheap takes the lowest cost above the minimum chance of success and moves up only if review fails; Best takes the likeliest to succeed. The Team button in the prompt box sets the same mode. The first use downloads a 35 MB profiler from GitHub.';
+const HELP = () => tr('modules.routing.help');
 const HEALTH_REFRESH_MS = 30_000;
 const money = (usd: number) => usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`;
 const percent = (p: number) => `${Math.round(p * 100)}%`;
 
 export function mountModelRouting(host: HTMLElement, options: ModelRoutingOptions): () => void {
-  host.innerHTML = `<div class="settings-group model-routing">
-    <div class="setting-row"><div><strong>Model routing ${infoMark(HELP, 'About model routing')}</strong></div></div>
-    <div class="setting-row"><div><strong>Pick worker models with Panda Router</strong></div><input type="checkbox" class="settings-switch routing-enabled" aria-label="Pick worker models with Panda Router"></div>
-    <div class="setting-row"><div><strong>Mode</strong></div><div class="routing-modes" role="radiogroup" aria-label="Routing mode">${MODES.map(([id, label]) => `<button type="button" role="radio" aria-checked="false" tabindex="-1" data-mode="${id}">${label}</button>`).join('')}</div></div>
-    <div class="setting-row routing-minp-row" hidden><div><strong>Minimum chance of success</strong></div><input type="number" class="routing-minp" aria-label="Minimum chance of success in percent" min="${MIN_P}" max="${MAX_P}" step="1"></div>
-    <div class="setting-row"><div><strong>Profiler</strong><small class="routing-status" role="status"></small></div><button type="button" class="secondary-button routing-prepare" hidden></button></div>
-    <div class="routing-try"><p class="routing-off" hidden>Routing is off. Turn it on to try it.</p><textarea class="routing-text" aria-label="Task to route" rows="3" spellcheck="false" placeholder="Describe a task to see which model Panda Router would pick."></textarea>
-      <div class="routing-try-actions"><button type="button" class="secondary-button routing-route">Route</button></div>
+  const markup = () => `<div class="settings-group model-routing">
+    <div class="setting-row"><div><strong>${escape(tr('modules.routing.title'))} ${infoMark(HELP(), tr('modules.common.about_model_routing'))}</strong></div></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.pick_worker_models_with_panda_router'))}</strong></div><input type="checkbox" class="settings-switch routing-enabled" aria-label="${escapeI18n(tr('modules.common.pick_worker_models_with_panda_router'))}"></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.mode'))}</strong></div><div class="routing-modes" role="radiogroup" aria-label="${escapeI18n(tr('modules.common.routing_mode'))}">${routingModes().map(([id, label]) => `<button type="button" role="radio" aria-checked="false" tabindex="-1" data-mode="${id}">${label}</button>`).join('')}</div></div>
+    <div class="setting-row routing-minp-row" hidden><div><strong>${escapeI18n(tr('modules.common.minimum_chance_of_success'))}</strong></div><input type="number" class="routing-minp" aria-label="${escapeI18n(tr('modules.common.minimum_chance_of_success_in_percent'))}" min="${MIN_P}" max="${MAX_P}" step="1"></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.profiler'))}</strong><small class="routing-status" role="status"></small></div><button type="button" class="secondary-button routing-prepare" hidden></button></div>
+    <div class="routing-try"><p class="routing-off" hidden>${escapeI18n(tr('modules.common.routing_is_off_turn_it_on_to_try_it'))}</p><textarea class="routing-text" aria-label="${escapeI18n(tr('modules.common.task_to_route'))}" rows="3" spellcheck="false" placeholder="${escapeI18n(tr('modules.common.describe_a_task_to_see_which_model_panda_router_would_pick'))}"></textarea>
+      <div class="routing-try-actions"><button type="button" class="secondary-button routing-route">${escapeI18n(tr('modules.common.route'))}</button></div>
       <div class="routing-result" role="status" aria-live="polite" hidden></div></div>
   </div>
-  <div class="settings-group routing-health" role="group" aria-label="Unavailable models" hidden>
-    <div class="setting-row"><div><strong>Unavailable models ${infoMark('Panda Router skips these models until their cooldown ends because their runs failed, and a team worker on one of them moves to the same model on another harness. Allow now lets the router pick it again.', 'About unavailable models')}</strong></div><button type="button" class="secondary-button routing-health-clear" aria-label="Allow all unavailable models now">Allow all</button></div>
+  <div class="settings-group routing-health" role="group" aria-label="${escapeI18n(tr('modules.common.unavailable_models'))}" hidden>
+    <div class="setting-row"><div><strong>${escape(tr('modules.common.unavailable_models'))} ${infoMark(tr('modules.common.panda_router_skips_these_models_until_their_cooldown_ends_because_their_runs'), tr('modules.common.about_unavailable_models'))}</strong></div><button type="button" class="secondary-button routing-health-clear" aria-label="${escapeI18n(tr('modules.common.allow_all_unavailable_models_now'))}">${escapeI18n(tr('modules.common.allow_all'))}</button></div>
     <div class="routing-health-rows"></div>
   </div>
-  <div class="settings-group routing-pool" role="group" aria-label="Models for teams">
-    <div class="setting-row"><div><strong>Models for teams ${infoMark('Turned-off harnesses and models are never picked for team workers: Panda Router skips them, profiles and fallbacks never staff them and a failed worker never fails over to them. A model the lead is explicitly asked to use still runs.', 'About models for teams')}</strong><small class="routing-pool-note" role="status" data-live></small></div></div>
-    <p class="routing-pool-warning" role="alert" hidden>No model is on for teams. Workers will use the lead's model.</p>
+  <div class="settings-group routing-pool" role="group" aria-label="${escapeI18n(tr('modules.common.models_for_teams'))}">
+    <div class="setting-row"><div><strong>${escape(tr('modules.common.models_for_teams'))} ${infoMark(tr('modules.common.turned_off_harnesses_and_models_are_never_picked_for_team_workers_panda'), tr('modules.common.about_models_for_teams'))}</strong><small class="routing-pool-note" role="status" data-live></small></div></div>
+    <p class="routing-pool-warning" role="alert" hidden>${escapeI18n(tr('modules.common.no_model_is_on_for_teams_workers_will_use_the_lead_s'))}</p>
     <div class="routing-pool-rows"></div>
   </div>
   ${modelTiersHtml()}`;
+  host.innerHTML = markup();
   const $ = <T extends HTMLElement>(selector: string) => host.querySelector<T>(selector)!;
   const enabled = $<HTMLInputElement>('.routing-enabled'), minP = $<HTMLInputElement>('.routing-minp'), minRow = $('.routing-minp-row');
   const statusText = $('.routing-status'), prepare = $<HTMLButtonElement>('.routing-prepare');
@@ -103,7 +106,7 @@ export function mountModelRouting(host: HTMLElement, options: ModelRoutingOption
       const row = document.createElement('div');
       row.className = 'setting-row routing-health-row'; row.dataset.key = key;
       row.innerHTML = `<div>${providerLogo(entry.provider as ProviderId, 'routing-logo')}<strong>${escape(label)} ${infoMark(entry.reason, `Why ${label} is paused`)}</strong><small class="routing-health-left">${escape(left)}</small></div>`
-        + `<button type="button" class="secondary-button routing-health-retry" data-provider="${escape(entry.provider)}" data-model="${escape(entry.model)}" aria-label="Allow ${escape(label)} now">Allow now</button>`;
+        + `<button type="button" class="secondary-button routing-health-retry" data-provider="${escape(entry.provider)}" data-model="${escape(entry.model)}" aria-label="Allow ${escape(label)} now">${escapeI18n(tr('modules.common.allow_now'))}</button>`;
       healthRows.append(row);
     }
   };
@@ -122,6 +125,15 @@ export function mountModelRouting(host: HTMLElement, options: ModelRoutingOption
     if (button) void loadHealth('model_health_clear', { provider: button.dataset.provider, model: button.dataset.model });
   });
 
+  const profilerLabel = (next: RoutingStatus): string => {
+    switch (next.profiler) {
+      case 'ready': return tr('modules.common.ready');
+      case 'downloading': return tr('modules.routing.downloading');
+      case 'missing': return tr('modules.routing.notDownloaded');
+      case 'failed': return tr('modules.routing.failed', { error: next.error ?? tr('modules.routing.unknownError') });
+      default: return tr('modules.routing.heuristic', { reason: next.error ?? tr('modules.routing.profilerUnavailable') });
+    }
+  };
   const render = (next: RoutingStatus) => {
     status = next;
     void loadHealth();
@@ -137,9 +149,9 @@ export function mountModelRouting(host: HTMLElement, options: ModelRoutingOption
     if (document.activeElement !== minP) minP.value = String(Math.round(next.minP * 100));
     off.hidden = next.enabled; text.disabled = routeButton.disabled = !next.enabled;
     if (next.profiler === 'downloading') poll();
-    statusText.textContent = { ready: 'Ready', downloading: 'Downloading…', missing: 'Not downloaded', failed: `Failed: ${next.error ?? 'unknown error'}`, unavailable: `Keyword heuristic: ${next.error ?? 'the profiler cannot run here'}` }[next.profiler];
+    statusText.textContent = profilerLabel(next);
     prepare.hidden = next.profiler === 'ready' || next.profiler === 'downloading' || next.profiler === 'unavailable';
-    prepare.textContent = next.profiler === 'failed' ? 'Retry' : 'Download';
+    prepare.textContent = next.profiler === 'failed' ? tr('modules.common.retry') : tr('modules.common.download');
   };
   const fail = (cause: unknown) => { if (!disposed) { result.hidden = false; result.textContent = cause instanceof Error ? cause.message : String(cause); } };
   const configure = (patch: Record<string, unknown>) => request('model_routing_configure', patch, true).catch(fail);
@@ -170,7 +182,7 @@ export function mountModelRouting(host: HTMLElement, options: ModelRoutingOption
   routeButton.addEventListener('click', async () => {
     const task = text.value.trim();
     if (!task || routeButton.disabled) return;
-    routeButton.disabled = true; result.hidden = false; result.textContent = 'Routing…';
+    routeButton.disabled = true; result.hidden = false; result.textContent = tr('modules.common.routing');
     try {
       const { catalog: pool } = await installedCatalog(options.providers, options.loadModels);
       const route = await options.call<RouteResult>('model_routing_route', { text: task, pool });
@@ -178,7 +190,7 @@ export function mountModelRouting(host: HTMLElement, options: ModelRoutingOption
       const row = (m: RoutedModel, label: string) => `<li><span class="routing-label">${label}</span><span class="routing-name">${escape(m.name)}</span><span>${percent(m.pSuccess)}</span><span>${money(m.estCostUsd)}</span></li>`;
       const alternatives = route.ranking.filter(m => !route.pick || m.cardId !== route.pick.cardId).slice(0, 4);
       result.innerHTML = `<p class="routing-summary">Difficulty ${route.difficulty}/10 · ${escape(route.category)} · ${route.profiler === 'onnx' ? 'ONNX profiler' : 'keyword heuristic'} · ${Math.round(route.latencyMs)} ms</p>`
-        + (route.pick ? `<ul class="routing-ranking" aria-label="Routed models">${row(route.pick, 'Pick')}${alternatives.map(m => row(m, 'Also')).join('')}</ul>` : '<p>No rated model fits. The lead will choose.</p>');
+        + (route.pick ? `<ul class="routing-ranking" aria-label="${escapeI18n(tr('modules.common.routed_models'))}">${row(route.pick, 'Pick')}${alternatives.map(m => row(m, 'Also')).join('')}</ul>` : `<p>${escapeI18n(tr('modules.common.no_rated_model_fits_the_lead_will_choose'))}</p>`);
     } catch (cause) { fail(cause); }
     finally { routeButton.disabled = !status?.enabled; }
   });
@@ -186,14 +198,24 @@ export function mountModelRouting(host: HTMLElement, options: ModelRoutingOption
   void request('model_routing_status').catch(fail);
   const tiers = mountModelTiers($('.model-tiers'), { ...options, fail });
   void loadHealth();
-  mountPool($('.routing-pool'), options, fail, () => disposed, tiers.setExclusions);
-  return () => { disposed = true; tiers.dispose(); clearTimeout(polling); clearInterval(healthTimer); };
+  const disposePool = mountPool($('.routing-pool'), options, fail, () => disposed, tiers.setExclusions);
+  const disposeLocale = onLocaleChange(() => {
+    const next = document.createElement('div'); next.innerHTML = markup();
+    const selector = ':scope > .settings-group > .setting-row > div > strong, .routing-off, .routing-pool-warning, .routing-route, .routing-health-clear';
+    const fresh = [...next.querySelectorAll(selector)];
+    host.querySelectorAll(selector).forEach((node, index) => { if (fresh[index]) morph(node, fresh[index].innerHTML, 20); });
+    for (const [id, label] of routingModes()) modes.querySelector('[data-mode="' + id + '"]')!.textContent = label;
+    for (const selector of ['.routing-enabled', '.routing-modes', '.routing-minp', '.routing-text', '.routing-health', '.routing-health-clear', '.routing-pool']) { const node = host.querySelector(selector), copy = next.querySelector(selector); if (node && copy) for (const attr of ['aria-label', 'placeholder']) if (copy.hasAttribute(attr)) node.setAttribute(attr, copy.getAttribute(attr)!); }
+    if (status) { statusText.textContent = profilerLabel(status); prepare.textContent = status.profiler === 'failed' ? tr('modules.common.retry') : tr('modules.common.download'); }
+    healthRows.querySelectorAll('button').forEach(button => { button.textContent = tr('modules.common.allow_now'); });
+  });
+  return () => { disposed = true; disposeLocale(); disposePool(); tiers.dispose(); clearTimeout(polling); clearInterval(healthTimer); };
 }
 
 // Models for teams: one switch per installed harness, its models behind a disclosure. The switches stay
 // disabled until the saved set loads. Saves run one at a time, each sending the newest set; a failure of
 // the newest save reverts to the last set native confirmed.
-function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (cause: unknown) => void, disposed: () => boolean, onChange: (shown: Exclusions) => void): void {
+function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (cause: unknown) => void, disposed: () => boolean, onChange: (shown: Exclusions) => void): () => void {
   const harnesses = options.providers.filter(p => p.installed);
   const models = new Map<ProviderId, ProviderModel[]>(harnesses.map(p => [p.id, p.models]));
   const rows = group.querySelector<HTMLElement>('.routing-pool-rows')!, note = group.querySelector<HTMLElement>('.routing-pool-note')!;
@@ -208,7 +230,7 @@ function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (caus
       <input type="checkbox" class="settings-switch routing-pool-provider" aria-label="Use ${escape(p.name)} for teams"></div>
     <div class="routing-pool-models" id="routing-pool-${escape(p.id)}" hidden></div></div>`).join('');
 
-  const sync = () => {
+  const sync = (notify = true) => {
     group.setAttribute('aria-busy', String(!loaded));
     rows.querySelectorAll<HTMLElement>('.routing-pool-harness').forEach(row => {
       const id = row.dataset.provider as ProviderId;
@@ -225,9 +247,9 @@ function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (caus
       return list.length ? list.filter(m => !modelOff(p.id, m.id)).length : 1;
     });
     const on = counts.reduce((sum, n) => sum + n, 0);
-    note.textContent = `${on} model${on === 1 ? '' : 's'} on`;
+    note.textContent = tr((on === 1 ? '' : 's') === '' ? 'modules.dynamic.modelsOn.one' : 'modules.dynamic.modelsOn.many', { count: String(on) });
     warning.hidden = !loaded || on > 0;
-    if (loaded) onChange(shown);
+    if (loaded && notify) onChange(shown);
   };
   const flush = async () => {
     if (sent === version || disposed()) return;
@@ -251,7 +273,7 @@ function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (caus
     const open = button.getAttribute('aria-expanded') !== 'true';
     button.setAttribute('aria-expanded', String(open)); list.hidden = !open;
     if (!open || list.dataset.loaded) return;
-    list.dataset.loaded = '1'; list.textContent = 'Loading…';
+    list.dataset.loaded = '1'; list.textContent = tr('modules.common.loading');
     const name = harnesses.find(p => p.id === id)!.name;
     const loaded = await options.loadModels(id).catch(() => [] as ProviderModel[]);
     const entries = loaded.length ? loaded : models.get(id) ?? [];
@@ -259,7 +281,7 @@ function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (caus
     models.set(id, entries);
     list.innerHTML = entries.length ? entries.map(m => `<label class="setting-row routing-pool-model-row" title="${escape(m.id)}"><span>${escape(m.name)}</span>`
       + `<input type="checkbox" class="settings-switch routing-pool-model" data-model="${escape(m.id)}" aria-label="Use ${escape(m.name)} (${escape(name)}) for teams"></label>`).join('')
-      : '<p class="routing-pool-empty">No models listed.</p>';
+      : `<p class="routing-pool-empty">${escapeI18n(tr('modules.common.no_models_listed'))}</p>`;
     sync();
   };
 
@@ -279,4 +301,5 @@ function mountPool(group: HTMLElement, options: ModelRoutingOptions, fail: (caus
 
   sync();
   options.call<Exclusions>('model_routing_exclusions').then(value => { if (!disposed()) { saved = shown = value; loaded = true; sync(); } }, fail);
+  return onLocaleChange(() => { if (!disposed()) sync(false); });
 }

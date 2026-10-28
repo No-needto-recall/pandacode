@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import type { ProviderId } from './types';
 import { escape, icon } from './dom';
 import { providerLogo } from './provider-logos';
@@ -169,7 +170,7 @@ export function openChoiceMenu(options: ChoiceMenuOptions): () => void {
     buttons.forEach((button, index) => { button.disabled = pending || Boolean(items[index].disabled); });
     if (search) search.disabled = pending;
     list.setAttribute('aria-busy', String(pending));
-    status.textContent = pending ? 'Applying…' : !items.length ? search?.value.trim() ? 'No matching options.' : 'No options available.' : matches > items.length ? `Showing ${items.length} of ${matches} options.${search ? ' Search to narrow the list.' : ''}` : '';
+    status.textContent = pending ? tr('modules.common.applying') : !items.length ? search?.value.trim() ? tr('modules.common.no_matching_options') : tr('modules.common.no_options_available') : matches > items.length ? `Showing ${items.length} of ${matches} options.${search ? ' Search to narrow the list.' : ''}` : '';
     status.hidden = !status.textContent;
     position();
   }

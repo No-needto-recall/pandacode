@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 // Named provider connections (issue #29): several setups of one harness, each with its own
 // executable, arguments, environment and config folder. Secret values go to the native
 // secure store and never come back; the list only carries their names.
@@ -17,30 +19,30 @@ export function mountConnections(host: HTMLElement, harnesses: { id: ProviderId;
   let snapshot = emptyConnections(), editing: Connection | 'new' | null = null, disposed = false;
   const harnessName = (id: string) => harnesses.find(h => h.id === id)?.name ?? id;
   function render(): void {
-    const rows = snapshot.connections.map(c => `<li class="named-connection" data-connection="${escape(c.id)}"><span><strong>${escape(c.name)}</strong> <small>${escape(harnessName(c.provider))}</small></span><span class="connection-row-actions"><button type="button" class="secondary-button" data-edit-connection="${escape(c.id)}" aria-label="Edit ${escape(c.name)}">Edit</button><button type="button" class="secondary-button" data-delete-connection="${escape(c.id)}" aria-label="Delete ${escape(c.name)}">Delete</button></span></li>`).join('');
-    host.innerHTML = `<h3>Connections</h3><p>Add named setups of a harness, such as Claude Work and Claude Personal, each with its own executable, arguments, environment and config folder. Choose one in the model picker; tasks keep theirs.</p>${rows ? `<ul class="named-connections">${rows}</ul>` : ''}${editing ? form(editing === 'new' ? null : editing) : '<button type="button" class="secondary-button" data-add-connection>Add connection</button>'}<p class="named-connection-feedback" role="status" hidden></p>`;
+    const rows = snapshot.connections.map(c => `<li class="named-connection" data-connection="${escape(c.id)}"><span><strong>${escape(c.name)}</strong> <small>${escape(harnessName(c.provider))}</small></span><span class="connection-row-actions"><button type="button" class="secondary-button" data-edit-connection="${escape(c.id)}" aria-label="Edit ${escape(c.name)}">${escapeI18n(tr('modules.common.edit'))}</button><button type="button" class="secondary-button" data-delete-connection="${escape(c.id)}" aria-label="Delete ${escape(c.name)}">${escapeI18n(tr('modules.common.delete'))}</button></span></li>`).join('');
+    host.innerHTML = `<h3>${escapeI18n(tr('modules.common.connections'))}</h3><p>${escapeI18n(tr('modules.common.add_named_setups_of_a_harness_such_as_claude_work_and_claude'))}</p>${rows ? `<ul class="named-connections">${rows}</ul>` : ''}${editing ? form(editing === 'new' ? null : editing) : `<button type="button" class="secondary-button" data-add-connection>${escapeI18n(tr('modules.common.add_connection'))}</button>`}<p class="named-connection-feedback" role="status" hidden></p>`;
   }
   function envRow(row: EnvRow): string {
-    return `<div class="connection-input-row" data-env-row><input aria-label="Variable name" data-env-name value="${escape(row.name)}" placeholder="NAME" autocomplete="off" spellcheck="false" maxlength="128"><input aria-label="Value" data-env-value type="${row.secret ? 'password' : 'text'}" value="${escape(row.value)}" placeholder="${row.saved ? 'Saved · leave empty to keep' : 'value'}" autocomplete="off" spellcheck="false" maxlength="4096"><label class="connection-secret"><input type="checkbox" data-env-secret ${row.secret ? 'checked' : ''}${row.saved ? ' data-saved' : ''}> Secret</label><button type="button" class="secondary-button" data-remove-env aria-label="Remove variable">Remove</button></div>`;
+    return `<div class="connection-input-row" data-env-row><input aria-label="${escapeI18n(tr('modules.common.variable_name'))}" data-env-name value="${escape(row.name)}" placeholder="NAME" autocomplete="off" spellcheck="false" maxlength="128"><input aria-label="${escapeI18n(tr('modules.common.value'))}" data-env-value type="${row.secret ? 'password' : 'text'}" value="${escape(row.value)}" placeholder="${row.saved ? 'Saved · leave empty to keep' : 'value'}" autocomplete="off" spellcheck="false" maxlength="4096"><label class="connection-secret"><input type="checkbox" data-env-secret ${row.secret ? 'checked' : ''}${row.saved ? ' data-saved' : ''}> ${escapeI18n(tr('modules.common.secret'))}</label><button type="button" class="secondary-button" data-remove-env aria-label="${escapeI18n(tr('modules.common.remove_variable'))}">${escapeI18n(tr('modules.common.remove'))}</button></div>`;
   }
   function form(connection: Connection | null): string {
     const options = harnesses.map(h => `<option value="${h.id}" ${connection?.provider === h.id ? 'selected' : ''}>${escape(h.name)}</option>`).join('');
     const env: EnvRow[] = connection ? [...Object.entries(connection.env).map(([name, value]) => ({ name, value, secret: false, saved: false })), ...connection.secretEnv.map(name => ({ name, value: '', secret: true, saved: true }))] : [];
     return `<form class="named-connection-form" aria-label="${connection ? 'Edit connection' : 'New connection'}">
-      <label for="connection-provider">Harness</label><div class="connection-select"><select id="connection-provider" ${connection ? 'disabled' : ''}>${options}</select></div>
-      <label for="connection-name">Name</label><div class="connection-input-row"><input id="connection-name" required maxlength="60" value="${escape(connection?.name ?? '')}" placeholder="Claude Work" autocomplete="off"></div>
-      <label for="connection-executable">Executable</label><div class="connection-input-row"><input id="connection-executable" value="${escape(connection?.executable ?? '')}" placeholder="Leave empty to use the harness's executable" autocomplete="off" spellcheck="false"></div>
-      <label for="connection-args">Extra arguments, one per line</label><textarea id="connection-args" rows="2" spellcheck="false">${escape((connection?.args ?? []).join('\n'))}</textarea>
-      <label for="connection-config-dir">Config folder <small data-config-var data-live></small></label><div class="connection-input-row"><input id="connection-config-dir" value="${escape(connection?.configDir ?? '')}" placeholder="/Users/you/.claude-work" autocomplete="off" spellcheck="false"></div>
-      <label>Environment</label><div data-env-rows>${env.map(envRow).join('')}</div><button type="button" class="secondary-button" data-add-env>Add variable</button>
-      <div class="dialog-footer"><button type="button" class="secondary-button" data-cancel-connection>Cancel</button><button type="submit" class="primary-button">Save connection</button></div></form>`;
+      <label for="connection-provider">${escapeI18n(tr('modules.common.harness'))}</label><div class="connection-select"><select id="connection-provider" ${connection ? 'disabled' : ''}>${options}</select></div>
+      <label for="connection-name">${escapeI18n(tr('modules.common.name'))}</label><div class="connection-input-row"><input id="connection-name" required maxlength="60" value="${escape(connection?.name ?? '')}" placeholder="Claude Work" autocomplete="off"></div>
+      <label for="connection-executable">${escapeI18n(tr('modules.common.executable'))}</label><div class="connection-input-row"><input id="connection-executable" value="${escape(connection?.executable ?? '')}" placeholder="${escapeI18n(tr('modules.common.leave_empty_to_use_the_harness_s_executable'))}" autocomplete="off" spellcheck="false"></div>
+      <label for="connection-args">${escapeI18n(tr('modules.common.extra_arguments_one_per_line'))}</label><textarea id="connection-args" rows="2" spellcheck="false">${escape((connection?.args ?? []).join('\n'))}</textarea>
+      <label for="connection-config-dir">${escapeI18n(tr('modules.common.config_folder'))} <small data-config-var data-live></small></label><div class="connection-input-row"><input id="connection-config-dir" value="${escape(connection?.configDir ?? '')}" placeholder="/Users/you/.claude-work" autocomplete="off" spellcheck="false"></div>
+      <label>${escapeI18n(tr('modules.common.environment'))}</label><div data-env-rows>${env.map(envRow).join('')}</div><button type="button" class="secondary-button" data-add-env>${escapeI18n(tr('modules.common.add_variable'))}</button>
+      <div class="dialog-footer"><button type="button" class="secondary-button" data-cancel-connection>${escapeI18n(tr('modules.common.cancel'))}</button><button type="submit" class="primary-button">${escapeI18n(tr('modules.common.save_connection'))}</button></div></form>`;
   }
   function syncConfigVar(): void {
     const provider = host.querySelector<HTMLSelectElement>('#connection-provider')?.value as ProviderId | undefined;
     const hint = host.querySelector<HTMLElement>('[data-config-var]'), input = host.querySelector<HTMLInputElement>('#connection-config-dir');
     if (!provider || !hint || !input) return;
     const variable = CONFIG_DIR[provider];
-    hint.textContent = variable ? `(sets ${variable})` : '(set it under Environment for this harness)';
+    hint.textContent = variable ? `(sets ${variable})` : tr('modules.common.set_it_under_environment_for_this_harness');
     input.disabled = !variable;
   }
   function message(text: string, error = false): void {
@@ -94,5 +96,19 @@ export function mountConnections(host: HTMLElement, harnesses: { id: ProviderId;
   host.addEventListener('click', click); host.addEventListener('change', change); host.addEventListener('submit', submit);
   render();
   void call<ConnectionSnapshot>('connections_list').then(next => { if (!disposed) { snapshot = next; if (!editing) render(); } }).catch(error => { if (!disposed) message(String(error), true); });
-  return () => { disposed = true; host.removeEventListener('click', click); host.removeEventListener('change', change); host.removeEventListener('submit', submit); };
+  const disposeLocale = onLocaleChange(() => {
+    const form = host.querySelector<HTMLFormElement>('.named-connection-form');
+    const values = form ? [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[id]')].map(input => ({ id: input.id, value: input.value, disabled: input.disabled })) : [];
+    const env: EnvRow[] = form ? [...form.querySelectorAll<HTMLElement>('[data-env-row]')].map(row => ({ name: row.querySelector<HTMLInputElement>('[data-env-name]')!.value, value: row.querySelector<HTMLInputElement>('[data-env-value]')!.value, secret: row.querySelector<HTMLInputElement>('[data-env-secret]')!.checked, saved: row.querySelector('[data-env-secret]')!.hasAttribute('data-saved') })) : [];
+    const focused = document.activeElement instanceof HTMLElement && host.contains(document.activeElement) ? document.activeElement.id : '';
+    const feedback = host.querySelector<HTMLElement>('.named-connection-feedback');
+    const notice = feedback ? { text: feedback.textContent, hidden: feedback.hidden, className: feedback.className } : null;
+    render();
+    const rows = host.querySelector('[data-env-rows]'); if (rows) rows.innerHTML = env.map(envRow).join('');
+    for (const value of values) { const input = host.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('#' + CSS.escape(value.id)); if (input) { input.value = value.value; input.disabled = value.disabled; } }
+    syncConfigVar();
+    const nextFeedback = host.querySelector<HTMLElement>('.named-connection-feedback'); if (notice && nextFeedback) { nextFeedback.textContent = notice.text; nextFeedback.hidden = notice.hidden; nextFeedback.className = notice.className; }
+    if (focused) host.querySelector<HTMLElement>('#' + CSS.escape(focused))?.focus();
+  });
+  return () => { disposed = true; disposeLocale(); host.removeEventListener('click', click); host.removeEventListener('change', change); host.removeEventListener('submit', submit); };
 }

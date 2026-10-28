@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './sketch.css';
 import { escape, icon } from './dom';
 import type { PromptImage } from './attachments';
@@ -21,21 +23,21 @@ export type SketchOptions = {
 };
 
 const PRESETS: { id: string; label: string; width: number; height: number }[] = [
-  { id: 'desktop', label: 'Desktop', width: 1280, height: 800 },
-  { id: 'tablet', label: 'Tablet', width: 834, height: 1112 },
-  { id: 'phone', label: 'Phone', width: 390, height: 844 },
-  { id: 'square', label: 'Square', width: 800, height: 800 },
+  { id: 'desktop', get label() { return tr('modules.common.desktop'); }, width: 1280, height: 800 },
+  { id: 'tablet', get label() { return tr('modules.common.tablet'); }, width: 834, height: 1112 },
+  { id: 'phone', get label() { return tr('modules.common.phone'); }, width: 390, height: 844 },
+  { id: 'square', get label() { return tr('modules.common.square'); }, width: 800, height: 800 },
 ];
 const COLORS = [['#1d1d1b', 'Ink'], ['#8a8a85', 'Gray'], ['#c99a00', 'Yellow'], ['#2f6fdd', 'Blue'], ['#d0453a', 'Red'], ['#2e8b57', 'Green']] as const;
 const TOOLS: { id: Tool; label: string; key: string; icon: string }[] = [
-  { id: 'select', label: 'Select', key: 'V', icon: 'select' }, { id: 'pen', label: 'Pen', key: 'P', icon: 'edit' }, { id: 'rect', label: 'Rectangle', key: 'R', icon: 'square' },
-  { id: 'ellipse', label: 'Ellipse', key: 'O', icon: 'circle' }, { id: 'line', label: 'Line', key: 'L', icon: 'line' }, { id: 'arrow', label: 'Arrow', key: 'A', icon: 'arrow-right' }, { id: 'text', label: 'Text', key: 'T', icon: 'text' },
+  { id: 'select', get label() { return tr('modules.common.select'); }, key: 'V', icon: 'select' }, { id: 'pen', get label() { return tr('modules.common.pen'); }, key: 'P', icon: 'edit' }, { id: 'rect', get label() { return tr('modules.common.rectangle'); }, key: 'R', icon: 'square' },
+  { id: 'ellipse', get label() { return tr('modules.common.ellipse'); }, key: 'O', icon: 'circle' }, { id: 'line', get label() { return tr('modules.common.line'); }, key: 'L', icon: 'line' }, { id: 'arrow', get label() { return tr('modules.common.arrow'); }, key: 'A', icon: 'arrow-right' }, { id: 'text', get label() { return tr('modules.common.text'); }, key: 'T', icon: 'text' },
 ];
 const STENCILS: { id: Stencil; label: string; w: number; h: number; text?: string }[] = [
-  { id: 'heading', label: 'Heading', w: 320, h: 44, text: 'Heading' }, { id: 'button', label: 'Button', w: 140, h: 40, text: 'Button' }, { id: 'input', label: 'Input', w: 260, h: 40, text: 'Placeholder' },
-  { id: 'checkbox', label: 'Checkbox', w: 180, h: 28, text: 'Option' }, { id: 'toggle', label: 'Toggle', w: 180, h: 28, text: 'Setting' }, { id: 'image', label: 'Image', w: 220, h: 150 },
-  { id: 'card', label: 'Card', w: 260, h: 160, text: 'Card title' }, { id: 'navbar', label: 'Nav bar', w: 720, h: 56, text: 'Logo' }, { id: 'avatar', label: 'Avatar', w: 48, h: 48 },
-  { id: 'tabs', label: 'Tabs', w: 320, h: 40, text: 'Overview, Activity, Settings' }, { id: 'list', label: 'List', w: 280, h: 120, text: 'First item\nSecond item\nThird item' },
+  { id: 'heading', get label() { return tr('modules.common.heading'); }, w: 320, h: 44, text: 'Heading' }, { id: 'button', get label() { return tr('modules.common.button'); }, w: 140, h: 40, text: 'Button' }, { id: 'input', get label() { return tr('modules.common.input'); }, w: 260, h: 40, text: 'Placeholder' },
+  { id: 'checkbox', get label() { return tr('modules.common.checkbox'); }, w: 180, h: 28, text: 'Option' }, { id: 'toggle', get label() { return tr('modules.common.toggle'); }, w: 180, h: 28, text: 'Setting' }, { id: 'image', get label() { return tr('modules.sketch.image'); }, w: 220, h: 150 },
+  { id: 'card', get label() { return tr('modules.common.card'); }, w: 260, h: 160, text: 'Card title' }, { id: 'navbar', get label() { return tr('modules.common.nav_bar'); }, w: 720, h: 56, text: 'Logo' }, { id: 'avatar', get label() { return tr('modules.common.avatar'); }, w: 48, h: 48 },
+  { id: 'tabs', get label() { return tr('modules.common.tabs'); }, w: 320, h: 40, text: 'Overview, Activity, Settings' }, { id: 'list', get label() { return tr('modules.common.list'); }, w: 280, h: 120, text: 'First item\nSecond item\nThird item' },
 ];
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const HISTORY_LIMIT = 100;
@@ -227,19 +229,19 @@ export function showSketch(options: SketchOptions): void {
 
   const dialog = options.modal(options.existing ? 'Edit mockup' : 'Sketch a mockup', `
     <div class="sketch-editor" data-tool="select">
-      <div class="sketch-toolbar" role="toolbar" aria-label="Drawing tools">
-        <div class="sketch-group" role="group" aria-label="Tools">${TOOLS.map(t => `<button type="button" class="sketch-tool" data-tool="${t.id}" aria-label="${t.label} (${t.key})" title="${t.label} · ${t.key}" aria-pressed="${t.id === 'select'}">${icon(t.icon)}</button>`).join('')}</div>
-        <div class="sketch-group" role="group" aria-label="Color">${COLORS.map(([value, name]) => `<button type="button" class="sketch-swatch" data-color="${value}" style="--swatch:${value}" aria-label="${name}" title="${name}" aria-pressed="${value === COLORS[0][0]}"></button>`).join('')}</div>
-        <div class="sketch-group" role="group" aria-label="Fill"><button type="button" class="sketch-option" data-fill="none" aria-pressed="true" title="No fill">Outline</button><button type="button" class="sketch-option" data-fill="tint" aria-pressed="false" title="Tinted fill">Tint</button><button type="button" class="sketch-option" data-fill="white" aria-pressed="false" title="White fill">Solid</button></div>
-        <div class="sketch-group" role="group" aria-label="Line weight"><button type="button" class="sketch-option" data-weight="1.5" aria-pressed="false" title="Thin">Thin</button><button type="button" class="sketch-option" data-weight="2" aria-pressed="true" title="Regular">Regular</button><button type="button" class="sketch-option" data-weight="3.5" aria-pressed="false" title="Bold">Bold</button></div>
-        <div class="sketch-group sketch-group-end" role="group" aria-label="History"><button type="button" class="icon-button" data-history="undo" aria-label="Undo (⌘Z)" title="Undo · ⌘Z" disabled>${icon('undo')}</button><button type="button" class="icon-button" data-history="redo" aria-label="Redo (⇧⌘Z)" title="Redo · ⇧⌘Z" disabled>${icon('redo')}</button><button type="button" class="icon-button" data-edit="duplicate" aria-label="Duplicate (⌘D)" title="Duplicate · ⌘D" disabled>${icon('copy')}</button><button type="button" class="icon-button" data-edit="delete" aria-label="Delete selection" title="Delete" disabled>${icon('trash')}</button></div>
+      <div class="sketch-toolbar" role="toolbar" aria-label="${escapeI18n(tr('modules.common.drawing_tools'))}">
+        <div class="sketch-group" role="group" aria-label="${escapeI18n(tr('modules.common.tools'))}">${TOOLS.map(t => `<button type="button" class="sketch-tool" data-tool="${t.id}" aria-label="${t.label} (${t.key})" title="${t.label} · ${t.key}" aria-pressed="${t.id === 'select'}">${icon(t.icon)}</button>`).join('')}</div>
+        <div class="sketch-group" role="group" aria-label="${escapeI18n(tr('modules.common.color'))}">${COLORS.map(([value, name]) => `<button type="button" class="sketch-swatch" data-color="${value}" style="--swatch:${value}" aria-label="${name}" title="${name}" aria-pressed="${value === COLORS[0][0]}"></button>`).join('')}</div>
+        <div class="sketch-group" role="group" aria-label="${escapeI18n(tr('modules.common.fill'))}"><button type="button" class="sketch-option" data-fill="none" aria-pressed="true" title="${escapeI18n(tr('modules.common.no_fill'))}">${escapeI18n(tr('modules.common.outline'))}</button><button type="button" class="sketch-option" data-fill="tint" aria-pressed="false" title="${escapeI18n(tr('modules.common.tinted_fill'))}">${escapeI18n(tr('modules.common.tint'))}</button><button type="button" class="sketch-option" data-fill="white" aria-pressed="false" title="${escapeI18n(tr('modules.common.white_fill'))}">${escapeI18n(tr('modules.common.solid'))}</button></div>
+        <div class="sketch-group" role="group" aria-label="${escapeI18n(tr('modules.common.line_weight'))}"><button type="button" class="sketch-option" data-weight="1.5" aria-pressed="false" title="${escapeI18n(tr('modules.common.thin'))}">${escapeI18n(tr('modules.common.thin'))}</button><button type="button" class="sketch-option" data-weight="2" aria-pressed="true" title="${escapeI18n(tr('modules.common.regular'))}">${escapeI18n(tr('modules.common.regular'))}</button><button type="button" class="sketch-option" data-weight="3.5" aria-pressed="false" title="${escapeI18n(tr('modules.common.bold'))}">${escapeI18n(tr('modules.common.bold'))}</button></div>
+        <div class="sketch-group sketch-group-end" role="group" aria-label="${escapeI18n(tr('modules.common.history'))}"><button type="button" class="icon-button" data-history="undo" aria-label="${escapeI18n(tr('modules.common.undo_z'))}" title="${escapeI18n(tr('modules.common.undo_z_7f85e4'))}" disabled>${icon('undo')}</button><button type="button" class="icon-button" data-history="redo" aria-label="${escapeI18n(tr('modules.common.redo_z'))}" title="${escapeI18n(tr('modules.common.redo_z_be174c'))}" disabled>${icon('redo')}</button><button type="button" class="icon-button" data-edit="duplicate" aria-label="${escapeI18n(tr('modules.common.duplicate_d'))}" title="${escapeI18n(tr('modules.common.duplicate_d_e8a17e'))}" disabled>${icon('copy')}</button><button type="button" class="icon-button" data-edit="delete" aria-label="${escapeI18n(tr('modules.common.delete_selection'))}" title="${escapeI18n(tr('modules.common.delete'))}" disabled>${icon('trash')}</button></div>
       </div>
       <div class="sketch-toolbar sketch-toolbar-secondary">
-        <div class="sketch-group" role="group" aria-label="Add a component"><span class="sketch-group-label">${icon('widget')}Add</span>${STENCILS.map(s => `<button type="button" class="sketch-option sketch-stencil" data-stencil="${s.id}" aria-label="Add ${s.label.toLowerCase()}" title="Add ${s.label.toLowerCase()}">${s.label}</button>`).join('')}</div>
-        <div class="sketch-group sketch-group-end" role="group" aria-label="Canvas"><label class="sketch-select">Canvas<select aria-label="Canvas size">${PRESETS.map(p => `<option value="${p.id}">${p.label} · ${p.width} × ${p.height}</option>`).join('')}</select></label><button type="button" class="sketch-option" data-grid aria-pressed="true" title="Toggle grid">${icon('grid')}Grid</button><button type="button" class="sketch-option" data-edit="clear" title="Clear the canvas">Clear</button></div>
+        <div class="sketch-group" role="group" aria-label="${escapeI18n(tr('modules.common.add_a_component'))}"><span class="sketch-group-label">${icon('widget')}Add</span>${STENCILS.map(s => `<button type="button" class="sketch-option sketch-stencil" data-stencil="${s.id}" aria-label="Add ${s.label.toLowerCase()}" title="Add ${s.label.toLowerCase()}">${s.label}</button>`).join('')}</div>
+        <div class="sketch-group sketch-group-end" role="group" aria-label="${escapeI18n(tr('modules.common.canvas'))}"><label class="sketch-select">${escapeI18n(tr('modules.common.canvas'))}<select aria-label="${escapeI18n(tr('modules.common.canvas_size'))}">${PRESETS.map(p => `<option value="${p.id}">${p.label} · ${p.width} × ${p.height}</option>`).join('')}</select></label><button type="button" class="sketch-option" data-grid aria-pressed="true" title="${escapeI18n(tr('modules.common.toggle_grid'))}">${icon('grid')}Grid</button><button type="button" class="sketch-option" data-edit="clear" title="${escapeI18n(tr('modules.common.clear_the_canvas'))}">${escapeI18n(tr('modules.common.clear'))}</button></div>
       </div>
-      <div class="sketch-stage"><div class="sketch-paper"><canvas role="img" aria-label="Mockup canvas"></canvas></div></div>
-      <div class="dialog-footer sketch-footer"><span class="sketch-hint" role="status">Drag to draw. Double-click a component or text to edit its label.</span><button type="button" class="secondary-button" data-action="close-dialog">Cancel</button><button type="button" class="primary-button sketch-attach">${options.existing ? 'Update mockup' : 'Attach to message'}</button></div>
+      <div class="sketch-stage"><div class="sketch-paper"><canvas role="img" aria-label="${escapeI18n(tr('modules.common.mockup_canvas'))}"></canvas></div></div>
+      <div class="dialog-footer sketch-footer"><span class="sketch-hint" role="status">${escapeI18n(tr('modules.common.drag_to_draw_double_click_a_component_or_text_to_edit_its'))}</span><button type="button" class="secondary-button" data-action="close-dialog">${escapeI18n(tr('modules.common.cancel'))}</button><button type="button" class="primary-button sketch-attach">${options.existing ? 'Update mockup' : 'Attach to message'}</button></div>
     </div>`, 'sketch-dialog');
   const editor = dialog.querySelector<HTMLElement>('.sketch-editor')!;
   const paper = editor.querySelector<HTMLElement>('.sketch-paper')!;
@@ -267,7 +269,9 @@ export function showSketch(options: SketchOptions): void {
     editor.querySelector<HTMLButtonElement>('[data-history=undo]')!.disabled = !history.length;
     editor.querySelector<HTMLButtonElement>('[data-history=redo]')!.disabled = !future.length;
     for (const button of editor.querySelectorAll<HTMLButtonElement>('[data-edit=duplicate],[data-edit=delete]')) button.disabled = !shape;
-    canvas.setAttribute('aria-label', `Mockup canvas, ${scene.shapes.length} ${scene.shapes.length === 1 ? 'shape' : 'shapes'}${shape ? `, ${shape.type === 'stencil' ? shape.stencil : shape.type} selected` : ''}`);
+    const selectedName = shape ? (shape.type === 'stencil' ? STENCILS.find(item => item.id === shape.stencil)?.label : TOOLS.find(item => item.id === shape.type)?.label) ?? shape.type : '';
+    const selection = shape ? tr('modules.sketch.selected', { shape: selectedName }) : '';
+    canvas.setAttribute('aria-label', scene.shapes.length === 1 ? tr('modules.sketch.canvasOne', { count: scene.shapes.length, selection }) : tr('modules.sketch.canvasMany', { count: scene.shapes.length, selection }));
     editor.dataset.tool = tool; editor.dataset.selection = shape ? 'true' : 'false';
     drafts.set(options.taskId, clone(scene));
   }
@@ -286,7 +290,7 @@ export function showSketch(options: SketchOptions): void {
   function setTool(next: Tool): void {
     tool = next;
     for (const button of editor.querySelectorAll<HTMLButtonElement>('.sketch-tool')) button.setAttribute('aria-pressed', String(button.dataset.tool === next));
-    hint.textContent = next === 'select' ? 'Drag to move. Drag a handle to resize. Double-click a component or text to edit its label.' : next === 'text' ? 'Click where the text should start, then type. Enter adds a line; Escape finishes.' : next === 'pen' ? 'Draw freely. Hold Alt to ignore the grid with other tools.' : `Drag to draw ${next === 'ellipse' ? 'an' : 'a'} ${next}. Hold Alt to ignore the grid.`;
+    hint.textContent = next === 'select' ? tr('modules.common.drag_to_move_drag_a_handle_to_resize_double_click_a_component') : next === 'text' ? tr('modules.common.click_where_the_text_should_start_then_type_enter_adds_a_line') : next === 'pen' ? tr('modules.common.draw_freely_hold_alt_to_ignore_the_grid_with_other_tools') : `Drag to draw ${next === 'ellipse' ? 'an' : 'a'} ${next}. Hold Alt to ignore the grid.`;
     render();
   }
   function applyStyle(patch: Partial<Pick<Shape, 'stroke' | 'fill' | 'weight' | 'fontSize'>>): void {
@@ -474,7 +478,7 @@ export function showSketch(options: SketchOptions): void {
 
   async function attach(): Promise<void> {
     if (busy) return;
-    if (!scene.shapes.length) { hint.textContent = 'Draw something first.'; return; }
+    if (!scene.shapes.length) { hint.textContent = tr('modules.common.draw_something_first'); return; }
     busy = true; editor.classList.add('sketch-busy');
     try {
       const scale = Math.min(2, MAX_EXPORT_EDGE / Math.max(scene.width, scene.height));

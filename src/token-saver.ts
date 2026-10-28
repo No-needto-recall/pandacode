@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /* Token saver: per-thread guidance that makes agents spend fewer tokens. Packs are
  * short, benchmarked or well-understood instructions sent as a folded context block
  * with a message — only when they change, and as an occasional reminder — so every
@@ -14,15 +15,15 @@ export type ThreadSaver = { packs: PackId[]; level: Level; sentKey?: string; tur
 type Store = { defaults: ThreadSaver | null; threads: Record<string, ThreadSaver> };
 
 export const PACKS: Pack[] = [
-  { id: 'caveman', title: 'Caveman', summary: 'Terse replies: answer first, no filler, every technical fact kept.', saves: '15–65% of replies', source: 'caveman · caveman-micro benchmarks' },
-  { id: 'lean-code', title: 'Lean code', summary: 'Least code that works: reuse what exists, no speculative extras, diffs not whole files.', saves: '~20–40% of code output (est.)', source: 'YAGNI, as in ponytail and Chisle' },
-  { id: 'quiet-tools', title: 'Quiet tools', summary: 'Targeted searches, line ranges, quiet flags, no re-reading files.', saves: '~20–50% of tool input (est.)', source: 'context hygiene' },
-  { id: 'rtk', title: 'RTK compression', summary: 'Runs commands through rtk, which compresses their output before the agent reads it.', saves: '60–90% of command output', source: 'rtk-ai/rtk', needs: 'rtk' },
+  { id: 'caveman', get title() { return tr('modules.common.caveman'); }, get summary() { return tr('modules.saver.cavemanSummary'); }, get saves() { return tr('modules.saver.cavemanSavings'); }, get source() { return tr('modules.saver.cavemanSource'); } },
+  { id: 'lean-code', get title() { return tr('modules.common.lean_code'); }, get summary() { return tr('modules.saver.leanSummary'); }, get saves() { return tr('modules.saver.leanSavings'); }, get source() { return tr('modules.saver.leanSource'); } },
+  { id: 'quiet-tools', get title() { return tr('modules.common.quiet_tools'); }, get summary() { return tr('modules.saver.quietSummary'); }, get saves() { return tr('modules.saver.quietSavings'); }, get source() { return tr('modules.saver.quietSource'); } },
+  { id: 'rtk', get title() { return tr('modules.common.rtk_compression'); }, get summary() { return tr('modules.saver.rtkSummary'); }, get saves() { return tr('modules.saver.rtkSavings'); }, source: 'rtk-ai/rtk', needs: 'rtk' },
 ];
 export const LEVELS: { id: Level; label: string; hint: string }[] = [
-  { id: 'lite', label: 'Lite', hint: 'Brief, normal grammar' },
-  { id: 'full', label: 'Full', hint: 'Caveman voice' },
-  { id: 'ultra', label: 'Ultra', hint: 'Telegraphic' },
+  { id: 'lite', get label() { return tr('modules.common.lite'); }, get hint() { return tr('modules.saver.liteHint'); } },
+  { id: 'full', get label() { return tr('modules.common.full'); }, get hint() { return tr('modules.saver.fullHint'); } },
+  { id: 'ultra', get label() { return tr('modules.common.ultra'); }, get hint() { return tr('modules.saver.ultraHint'); } },
 ];
 
 const CAVEMAN: Record<Level, string> = {

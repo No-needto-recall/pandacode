@@ -1,3 +1,4 @@
+import { t as tr, onLocaleChange } from './i18n.ts';
 /* Automatic updates from GitHub Releases. The app checks the latest release's
  * latest.json (tauri.conf.json `plugins.updater`) shortly after launch and every six
  * hours, downloads a newer version in the background, and installs it with a restart
@@ -40,12 +41,13 @@ let instance: AppUpdates | undefined;
 export const appUpdates = (): AppUpdates | undefined => instance;
 
 export function startAppUpdates(host: UpdatesHost): AppUpdates {
+  const disabled = preview || import.meta.env.VITE_PANDACODE_PREVIEW === '1';
   const listeners = new Set<() => void>();
-  let state: UpdateState = preview ? { kind: 'off' } : { kind: 'idle' };
-  let mode: UpdateMode = (() => { try { return parseUpdateMode(localStorage.getItem(KEY)); } catch { return 'automatic' as const; } })();
+  let state: UpdateState = disabled ? { kind: 'off' } : { kind: 'idle' };
+  let mode: UpdateMode = disabled ? 'off' : (() => { try { return parseUpdateMode(localStorage.getItem(KEY)); } catch { return 'automatic' as const; } })();
   // Until the native answer arrives nothing has been checked, so nothing can install.
   let installable = false, approved = false;
-  const known = preview ? Promise.resolve() : call<boolean>('app_update_install_supported')
+  const known = disabled ? Promise.resolve() : call<boolean>('app_update_install_supported')
     .then(value => { installable = value; }, cause => { console.warn('Could not tell how PandaCode was installed:', cause); });
   let pending: Pending | null = null, lastCheck = 0, lastInput = Date.now(), checking: Promise<void> | null = null;
   const set = (next: UpdateState) => { state = next; listeners.forEach(listener => listener()); };
@@ -62,7 +64,7 @@ export function startAppUpdates(host: UpdatesHost): AppUpdates {
   }
 
   async function run(): Promise<void> {
-    if (preview || state.kind === 'downloading' || state.kind === 'ready' || state.kind === 'installing') return;
+    if (disabled || state.kind === 'downloading' || state.kind === 'ready' || state.kind === 'installing') return;
     lastCheck = Date.now();
     set({ kind: 'checking' });
     await known;
@@ -89,7 +91,7 @@ export function startAppUpdates(host: UpdatesHost): AppUpdates {
     // The user asked for it: restart as soon as no agent is working, idle or not.
     approved = true;
     const busy = host.busy();
-    if (busy) host.notify('PandaCode will restart to update when your agents finish.');
+    if (busy) host.notify(tr('modules.common.pandacode_will_restart_to_update_when_your_agents_finish'));
     if (state.kind === 'available') { try { await download(pending); } catch (cause) { set({ kind: 'error', message: message(cause) }); return; } }
     if (busy || host.busy()) return;
     const version = pending.version;
@@ -103,7 +105,7 @@ export function startAppUpdates(host: UpdatesHost): AppUpdates {
     } catch (cause) { set({ kind: 'error', message: message(cause) }); }
   }
 
-  if (!preview) {
+  if (!disabled) {
     const input = () => { lastInput = Date.now(); };
     for (const name of ['pointerdown', 'keydown', 'wheel']) addEventListener(name, input, { passive: true, capture: true });
     window.setTimeout(() => { if (mode !== 'off') void check(); }, FIRST_CHECK);
@@ -117,9 +119,10 @@ export function startAppUpdates(host: UpdatesHost): AppUpdates {
     get state() { return state; },
     get mode() { return mode; },
     get installable() { return installable; },
-    supported: !preview,
+    supported: !disabled,
     subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
     setMode(next) {
+      if (disabled) return;
       mode = next;
       try { localStorage.setItem(KEY, next); } catch { /* A per-device preference only. */ }
       if (next !== 'off' && state.kind !== 'ready') void check();
@@ -133,16 +136,17 @@ export function startAppUpdates(host: UpdatesHost): AppUpdates {
 
 /** The header prompt (`#update-status`): Install and restart / Later for a found update,
  * Restart to update once downloaded. Later hides it until a newer version turns up. */
-export function mountUpdatePill(pill: HTMLButtonElement, updates: AppUpdates): void {
+export function mountUpdatePill(pill: HTMLButtonElement, updates: AppUpdates): () => void {
   const label = pill.querySelector('span')!;
   const later = document.createElement('button');
   later.type = 'button';
   later.className = 'update-status update-later';
-  later.textContent = 'Later';
+  later.textContent = tr('modules.common.later');
   later.hidden = true;
   pill.after(later);
   let dismissed: string | null = null;
   const paint = () => {
+    later.textContent = tr('modules.common.later');
     const state = updates.state;
     const prompt = updatePrompt(state, updates.installable, dismissed);
     pill.hidden = !prompt;
@@ -152,11 +156,14 @@ export function mountUpdatePill(pill: HTMLButtonElement, updates: AppUpdates): v
     pill.title = prompt.title;
     pill.disabled = state.kind === 'installing';
   };
-  updates.subscribe(paint);
-  pill.addEventListener('click', () => {
+  const unsubscribe = updates.subscribe(paint);
+  const disposeLocale = onLocaleChange(paint);
+  const install = () => {
     if (updates.state.kind === 'available' && !updates.installable) void call('open_external_url', { url: PROJECT_LINKS.releases });
     else void updates.restart();
-  });
-  later.addEventListener('click', () => { if (updates.state.kind === 'available') dismissed = updates.state.version; paint(); });
+  };
+  const dismiss = () => { if (updates.state.kind === 'available') dismissed = updates.state.version; paint(); };
+  pill.addEventListener('click', install); later.addEventListener('click', dismiss);
   paint();
+  return () => { disposeLocale(); unsubscribe(); pill.removeEventListener('click', install); later.removeEventListener('click', dismiss); later.remove(); };
 }

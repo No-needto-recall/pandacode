@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './design-canvas.css';
 import { escape, icon } from './dom';
 
@@ -51,19 +53,19 @@ export function artboardWidth(html: string): number {
 }
 
 export function mountDesignCanvas(root: HTMLElement, host: DesignHost) {
-  root.innerHTML = `<div class="design-toolbar" role="toolbar" aria-label="Design canvas">
-      <button type="button" class="icon-button" data-design="comment" aria-pressed="false" aria-label="Comment on an element" title="Comment: click an element">${icon('chat')}</button>
-      <button type="button" class="icon-button" data-design="out" aria-label="Zoom out" title="Zoom out">${icon('minimize')}</button>
-      <button type="button" class="design-zoom" data-design="fit" aria-label="Fit artboards" title="Fit artboards">100%</button>
-      <button type="button" class="icon-button" data-design="in" aria-label="Zoom in" title="Zoom in">${icon('plus')}</button>
-      <button type="button" class="icon-button" data-design="refresh" aria-label="Reload artboards" title="Reload artboards">${icon('refresh')}</button>
-      <button type="button" class="secondary-button design-send" data-design="send" disabled>Send comments to agent</button>
+  root.innerHTML = `<div class="design-toolbar" role="toolbar" aria-label="${escapeI18n(tr('modules.common.design_canvas'))}">
+      <button type="button" class="icon-button" data-design="comment" aria-pressed="false" aria-label="${escapeI18n(tr('modules.common.comment_on_an_element'))}" title="${escapeI18n(tr('modules.common.comment_click_an_element'))}">${icon('chat')}</button>
+      <button type="button" class="icon-button" data-design="out" aria-label="${escapeI18n(tr('modules.common.zoom_out'))}" title="${escapeI18n(tr('modules.common.zoom_out'))}">${icon('minimize')}</button>
+      <button type="button" class="design-zoom" data-design="fit" aria-label="${escapeI18n(tr('modules.common.fit_artboards'))}" title="${escapeI18n(tr('modules.common.fit_artboards'))}">100%</button>
+      <button type="button" class="icon-button" data-design="in" aria-label="${escapeI18n(tr('modules.common.zoom_in'))}" title="${escapeI18n(tr('modules.common.zoom_in'))}">${icon('plus')}</button>
+      <button type="button" class="icon-button" data-design="refresh" aria-label="${escapeI18n(tr('modules.common.reload_artboards'))}" title="${escapeI18n(tr('modules.common.reload_artboards'))}">${icon('refresh')}</button>
+      <button type="button" class="secondary-button design-send" data-design="send" disabled>${escapeI18n(tr('modules.common.send_comments_to_agent'))}</button>
     </div>
-    <div class="design-viewport" tabindex="0" aria-label="Artboards. Drag to pan, Shift-scroll to pan horizontally, or pinch and Ctrl/Command-scroll to zoom.">
+    <div class="design-viewport" tabindex="0" aria-label="${escapeI18n(tr('modules.common.artboards_drag_to_pan_shift_scroll_to_pan_horizontally_or_pinch_and'))}">
       <div class="design-world"></div>
       <div class="design-empty" hidden></div>
     </div>
-    <section class="design-comments" aria-label="Design comments"></section>`;
+    <section class="design-comments" aria-label="${escapeI18n(tr('modules.common.design_comments'))}"></section>`;
   const $ = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
   const viewport = $('.design-viewport'), world = $('.design-world'), empty = $('.design-empty'), list = $('.design-comments');
   const tool = (name: string) => $<HTMLButtonElement>(`[data-design="${name}"]`);
@@ -160,16 +162,16 @@ export function mountDesignCanvas(root: HTMLElement, host: DesignHost) {
   function renderComments(): void {
     const open = comments.filter(c => c.status === 'open');
     tool('send').disabled = !open.length;
-    tool('send').textContent = open.length ? `Send ${open.length} comment${open.length === 1 ? '' : 's'} to agent` : 'Send comments to agent';
+    tool('send').textContent = open.length ? `Send ${open.length} comment${open.length === 1 ? '' : 's'} to agent` : tr('modules.common.send_comments_to_agent');
     const form = pick ? `<form class="design-new"><label class="sr-only" for="design-comment-text">Comment on ${escape(pick.selector)}</label>
       <textarea id="design-comment-text" rows="2" maxlength="4000" placeholder="Comment on ${escape(pick.selector)}"></textarea>
-      <div><button type="button" class="secondary-button" data-design="cancel">Cancel</button><button type="submit" class="primary-button">Add comment</button></div></form>` : '';
+      <div><button type="button" class="secondary-button" data-design="cancel">${escapeI18n(tr('modules.common.cancel'))}</button><button type="submit" class="primary-button">${escapeI18n(tr('modules.common.add_comment'))}</button></div></form>` : '';
     const rows = comments.map((c, i) => `<li class="design-comment${c.status === 'resolved' ? ' resolved' : ''}" data-comment="${escape(c.id)}">
       <span class="design-comment-number">${c.status === 'open' ? open.indexOf(c) + 1 : icon('check')}</span>
       <div><p>${escape(c.text)}</p><small>${escape(c.artboard)} · <code>${escape(c.selector)}</code></small>${c.note ? `<small class="design-note">${escape(c.note)}</small>` : ''}</div>
       <button type="button" class="icon-button" data-design="toggle" data-index="${i}" aria-label="${c.status === 'open' ? 'Resolve' : 'Reopen'} comment" title="${c.status === 'open' ? 'Resolve' : 'Reopen'}">${icon(c.status === 'open' ? 'check' : 'refresh')}</button>
-      <button type="button" class="icon-button" data-design="delete" data-index="${i}" aria-label="Delete comment" title="Delete">${icon('trash')}</button></li>`).join('');
-    list.innerHTML = form + (rows ? `<ol>${rows}</ol>` : commenting || pick ? '' : '<p class="design-hint">Turn on comment mode and click an element to comment on it.</p>');
+      <button type="button" class="icon-button" data-design="delete" data-index="${i}" aria-label="${escapeI18n(tr('modules.common.delete_comment'))}" title="${escapeI18n(tr('modules.common.delete'))}">${icon('trash')}</button></li>`).join('');
+    list.innerHTML = form + (rows ? `<ol>${rows}</ol>` : commenting || pick ? '' : `<p class="design-hint">${escapeI18n(tr('modules.common.turn_on_comment_mode_and_click_an_element_to_comment_on_it'))}</p>`);
     list.querySelector('textarea')?.focus();
     paintMarks();
   }
@@ -177,7 +179,7 @@ export function mountDesignCanvas(root: HTMLElement, host: DesignHost) {
     const context = args();
     if (!context) return;
     try { await host.call('design_save_comments', { ...context, comments: next }); comments = next; }
-    catch (error) { host.notify(`Could not save design comments: ${failure(error)}`); }
+    catch (error) { host.notify(tr('modules.dynamic.saveCommentsFailed', { error: String(failure(error)) })); }
     renderComments();
   }
 

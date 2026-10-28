@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 /* Scoped pairing (src-tauri/src/remote/grants.rs): the prompt shown when a device asks for
  * access to this computer for the first time, with the shared grant types. Mounted once by
  * main.ts; Settings → Remote access lists the same devices. */
@@ -11,12 +13,12 @@ export interface PairCode { code: string; scope: GrantScope; expiresAt: number }
 export interface DevicePending { deviceId: string; name: string; fingerprint: string }
 
 export const APPROVE_SCOPES: { id: GrantScope; label: string }[] = [
-  { id: 'view', label: 'View only' },
-  { id: 'control', label: 'Control' },
-  { id: 'full', label: 'Full access' },
+  { id: 'view', get label() { return tr('modules.common.view_only'); } },
+  { id: 'control', get label() { return tr('modules.common.control'); } },
+  { id: 'full', get label() { return tr('modules.common.full_access'); } },
 ];
-export const SCOPE_LABELS: Record<GrantScope, string> = { pending: 'Waiting for approval', view: 'View only', control: 'Control', full: 'Full access', blocked: 'Blocked' };
-export const SCOPE_HELP = 'View only: see tasks, changes and diffs. Control: also send prompts, stop tasks and answer approvals. Full access: also start tasks, merge pull requests and message bots. Blocked: refused.';
+export const SCOPE_LABELS: Record<GrantScope, string> = { get pending() { return tr('modules.remote.waitingApproval'); }, get view() { return tr('modules.common.view_only'); }, get control() { return tr('modules.common.control'); }, get full() { return tr('modules.common.full_access'); }, get blocked() { return tr('modules.common.blocked'); } };
+export const SCOPE_HELP = () => tr('modules.remote.scopeHelp');
 
 /** The first 16 hex digits of a key fingerprint in groups of four, to compare by eye on both computers. */
 export function groupFingerprint(fingerprint: string): string {
@@ -28,7 +30,7 @@ const options = (selected: GrantScope) => APPROVE_SCOPES.map(scope => `<option v
 export function mountPairingPrompt(host: RemoteHost): () => void {
   const stack = document.createElement('div');
   stack.className = 'pairing-prompts';
-  stack.setAttribute('aria-label', 'Devices asking for access');
+  stack.setAttribute('aria-label', tr('modules.common.devices_asking_for_access'));
   document.body.append(stack);
   const card = (deviceId: string) => [...stack.children].find((child): child is HTMLElement => child instanceof HTMLElement && child.dataset.device === deviceId);
   const show = (pending: DevicePending) => {
@@ -37,8 +39,8 @@ export function mountPairingPrompt(host: RemoteHost): () => void {
     element.className = 'pairing-prompt';
     element.dataset.device = pending.deviceId;
     element.setAttribute('role', 'alert');
-    element.innerHTML = `<div class="pairing-prompt-text"><strong>${escape(pending.name || 'A device')} wants access to this computer</strong><small>Its key is <code>${escape(groupFingerprint(pending.fingerprint))}</code>. Approve only if it matches the key shown on that device.</small></div>
-      <div class="pairing-prompt-actions"><select aria-label="Access for ${escape(pending.name)}">${options('control')}</select><button type="button" class="primary-button" data-approve>Approve</button><button type="button" class="secondary-button" data-block>Block</button><button type="button" class="secondary-button" data-later aria-label="Decide later">Later</button></div>`;
+    element.innerHTML = `<div class="pairing-prompt-text"><strong>${escape(tr('modules.remote.accessRequest', { device: pending.name || tr('modules.remote.aDevice') }))}</strong><small>${escape(tr('modules.remote.verifyKey', { key: groupFingerprint(pending.fingerprint) }))}</small></div>
+      <div class="pairing-prompt-actions"><select aria-label="${escape(tr('modules.remote.accessFor', { device: pending.name }))}">${options('control')}</select><button type="button" class="primary-button" data-approve>${escapeI18n(tr('modules.common.approve'))}</button><button type="button" class="secondary-button" data-block>${escapeI18n(tr('modules.common.block'))}</button><button type="button" class="secondary-button" data-later aria-label="${escapeI18n(tr('modules.common.decide_later'))}">${escapeI18n(tr('modules.common.later'))}</button></div>`;
     stack.append(element);
   };
   stack.addEventListener('click', event => {

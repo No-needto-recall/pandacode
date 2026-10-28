@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 /** The queue above the composer: follow-ups typed while an agent works, delivered in order. */
 import { escape, icon } from './dom';
 
@@ -47,21 +49,21 @@ function attachmentLabel(entry: QueuedMessage): string {
 function row(entry: QueuedMessage, index: number, view: QueueView): string {
   const last = index === view.entries.length - 1;
   if (entry.id === view.editingId) {
-    return `<li class="queue-row editing" data-queue-id="${escape(entry.id)}"><div class="queue-edit-head"><span class="queue-badge">Editing</span><span class="queue-edit-notice" role="note">You are editing a queued message. Save or cancel the edit to let it run.</span></div><textarea class="queue-edit" aria-label="Edit queued message" rows="2">${escape(entry.text)}</textarea>
-      <div class="queue-edit-actions"><button type="button" class="secondary-button" data-action="queue-cancel">Cancel edit</button><button type="button" class="primary-button" data-action="queue-save">Save</button></div></li>`;
+    return `<li class="queue-row editing" data-queue-id="${escape(entry.id)}"><div class="queue-edit-head"><span class="queue-badge">${escapeI18n(tr('modules.common.editing'))}</span><span class="queue-edit-notice" role="note">${escapeI18n(tr('modules.common.you_are_editing_a_queued_message_save_or_cancel_the_edit_to'))}</span></div><textarea class="queue-edit" aria-label="${escapeI18n(tr('modules.common.edit_queued_message'))}" rows="2">${escape(entry.text)}</textarea>
+      <div class="queue-edit-actions"><button type="button" class="secondary-button" data-action="queue-cancel">${escapeI18n(tr('modules.common.cancel_edit'))}</button><button type="button" class="primary-button" data-action="queue-save">${escapeI18n(tr('modules.common.save'))}</button></div></li>`;
   }
   const preview = escape(entry.text.slice(0, 60));
   if (view.steering.has(entry.id)) {
     return `<li class="queue-row steering" data-queue-id="${escape(entry.id)}" aria-busy="true"><span class="queue-index" aria-hidden="true">${icon('spark')}</span>
     <span class="queue-text" title="${escape(entry.text)}">${escape(entry.text.split('\n')[0] || '(attachments only)')}</span><span class="queue-status" role="status">${SPINNER}Steering…</span></li>`;
   }
-  const steer = view.running && view.steerable && !view.busy && !entry.attachments.length ? `<button type="button" class="queue-now" data-action="queue-steer" title="Steer message" aria-label="Steer now: ${preview}">${icon('spark')}<span>Steer</span></button>` : '';
-  const sendNow = view.sendable && !view.busy ? `<button type="button" class="queue-now" data-action="queue-send-now" title="${!view.running ? 'Send this now' : view.steerable && !entry.attachments.length ? 'Send into the running turn' : 'Stop the run and send this next'}" aria-label="Send now: ${preview}">${icon('arrow')}<span>Send now</span></button>` : '';
+  const steer = view.running && view.steerable && !view.busy && !entry.attachments.length ? `<button type="button" class="queue-now" data-action="queue-steer" title="${escapeI18n(tr('modules.common.steer_message'))}" aria-label="Steer now: ${preview}">${icon('spark')}<span>${escapeI18n(tr('modules.common.steer'))}</span></button>` : '';
+  const sendNow = view.sendable && !view.busy ? `<button type="button" class="queue-now" data-action="queue-send-now" title="${!view.running ? 'Send this now' : view.steerable && !entry.attachments.length ? 'Send into the running turn' : 'Stop the run and send this next'}" aria-label="Send now: ${preview}">${icon('arrow')}<span>${escapeI18n(tr('modules.common.send_now'))}</span></button>` : '';
   const failure = view.notSteered?.get(entry.id);
-  const badge = failure !== undefined ? `<span class="queue-badge warn" title="${escape(failure)}" tabindex="0">Not steered</span>` : '';
+  const badge = failure !== undefined ? `<span class="queue-badge warn" title="${escape(failure)}" tabindex="0">${escapeI18n(tr('modules.common.not_steered'))}</span>` : '';
   return `<li class="queue-row" data-queue-id="${escape(entry.id)}" draggable="${view.busy ? 'false' : 'true'}" tabindex="0" aria-label="Queued message ${index + 1}: ${preview}" aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"><span class="queue-index" aria-hidden="true">${icon('spark')}</span>
     <span class="queue-text" title="${escape(entry.text)}">${escape(entry.text.split('\n')[0] || '(attachments only)')}</span>${attachmentLabel(entry)}${badge}
-    <span class="queue-actions">${steer}${sendNow}<button type="button" class="icon-button" data-action="queue-edit" aria-label="Edit queued message ${index + 1}" title="Edit message" ${view.busy ? 'disabled' : ''}>${icon('edit')}</button><button type="button" class="icon-button" data-action="queue-up" aria-label="Move queued message ${index + 1} up" title="Move up" ${index === 0 || view.busy ? 'disabled' : ''}>${icon('arrow')}</button><button type="button" class="icon-button queue-down" data-action="queue-down" aria-label="Move queued message ${index + 1} down" title="Move down" ${last || view.busy ? 'disabled' : ''}>${icon('arrow')}</button><button type="button" class="icon-button" data-action="queue-remove" aria-label="Remove queued message ${index + 1}" title="Delete message" data-held="${view.hold ? '1' : ''}" ${view.busy ? 'disabled' : ''}>${icon('trash')}</button></span></li>`;
+    <span class="queue-actions">${steer}${sendNow}<button type="button" class="icon-button" data-action="queue-edit" aria-label="Edit queued message ${index + 1}" title="${escapeI18n(tr('modules.common.edit_message'))}" ${view.busy ? 'disabled' : ''}>${icon('edit')}</button><button type="button" class="icon-button" data-action="queue-up" aria-label="Move queued message ${index + 1} up" title="${escapeI18n(tr('modules.common.move_up'))}" ${index === 0 || view.busy ? 'disabled' : ''}>${icon('arrow')}</button><button type="button" class="icon-button queue-down" data-action="queue-down" aria-label="Move queued message ${index + 1} down" title="${escapeI18n(tr('modules.common.move_down'))}" ${last || view.busy ? 'disabled' : ''}>${icon('arrow')}</button><button type="button" class="icon-button" data-action="queue-remove" aria-label="Remove queued message ${index + 1}" title="${escapeI18n(tr('modules.common.delete_message'))}" data-held="${view.hold ? '1' : ''}" ${view.busy ? 'disabled' : ''}>${icon('trash')}</button></span></li>`;
 }
 
 /** Markup for the queue panel, or an empty string when nothing is queued. */
@@ -72,7 +74,7 @@ export function queuePanel(view: QueueView): string {
   const resume = view.hold === 'limited' ? '' : `<button type="button" class="queue-resume" data-action="queue-resume" ${view.busy ? 'disabled' : ''}>${view.running ? 'Resume after this run' : 'Resume'}</button>`;
   const status = view.hold ? `<span class="queue-hold">${HOLD_LABEL[view.hold]}</span>${resume}`
     : `<span class="queue-next">${view.running ? (view.agentName ? `Waiting – ${escape(view.agentName)} is working` : 'Sends when the agent finishes') : `${SPINNER}Sending next…`}</span>`;
-  return `<section class="queue-panel" aria-label="Queued messages"><header class="queue-heading"><strong>Queued</strong><span class="queue-count">${count}</span>${status}</header><ol class="queue-list">${view.entries.map((entry, index) => row(entry, index, view)).join('')}</ol></section>`;
+  return `<section class="queue-panel" aria-label="${escapeI18n(tr('modules.common.queued_messages'))}"><header class="queue-heading"><strong>${escapeI18n(tr('modules.common.queued'))}</strong><span class="queue-count">${count}</span>${status}</header><ol class="queue-list">${view.entries.map((entry, index) => row(entry, index, view)).join('')}</ol></section>`;
 }
 
 /** Moves an entry one place and returns the new order of ids. */
@@ -148,7 +150,7 @@ function installQueueInteractions(): void {
     if (button && button.dataset.held === '1' && !button.dataset.confirmed) {
       event.stopImmediatePropagation(); event.preventDefault();
       const row = button.closest<HTMLElement>('.queue-row'); if (!row || row.querySelector('.queue-confirm')) return;
-      row.insertAdjacentHTML('beforeend', `<div class="queue-confirm" role="alertdialog" aria-label="Delete queued message?"><strong>Delete queued message?</strong><button type="button" class="secondary-button" data-queue-keep>Keep</button><button type="button" class="primary-button" data-action="queue-remove" data-confirmed="1">Delete</button></div>`);
+      row.insertAdjacentHTML('beforeend', `<div class="queue-confirm" role="alertdialog" aria-label="${escapeI18n(tr('modules.common.delete_queued_message'))}"><strong>${escapeI18n(tr('modules.common.delete_queued_message'))}</strong><button type="button" class="secondary-button" data-queue-keep>${escapeI18n(tr('modules.common.keep'))}</button><button type="button" class="primary-button" data-action="queue-remove" data-confirmed="1">${escapeI18n(tr('modules.common.delete'))}</button></div>`);
       row.querySelector<HTMLElement>('[data-queue-keep]')?.focus(); return;
     }
     if (target?.closest('[data-queue-keep]')) { const row = target.closest<HTMLElement>('.queue-row'); row?.querySelector('.queue-confirm')?.remove(); row?.focus(); }

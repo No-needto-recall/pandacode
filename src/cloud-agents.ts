@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { escape, icon } from './dom.ts';
 import type { ProviderId, Session } from './types';
 
@@ -22,8 +24,8 @@ export const cloudIcon = (): string => CLOUD_ICON;
  * ponytail: the "Cloud · " label prefix stands in for a section heading; choice-menu.ts has none. */
 export function cloudItems(targets: CloudTarget[], chosen: string) {
   return [
-    ...targets.filter(target => target.ready).map(target => ({ id: cloudChoice(target.provider), label: `Cloud · ${target.label}`, leading: CLOUD_ICON, selected: chosen === cloudChoice(target.provider) })),
-    { id: SETUP_CHOICE, label: 'Set up cloud providers…', icon: 'settings' },
+    ...targets.filter(target => target.ready).map(target => ({ id: cloudChoice(target.provider), label: tr('modules.dynamic.cloud', { name: String(target.label) }), leading: CLOUD_ICON, selected: chosen === cloudChoice(target.provider) })),
+    { id: SETUP_CHOICE, label: tr('modules.common.set_up_cloud_providers'), icon: 'settings' },
   ];
 }
 
@@ -62,20 +64,20 @@ export function cloudStrip(session: Session): string {
   const cloud = session.cloud; if (!cloud) return '';
   const text = stageText(cloud.stage, cloud.detail, session.provider);
   const lead = busyStage(cloud.stage) ? '<span class="support-spinner" aria-hidden="true"></span>' : CLOUD_ICON;
-  return `<div class="cloud-strip" data-stage="${cloud.stage}"><span class="cloud-strip-status" role="status">${lead}<span class="cloud-strip-text">${escape(cloud.label)} · ${escape(text)}</span></span><button type="button" id="cloud-menu" class="cloud-strip-menu" data-action="cloud-menu" aria-haspopup="dialog" aria-expanded="false" aria-label="Cloud machine actions" title="Cloud machine actions">${icon('more')}</button></div>`;
+  return `<div class="cloud-strip" data-stage="${cloud.stage}"><span class="cloud-strip-status" role="status">${lead}<span class="cloud-strip-text">${escape(cloud.label)} · ${escape(text)}</span></span><button type="button" id="cloud-menu" class="cloud-strip-menu" data-action="cloud-menu" aria-haspopup="dialog" aria-expanded="false" aria-label="${escapeI18n(tr('modules.common.cloud_machine_actions'))}" title="${escapeI18n(tr('modules.common.cloud_machine_actions'))}">${icon('more')}</button></div>`;
 }
 
 export function cloudActionItems(session: Session) {
   const stage = session.cloud?.stage;
   return [
-    { id: 'sync', label: 'Sync changes', icon: 'refresh', disabled: stage === 'syncing' },
-    ...(stage === 'error' ? [{ id: 'retry', label: 'Retry', icon: 'refresh' }] : []),
-    { id: 'open', label: 'Open machine', icon: 'monitor' },
-    { id: 'stop', label: 'Stop machine', icon: 'stop', disabled: stage === 'stopped' },
-    { id: 'delete', label: 'Delete machine…', icon: 'trash', danger: true },
+    { id: 'sync', label: tr('modules.common.sync_changes'), icon: 'refresh', disabled: stage === 'syncing' },
+    ...(stage === 'error' ? [{ id: 'retry', label: tr('modules.common.retry'), icon: 'refresh' }] : []),
+    { id: 'open', label: tr('modules.common.open_machine'), icon: 'monitor' },
+    { id: 'stop', label: tr('modules.common.stop_machine'), icon: 'stop', disabled: stage === 'stopped' },
+    { id: 'delete', label: tr('modules.common.delete_machine'), icon: 'trash', danger: true },
   ];
 }
 
 export function deleteMachineDialog(session: Session): string {
-  return `<form id="cloud-delete-form"><p class="dialog-description">Delete this task’s ${escape(session.cloud?.label ?? 'cloud')} machine? Its files there are lost; the task stays and creates a new machine with your next message.</p><div class="dialog-footer"><button type="button" class="secondary-button" data-action="close-dialog">Cancel</button><button type="submit" class="secondary-button delete-task-confirm">Delete machine</button></div></form>`;
+  return `<form id="cloud-delete-form"><p class="dialog-description">Delete this task’s ${escape(session.cloud?.label ?? 'cloud')} machine? Its files there are lost; the task stays and creates a new machine with your next message.</p><div class="dialog-footer"><button type="button" class="secondary-button" data-action="close-dialog">${escapeI18n(tr('modules.common.cancel'))}</button><button type="submit" class="secondary-button delete-task-confirm">${escapeI18n(tr('modules.common.delete_machine_a89312'))}</button></div></form>`;
 }

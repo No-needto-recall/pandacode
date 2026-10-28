@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 /** A bot's conversation pane: chat bubbles, grouped messages, day and unread dividers, hover
  *  actions (copy, reply, react), the working indicator and a steps row per finished turn.
  *  Only bot threads (`.bot-thread`) use it; the transcript itself is built by main.ts. */
@@ -18,7 +21,7 @@ const ELAPSED_AFTER_MS = 5_000;
 const NEAR_BOTTOM_PX = 80;
 const REACTIONS = ['👍', '❤️', '😂', '🎉', '🤔', '👀'];
 const REACTIONS_KEY = 'pandacode.botReactions', SEEN_KEY = 'pandacode.botSeen';
-export const WORKING_LABELS = ['Working on it…', 'Thinking it through…', 'Connecting the dots…', 'Checking the details…', 'Putting the answer together…', 'Making sense of it…', 'One step at a time…', 'Tiny gears are turning…', 'Consulting the inner council…', 'Cooking up something useful…'];
+export function workingLabels(): string[] { return [tr('bots.thread.working_0'), tr('bots.thread.working_1'), tr('bots.thread.working_2'), tr('bots.thread.working_3'), tr('bots.thread.working_4'), tr('bots.thread.working_5'), tr('bots.thread.working_6'), tr('bots.thread.working_7'), tr('bots.thread.working_8'), tr('bots.thread.working_9')]; }
 /** Statuses that say nothing beyond "working"; anything else is progress worth showing. */
 const GENERIC_STATUS = new Set(['', 'running', 'Working…', 'Starting agent', 'Continuing task', 'Generating response']);
 const svg = (paths: string) => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -33,44 +36,44 @@ function readJson<T>(key: string, fallback: T): T {
 /** The header: the bot (a button to its settings), where the thread comes from, and compact controls. */
 export function crumbHtml(bot: Bot, options: { where: string; status: string; nextModel?: { running: string; next: string } }): string {
   const id = escape(bot.id), name = escape(bot.name);
-  const next = options.nextModel ? `${escape(options.nextModel.running)} finishes this turn. ${escape(options.nextModel.next)} starts with the next one.` : '';
-  return `<span class="bot-crumb"><button class="bot-crumb-who" data-action="bot-settings" data-bot="${id}" aria-label="View bot settings" title="Profile, memory, schedules, channels and rules">${botAvatarHtml(bot.avatar, bot.name, 'bot-crumb-avatar', bot.color)}<strong>${name}</strong></button>`
+  const next = options.nextModel ? escape(tr('bots.thread.next_model', { running: options.nextModel.running, next: options.nextModel.next })) : '';
+  return `<span class="bot-crumb"><button class="bot-crumb-who" data-action="bot-settings" data-bot="${id}" aria-label="${escape(tr('bots.thread.view_settings'))}" title="${escape(tr('bots.thread.settings_hint'))}">${botAvatarHtml(bot.avatar, bot.name, 'bot-crumb-avatar', bot.color)}<strong>${name}</strong></button>`
     + `${options.where ? `<span class="bot-crumb-where">${escape(options.where)}</span>` : ''}<span class="bot-crumb-state sr-only">${escape(options.status)}</span>`
-    + `${next ? `<span class="bot-next-model" tabindex="0" role="note" aria-label="${next}" title="${next}">${CLOCK}After this turn</span>` : ''}</span>`
-    + `<button class="icon-button bot-crumb-action" data-action="bot-pause" data-bot="${id}" aria-label="${bot.paused ? 'Resume' : 'Pause'} ${name}" title="${bot.paused ? 'Resume: schedules, check-ins and channels continue' : 'Pause: stop work and hold schedules and messages'}" aria-pressed="${bot.paused}">${icon(bot.paused ? 'play' : 'pause')}</button>`
-    + `<button class="icon-button bot-crumb-action" data-action="bot-settings" data-bot="${id}" aria-label="${name} settings" title="Settings">${icon('settings')}</button>`;
+    + `${next ? `<span class="bot-next-model" tabindex="0" role="note" aria-label="${next}" title="${next}">${CLOCK}${escape(tr('bots.thread.after_turn'))}</span>` : ''}</span>`
+    + `<button class="icon-button bot-crumb-action" data-action="bot-pause" data-bot="${id}" aria-label="${escape(tr('bots.thread.toggle_name', { action: bot.paused ? tr('modules.common.resume') : tr('modules.common.pause'), name: bot.name }))}" title="${escape(bot.paused ? tr('bots.thread.resume_hint') : tr('bots.thread.pause_hint'))}" aria-pressed="${bot.paused}">${icon(bot.paused ? 'play' : 'pause')}</button>`
+    + `<button class="icon-button bot-crumb-action" data-action="bot-settings" data-bot="${id}" aria-label="${escape(tr('bots.thread.named_settings', { name: bot.name }))}" title="${escape(tr('bots.thread.settings'))}">${icon('settings')}</button>`;
 }
 
 /** Three things to ask, matched to what the bot is for. */
 export function suggestions(role: string): string[] {
   const topics: [RegExp, string[]][] = [
-    [/research|scout|investigat|analy/i, ['Research the latest news on a topic I care about.', 'Compare three options and recommend one.']],
-    [/writ|draft|post|blog|content|copy/i, ['Draft a short post about what I shipped this week.', 'Tighten this paragraph for me.']],
-    [/financ|ledger|budget|money|expens|account/i, ['Summarize my spending categories this month.', 'Remind me of bills due this week.']],
-    [/code|review|engineer|dev|bug|test/i, ['Review the latest changes for bugs.', 'Explain how this project is structured.']],
-    [/support|help ?desk|customer|inbox|email/i, ['Draft a friendly reply to a customer question.', 'Sort these messages by urgency.']],
+    [/research|scout|investigat|analy|研究|调研|分析/i, [tr('bots.thread.suggest_0'), tr('bots.thread.suggest_1')]],
+    [/writ|draft|post|blog|content|copy|写作|撰稿|文案/i, [tr('bots.thread.suggest_2'), tr('bots.thread.suggest_3')]],
+    [/financ|ledger|budget|money|expens|account|财务|预算|账单/i, [tr('bots.thread.suggest_4'), tr('bots.thread.suggest_5')]],
+    [/code|review|engineer|dev|bug|test|代码|开发|审查|测试/i, [tr('bots.thread.suggest_6'), tr('bots.thread.suggest_7')]],
+    [/support|help ?desk|customer|inbox|email|客服|收件箱|邮件/i, [tr('bots.thread.suggest_8'), tr('bots.thread.suggest_9')]],
   ];
-  const matched = topics.find(([pattern]) => pattern.test(role))?.[1] ?? ['Remember that I prefer short, direct answers.', 'Every weekday at 9, send me a summary of what changed.'];
-  return ['What can you help me with?', ...matched];
+  const matched = topics.find(([pattern]) => pattern.test(role))?.[1] ?? [tr('bots.thread.suggest_10'), tr('bots.thread.suggest_11')];
+  return [tr('bots.thread.suggest_12'), ...matched];
 }
 
 /** An empty bot conversation: who it is, three things to ask, and small settings shortcuts. */
 export function welcomeHtml(bot: Bot): string {
   const id = escape(bot.id);
-  const setup = ([['profile', 'edit', 'Instructions'], ['memory', 'leaf', 'Memory'], ['schedules', 'refresh', 'Schedules'], ['channels', 'globe', 'Connections']] as const)
-    .map(([tab, glyph, label]) => `<button data-action="bot-settings" data-bot="${id}" data-tab="${tab}">${icon(glyph)}${label}</button>`).join('');
+  const setup = ([['profile', 'edit', tr('bots.thread.instructions')], ['memory', 'leaf', tr('bots.thread.memory')], ['schedules', 'refresh', tr('bots.thread.schedules')], ['channels', 'globe', tr('bots.thread.connections')]] as const)
+    .map(([tab, glyph, label]) => `<button data-action="bot-settings" data-bot="${id}" data-tab="${tab}">${icon(glyph)}${escape(label)}</button>`).join('');
   const chips = suggestions(`${bot.role} ${bot.name}`).map(text => `<button class="bot-suggestion" data-action="suggest" data-text="${escape(text)}">${escape(text)}</button>`).join('');
-  return `<div class="new-task-welcome bot-welcome">${botAvatarHtml(bot.avatar, bot.name, 'bot-welcome-avatar', bot.color)}<h1>${escape(bot.name)} is ready.</h1><p>Ask, then watch it work.</p><div class="bot-suggestions" role="group" aria-label="Suggestions">${chips}</div><div class="bot-welcome-setup" role="group" aria-label="Set up ${escape(bot.name)}">${setup}</div></div>`;
+  return `<div class="new-task-welcome bot-welcome">${botAvatarHtml(bot.avatar, bot.name, 'bot-welcome-avatar', bot.color)}<h1>${escape(tr('bots.thread.ready', { name: bot.name }))}</h1><p>${escapeI18n(tr('modules.common.ask_then_watch_it_work'))}</p><div class="bot-suggestions" role="group" aria-label="${escapeI18n(tr('modules.common.suggestions'))}">${chips}</div><div class="bot-welcome-setup" role="group" aria-label="${escape(tr('bots.thread.setup', { name: bot.name }))}">${setup}</div></div>`;
 }
 
 /** "Today 3:04 PM", "Yesterday 9:12 AM", "Tue, Oct 6 3:04 PM". */
 export function dayLabel(at: number, now = Date.now()): string {
   const date = new Date(at), today = new Date(now);
-  const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const time = date.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' });
   const days = Math.round((new Date(today.toDateString()).getTime() - new Date(date.toDateString()).getTime()) / 86_400_000);
-  if (days === 0) return `Today ${time}`;
-  if (days === 1) return `Yesterday ${time}`;
-  return `${date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} ${time}`;
+  if (days === 0) return tr('bots.thread.today', { time });
+  if (days === 1) return tr('bots.thread.yesterday', { time });
+  return `${date.toLocaleDateString(getLocale(), { weekday: 'short', month: 'short', day: 'numeric' })} ${time}`;
 }
 
 /** Mostly code blocks or images reads better without the bubble's fill. */
@@ -102,7 +105,7 @@ function setReactions(key: string, list: string[]): void {
 }
 function reactionsHtml(key: string): string {
   const list = reactionsFor(key);
-  return list.length ? `<div class="bot-reactions">${list.map(emoji => `<button type="button" class="bot-reaction" data-bot-unreact="${escape(emoji)}" aria-label="Remove your ${escape(emoji)} reaction" aria-pressed="true">${escape(emoji)}</button>`).join('')}</div>` : '';
+  return list.length ? `<div class="bot-reactions">${list.map(emoji => `<button type="button" class="bot-reaction" data-bot-unreact="${escape(emoji)}" aria-label="${escape(tr('bots.thread.remove_reaction', { emoji }))}" aria-pressed="true">${escape(emoji)}</button>`).join('')}</div>` : '';
 }
 
 const nearBottom = (transcript: HTMLElement) => transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight < NEAR_BOTTOM_PX;
@@ -121,7 +124,7 @@ export function decorateTranscript(transcript: HTMLElement, bot: Bot, sessionId:
     const user = article.classList.contains('user-message'), at = message.createdAt < 1e12 ? message.createdAt * 1000 : message.createdAt;
     if (!user && message.id > 0) replies++;
     if (!user && !divided && unreadAfter !== undefined && at > unreadAfter && message.id > 0) {
-      article.insertAdjacentHTML('beforebegin', '<div class="bot-divider bot-unread" role="separator" aria-label="New messages"><span>New messages</span></div>');
+      article.insertAdjacentHTML('beforebegin', `<div class="bot-divider bot-unread" role="separator" aria-label="${escapeI18n(tr('modules.common.new_messages'))}"><span>${escapeI18n(tr('modules.common.new_messages'))}</span></div>`);
       divided = true;
     }
     if (!previous || new Date(previous.at).toDateString() !== new Date(at).toDateString()) article.insertAdjacentHTML('beforebegin', `<div class="bot-divider bot-day" role="separator"><span>${escape(dayLabel(at))}</span></div>`);
@@ -135,8 +138,8 @@ export function decorateTranscript(transcript: HTMLElement, bot: Bot, sessionId:
     }
     const actions = article.querySelector<HTMLElement>(':scope > .message-actions');
     if (actions && message.id > 0) {
-      actions.insertAdjacentHTML('afterbegin', `<time class="bot-message-time" datetime="${new Date(at).toISOString()}">${escape(new Date(at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))}</time>`);
-      actions.querySelector('.message-action-status')?.insertAdjacentHTML('beforebegin', `<button type="button" data-bot-reply aria-label="Reply" title="Reply">${REPLY}</button><button type="button" data-bot-react aria-label="React" title="React" aria-expanded="false">${SMILE}</button><span class="bot-react-menu" role="group" aria-label="Reactions" hidden>${REACTIONS.map(emoji => `<button type="button" data-bot-emoji="${emoji}" aria-label="React with ${emoji}">${emoji}</button>`).join('')}</span>`);
+      actions.insertAdjacentHTML('afterbegin', `<time class="bot-message-time" datetime="${new Date(at).toISOString()}">${escape(new Date(at).toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' }))}</time>`);
+      actions.querySelector('.message-action-status')?.insertAdjacentHTML('beforebegin', `<button type="button" data-bot-reply aria-label="${escapeI18n(tr('modules.common.reply'))}" title="${escapeI18n(tr('modules.common.reply'))}">${REPLY}</button><button type="button" data-bot-react aria-label="${escapeI18n(tr('modules.common.react'))}" title="${escapeI18n(tr('modules.common.react'))}" aria-expanded="false">${SMILE}</button><span class="bot-react-menu" role="group" aria-label="${escapeI18n(tr('modules.common.reactions'))}" hidden>${REACTIONS.map(emoji => `<button type="button" data-bot-emoji="${emoji}" aria-label="${escape(tr('bots.thread.react', { emoji }))}">${emoji}</button>`).join('')}</span>`);
       article.dataset.reactionKey = `${sessionId}:${message.id}`;
       actions.insertAdjacentHTML('beforebegin', reactionsHtml(article.dataset.reactionKey));
     }
@@ -190,20 +193,31 @@ function paintBotMessages(transcript: HTMLElement, messages: SavedMessage[], mar
 function collaborationGroupHtml(group: BotMessageMarker[]): string {
   if (group.length > 1) {
     const names = [...new Set(group.map(marker => marker.botName))];
-    return `<details class="bot-collab-group"><summary>${group.length} messages with ${names.map(escape).join(', ')}</summary><div class="bot-collab-items">${group.map(marker => collaborationItemHtml(marker)).join('')}</div></details>`;
+    return `<details class="bot-collab-group"><summary>${escape(tr('bots.thread.collaboration', { count: group.length, names: new Intl.ListFormat(getLocale(), { type: 'unit' }).format(names) }))}</summary><div class="bot-collab-items">${group.map(marker => collaborationItemHtml(marker)).join('')}</div></details>`;
   }
   const marker = group[0];
-  return `<details class="bot-collab-group"><summary><span>${escape(collaborationLabel(marker))}</span><span class="bot-collab-status">${escape(marker.status)}</span></summary><div class="bot-collab-body">${collaborationBody(marker)}</div></details>`;
+  return `<details class="bot-collab-group"><summary><span>${escape(collaborationLabel(marker))}</span><span class="bot-collab-status">${escape(collaborationStatus(marker.status))}</span></summary><div class="bot-collab-body">${collaborationBody(marker)}</div></details>`;
+}
+
+function collaborationStatus(status: string): string {
+  switch (status) {
+    case 'Queued': return tr('bots.thread.status_queued');
+    case 'In progress': return tr('bots.thread.status_in_progress');
+    case 'Completed': return tr('bots.thread.status_completed');
+    case 'Failed': return tr('bots.thread.status_failed');
+    case 'Stopped': return tr('bots.thread.status_stopped');
+    default: return status;
+  }
 }
 
 function collaborationLabel(marker: BotMessageMarker): string {
-  return marker.kind === 'sent' ? `Messaged ${marker.botName}` : marker.kind === 'received' ? `Message from ${marker.botName}` : `Update from ${marker.botName}`;
+  return marker.kind === 'sent' ? tr('bots.thread.sent', { name: marker.botName }) : marker.kind === 'received' ? tr('bots.thread.received', { name: marker.botName }) : tr('bots.thread.update', { name: marker.botName });
 }
 function collaborationBody(marker: BotMessageMarker): string {
   return `${botAvatarHtml(marker.avatar, marker.botName, 'bot-collab-avatar', marker.color)}<div class="bot-collab-copy">${escape(marker.text)}${marker.result && marker.kind !== 'update' ? `<p>${escape(marker.result)}</p>` : ''}</div>`;
 }
 function collaborationItemHtml(marker: BotMessageMarker): string {
-  return `<details class="bot-collab-item"><summary><span>${escape(collaborationLabel(marker))}</span><span class="bot-collab-status">${escape(marker.status)}</span></summary><div class="bot-collab-body">${collaborationBody(marker)}</div></details>`;
+  return `<details class="bot-collab-item"><summary><span>${escape(collaborationLabel(marker))}</span><span class="bot-collab-status">${escape(collaborationStatus(marker.status))}</span></summary><div class="bot-collab-body">${collaborationBody(marker)}</div></details>`;
 }
 
 /** A model change is a compact system row at the activity's chronological position. */
@@ -241,13 +255,13 @@ function decorateSteps(transcript: HTMLElement): void {
     // Folded traces keep "Worked for 12s" in the summary's title; older ones in the label.
     const said = turn.querySelector('.turn-activity-summary')?.getAttribute('title') ?? label.textContent ?? '';
     const duration = /for (?:about )?(.+)$/.exec(said)?.[1];
-    label.textContent = `${steps} ${steps === 1 ? 'step' : 'steps'}${duration ? ` · ${duration}` : ''}`;
+    label.textContent = tr(steps === 1 ? 'bots.thread.step' : 'bots.thread.steps', { count: steps }) + (duration ? ` · ${duration}` : '');
     turn.classList.add('bot-steps');
     // A turn folds once when it finishes (the live run was open); after that the reader decides.
     const key = turn.dataset.turnKey ?? '';
     if (!folded.has(key) && localStorage.getItem('pandacode.activityExpanded') !== 'true') (turn as HTMLDetailsElement).open = false;
     folded.add(key);
-    if (failed) label.insertAdjacentHTML('afterend', `<span class="bot-steps-failed">${failed} failed</span>`);
+    if (failed) label.insertAdjacentHTML('afterend', `<span class="bot-steps-failed">${escape(tr('bots.thread.failed', { count: failed }))}</span>`);
   }
 }
 
@@ -256,7 +270,7 @@ function paintJump(transcript: HTMLElement): void {
   let pill = pane.querySelector<HTMLButtonElement>('.bot-jump');
   if (!unseen) { pill?.remove(); return; }
   if (!pill) { transcript.insertAdjacentHTML('afterend', '<button type="button" class="bot-jump"></button>'); pill = pane.querySelector<HTMLButtonElement>('.bot-jump')!; }
-  pill.textContent = `${unseen} new ${unseen === 1 ? 'message' : 'messages'}`;
+  pill.textContent = tr(unseen === 1 ? 'bots.thread.new_message' : 'bots.thread.new_messages', { count: unseen });
 }
 
 function quoteOf(article: HTMLElement): string {
@@ -282,7 +296,7 @@ export function paintReplyChip(sessionId: string): void {
   // A sent (or rewritten) prompt drops the reply with its quote.
   if (reply && field && !field.value.startsWith(reply.quote)) reply = undefined;
   if (!composer || !field || reply?.sessionId !== sessionId) return;
-  field.insertAdjacentHTML('beforebegin', `<div class="bot-reply-chip">${REPLY}<span>Replying to ${escape(reply.author)}</span><button type="button" data-bot-reply-cancel aria-label="Cancel reply">${icon('close')}</button></div>`);
+  field.insertAdjacentHTML('beforebegin', `<div class="bot-reply-chip">${REPLY}<span>${escape(tr('bots.thread.replying', { name: reply.author }))}</span><button type="button" data-bot-reply-cancel aria-label="${escapeI18n(tr('modules.common.cancel_reply'))}">${icon('close')}</button></div>`);
   composer.querySelector('[data-bot-reply-cancel]')!.addEventListener('click', () => {
     const quote = reply?.quote ?? '', value = prompt()?.value ?? '';
     reply = undefined;
@@ -305,7 +319,7 @@ function bind(transcript: HTMLElement): void {
     if (!article || !article.closest('.bot-thread')) return;
     const key = article.dataset.reactionKey ?? '';
     if (target.closest('[data-bot-reply]')) {
-      const author = article.classList.contains('user-message') ? 'You' : article.querySelector('.message-meta strong')?.textContent ?? 'Bot';
+      const author = article.classList.contains('user-message') ? tr('bots.thread.you') : article.querySelector('.message-meta strong')?.textContent ?? tr('bots.thread.bot');
       const quote = quoteOf(article), field = prompt();
       const base = reply && field?.value.startsWith(reply.quote) ? field.value.slice(reply.quote.length) : field?.value ?? '';
       reply = { sessionId: opened, author, quote };
@@ -334,7 +348,7 @@ function repaintReactions(article: HTMLElement, key: string): void {
 }
 
 // ---- The working indicator below the last message while a turn runs.
-const labels = new WeakMap<object, string>();
+const labels = new WeakMap<object, { locale: string; text: string }>();
 const activity = new WeakMap<object, { mark: string; at: number }>();
 let lastLabel = '';
 let timer = 0;
@@ -342,7 +356,7 @@ let live: { region: HTMLElement; bot: Bot; provider: string; run: () => BotRun |
 
 /** One label per turn, picked at random and never the same twice in a row. */
 export function pickLabel(previous: string, random = Math.random): string {
-  const choices = WORKING_LABELS.filter(label => label !== previous);
+  const choices = workingLabels().filter(label => label !== previous);
   return choices[Math.floor(random() * choices.length)];
 }
 
@@ -373,18 +387,18 @@ function tick(): void {
   const current = live?.run(), indicator = live?.region.querySelector<HTMLElement>('.bot-working');
   if (!live || !current || !indicator?.isConnected) { clearInterval(timer); timer = 0; return; }
   const now = Date.now();
-  if (!labels.has(current)) { lastLabel = pickLabel(lastLabel); labels.set(current, lastLabel); }
+  if (labels.get(current)?.locale !== getLocale()) { lastLabel = pickLabel(lastLabel); labels.set(current, { locale: getLocale(), text: lastLabel }); }
   const mark = `${current.revision}:${current.text.length}:${current.status}`, seen = activity.get(current);
   if (!seen || seen.mark !== mark) activity.set(current, { mark, at: seen ? now : current.startedAt });
   const waiting = current.approvals.size > 0 || current.inputs.size > 0;
   const stalled = !waiting && now - activity.get(current)!.at > STALL_MS;
   const progress = GENERIC_STATUS.has(current.status) ? '' : current.status;
-  const label = stalled ? `Waiting for ${live.provider}…` : progress || labels.get(current)!;
+  const label = stalled ? tr('bots.thread.waiting', { provider: live.provider }) : progress || labels.get(current)!.text;
   indicator.toggleAttribute('data-shimmer', !stalled && !waiting);
   const text = indicator.querySelector<HTMLElement>('.bot-working-label')!, elapsed = indicator.querySelector<HTMLElement>('.bot-working-elapsed')!;
   if (text.textContent !== label) {
     text.textContent = label;
-    indicator.querySelector<HTMLElement>('[role="status"]')!.textContent = `${live.bot.name} is working: ${label}`;
+    indicator.querySelector<HTMLElement>('[role="status"]')!.textContent = tr('bots.thread.working_status', { name: live.bot.name, status: label });
   }
   const duration = now - current.startedAt;
   elapsed.textContent = duration >= ELAPSED_AFTER_MS ? formatDuration(duration) : '';

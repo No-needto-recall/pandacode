@@ -1,8 +1,10 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 /* Settings → Agents: the classic Team setup switch and named agent teams. A team is a name,
  * the models it may orchestrate and the one that leads; it appears in the model picker. */
 import './agent-teams.css';
 import type { TeamLibrary, TeamProfile } from './architect-types';
-import { escape, icon } from './dom';
+import { escape, icon, morph } from './dom';
 import { modelChoices } from './model-catalog';
 import { providerLogo } from './provider-logos';
 import { classicTeamSetup, modelKey, namedTeams, namedTeamSetup, setClassicTeamSetup, teamDetail, TEAM_MODELS_MAX, type TeamModel } from './team-mode';
@@ -15,22 +17,23 @@ export interface AgentTeamsOptions {
 }
 
 export function mountAgentTeams(host: HTMLElement, options: AgentTeamsOptions): () => void {
-  host.innerHTML = `<div class="settings-group agent-teams">
-    <div class="setting-row"><div><strong>Classic team setup</strong><small>Team opens Architect & workers.</small></div><input type="checkbox" class="settings-switch" aria-label="Classic team setup" ${classicTeamSetup() ? 'checked' : ''}></div>
-    <div class="setting-row"><div><strong>Agent teams</strong><small>Pick one in the model picker.</small></div><button type="button" class="secondary-button agent-team-new">${icon('plus')}New team</button></div>
-    <div class="setting-row"><div><strong>Lead guidance</strong><small>Added to the architect's built-in rules for every team.</small></div><button type="button" class="secondary-button agent-guidance-save">Save</button></div>
-    <div class="agent-guidance-row"><textarea class="agent-guidance" aria-label="Lead guidance" rows="3" maxlength="2000" spellcheck="false" placeholder="Leave empty for the built-in rules. For example: you only lead; never edit files yourself."></textarea></div>
+  const markup = () => `<div class="settings-group agent-teams">
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.classic_team_setup'))}</strong><small>${escapeI18n(tr('modules.common.team_opens_architect_workers'))}</small></div><input type="checkbox" class="settings-switch" aria-label="${escapeI18n(tr('modules.common.classic_team_setup'))}" ${classicTeamSetup() ? 'checked' : ''}></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.agent_teams'))}</strong><small>${escapeI18n(tr('modules.common.pick_one_in_the_model_picker'))}</small></div><button type="button" class="secondary-button agent-team-new">${icon('plus')}${escape(tr('modules.teams.new'))}</button></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.lead_guidance'))}</strong><small>${escapeI18n(tr('modules.common.added_to_the_architect_s_built_in_rules_for_every_team'))}</small></div><button type="button" class="secondary-button agent-guidance-save">${escapeI18n(tr('modules.common.save'))}</button></div>
+    <div class="agent-guidance-row"><textarea class="agent-guidance" aria-label="${escapeI18n(tr('modules.common.lead_guidance'))}" rows="3" maxlength="2000" spellcheck="false" placeholder="${escapeI18n(tr('modules.common.leave_empty_for_the_built_in_rules_for_example_you_only_lead'))}"></textarea></div>
     <p class="agent-guidance-status" role="status" hidden></p>
-    <ul class="agent-team-list" aria-label="Agent teams"></ul>
-    <form class="agent-team-editor" aria-label="Agent team" hidden>
-      <label class="agent-team-field"><span>Team name</span><input type="text" maxlength="80" autocomplete="off" spellcheck="false" aria-label="Team name" placeholder="Reviewers"></label>
-      <input type="search" class="agent-team-filter" aria-label="Filter models" placeholder="Filter models…" autocomplete="off" spellcheck="false">
-      <div class="agent-team-models" role="group" aria-label="Team models"><p class="agent-team-loading" role="status">Loading models…</p></div>
-      <label class="agent-team-field" hidden><span>Lead effort</span><select class="agent-team-lead-effort" aria-label="Lead effort"></select></label>
-      <div class="agent-team-actions"><span class="agent-team-count" aria-live="polite"></span><button type="button" class="secondary-button agent-team-cancel">Cancel</button><button type="submit" class="primary-button">Save team</button></div>
+    <ul class="agent-team-list" aria-label="${escapeI18n(tr('modules.common.agent_teams'))}"></ul>
+    <form class="agent-team-editor" aria-label="${escapeI18n(tr('modules.common.agent_team'))}" hidden>
+      <label class="agent-team-field"><span>${escapeI18n(tr('modules.common.team_name'))}</span><input type="text" maxlength="80" autocomplete="off" spellcheck="false" aria-label="${escapeI18n(tr('modules.common.team_name'))}" placeholder="${escapeI18n(tr('modules.common.reviewers'))}"></label>
+      <input type="search" class="agent-team-filter" aria-label="${escapeI18n(tr('modules.common.filter_models'))}" placeholder="${escapeI18n(tr('modules.common.filter_models_b7edb4'))}" autocomplete="off" spellcheck="false">
+      <div class="agent-team-models" role="group" aria-label="${escapeI18n(tr('modules.common.team_models'))}"><p class="agent-team-loading" role="status">${escapeI18n(tr('modules.common.loading_models'))}</p></div>
+      <label class="agent-team-field" hidden><span>${escapeI18n(tr('modules.common.lead_effort'))}</span><select class="agent-team-lead-effort" aria-label="${escapeI18n(tr('modules.common.lead_effort'))}"></select></label>
+      <div class="agent-team-actions"><span class="agent-team-count" aria-live="polite"></span><button type="button" class="secondary-button agent-team-cancel">${escapeI18n(tr('modules.common.cancel'))}</button><button type="submit" class="primary-button">${escapeI18n(tr('modules.common.save_team'))}</button></div>
     </form>
     <p class="agent-team-error" role="alert" hidden></p>
   </div>`;
+  host.innerHTML = markup();
   const classic = host.querySelector<HTMLInputElement>('.settings-switch')!;
   const list = host.querySelector<HTMLUListElement>('.agent-team-list')!;
   const create = host.querySelector<HTMLButtonElement>('.agent-team-new')!;
@@ -52,7 +55,7 @@ export function mountAgentTeams(host: HTMLElement, options: AgentTeamsOptions): 
   function renderList(): void {
     const teams = library ? namedTeams(library) : [];
     list.hidden = !teams.length;
-    list.innerHTML = teams.map(team => `<li class="agent-team-row" data-id="${escape(team.id)}"><span class="provider-small ${team.setup.architect.provider}">${providerLogo(team.setup.architect.provider)}</span><span class="agent-team-name"><strong>${escape(team.name)}</strong><small>${escape(teamDetail(team, harnessName))}</small></span><button type="button" class="secondary-button" data-team-edit aria-label="Edit ${escape(team.name)}">Edit</button><button type="button" class="icon-button" data-team-delete aria-label="Delete ${escape(team.name)}" title="Delete team">${icon('close')}</button></li>`).join('');
+    list.innerHTML = teams.map(team => `<li class="agent-team-row" data-id="${escape(team.id)}"><span class="provider-small ${team.setup.architect.provider}">${providerLogo(team.setup.architect.provider)}</span><span class="agent-team-name"><strong>${escape(team.name)}</strong><small>${escape(teamDetail(team, harnessName))}</small></span><button type="button" class="secondary-button" data-team-edit aria-label="Edit ${escape(team.name)}">${escapeI18n(tr('modules.common.edit'))}</button><button type="button" class="icon-button" data-team-delete aria-label="Delete ${escape(team.name)}" title="${escapeI18n(tr('modules.common.delete_team'))}">${icon('close')}</button></li>`).join('');
   }
   async function refresh(): Promise<void> {
     try {
@@ -74,19 +77,19 @@ export function mountAgentTeams(host: HTMLElement, options: AgentTeamsOptions): 
     });
   }
   /** Effort choices for a model that advertises them; empty means the harness default. */
-  const effortOptions = (model: TeamModel | undefined, current?: string | null) => `<option value="">Default effort</option>${(model?.efforts ?? []).map(effort => `<option value="${escape(effort.id)}" ${effort.id === current ? 'selected' : ''}>${escape(effort.name)}</option>`).join('')}`;
+  const effortOptions = (model: TeamModel | undefined, current?: string | null) => `<option value="">${escapeI18n(tr('modules.common.default_effort'))}</option>${(model?.efforts ?? []).map(effort => `<option value="${escape(effort.id)}" ${effort.id === current ? 'selected' : ''}>${escape(effort.name)}</option>`).join('')}`;
   const checked = () => [...models.querySelectorAll<HTMLInputElement>('input[type=checkbox]:checked')];
   function renderModels(chosen: ReadonlySet<string>, lead: string): void {
     const saved = editing?.setup.config.workers ?? [];
     const extra = saved.filter(worker => !catalog.some(model => modelKey(model) === modelKey(worker)))
       .map(worker => ({ provider: worker.provider, harness: harnessName(worker.provider), model: worker.model, name: worker.name.split(' · ')[0], reasoningEffort: worker.reasoningEffort }));
     const all: TeamModel[] = [...catalog, ...extra];
-    if (!all.length) { models.innerHTML = '<p class="agent-team-loading">No installed agents report models yet.</p>'; return; }
+    if (!all.length) { models.innerHTML = `<p class="agent-team-loading">${escapeI18n(tr('modules.common.no_installed_agents_report_models_yet'))}</p>`; return; }
     const groups = [...new Set(all.map(model => model.provider))];
     models.innerHTML = groups.map(provider => `<section aria-label="${escape(harnessName(provider))}"><h4>${providerLogo(provider)}${escape(harnessName(provider))}</h4>${all.filter(model => model.provider === provider).map(model => {
       const key = modelKey(model), label = `${model.name} · ${model.harness}`;
       const effort = model.efforts?.length ? `<select class="agent-team-effort" aria-label="Worker effort for ${escape(label)}">${effortOptions(model, saved.find(worker => modelKey(worker) === key)?.reasoningEffort)}</select>` : '';
-      return `<div class="agent-team-model" data-key="${escape(key)}" data-search="${escape(`${label} ${model.model}`.toLowerCase())}"><label><input type="checkbox" value="${escape(key)}" aria-label="Include ${escape(label)}" ${chosen.has(key) ? 'checked' : ''}><span>${escape(model.name)}</span></label><label class="agent-team-lead"><input type="radio" name="agent-team-lead" value="${escape(key)}" aria-label="${escape(label)} leads" ${key === lead ? 'checked' : ''}><span>Lead</span></label>${effort}</div>`;
+      return `<div class="agent-team-model" data-key="${escape(key)}" data-search="${escape(`${label} ${model.model}`.toLowerCase())}"><label><input type="checkbox" value="${escape(key)}" aria-label="Include ${escape(label)}" ${chosen.has(key) ? 'checked' : ''}><span>${escape(model.name)}</span></label><label class="agent-team-lead"><input type="radio" name="agent-team-lead" value="${escape(key)}" aria-label="${escape(label)} leads" ${key === lead ? 'checked' : ''}><span>${escapeI18n(tr('modules.common.lead'))}</span></label>${effort}</div>`;
     }).join('')}</section>`).join('');
     shown = all;
     leadSelected = lead;
@@ -108,7 +111,7 @@ export function mountAgentTeams(host: HTMLElement, options: AgentTeamsOptions): 
     const leadModel = shown.find(model => modelKey(model) === lead);
     if (lead !== leadSelected) { leadEffort.innerHTML = effortOptions(leadModel); leadSelected = lead; }
     leadEffort.parentElement!.hidden = !leadModel?.efforts?.length;
-    count.textContent = included.length ? `${included.length} model${included.length === 1 ? '' : 's'}` : 'Choose models';
+    count.textContent = included.length ? `${included.length} model${included.length === 1 ? '' : 's'}` : tr('modules.common.choose_models');
   }
   function applyFilter(): void {
     const query = filter.value.trim().toLowerCase();
@@ -190,12 +193,25 @@ export function mountAgentTeams(host: HTMLElement, options: AgentTeamsOptions): 
         library = await options.call<TeamLibrary>('architect_set_lead_guidance', { guidance: wanted || null });
         if (disposed) return;
         guidanceEdited = false; guidance.value = library.leadGuidance ?? '';
-        guidanceStatus.textContent = wanted ? 'Lead guidance saved. Every team follows it from its next turn.' : 'Lead guidance cleared. Teams use the built-in rules.';
+        guidanceStatus.textContent = wanted ? tr('modules.common.lead_guidance_saved_every_team_follows_it_from_its_next_turn') : tr('modules.common.lead_guidance_cleared_teams_use_the_built_in_rules');
         guidanceStatus.hidden = false;
       } catch (cause) { if (!disposed) showError(cause); }
       finally { busy = false; if (!disposed) guidanceSave.disabled = false; }
     })();
   });
   void refresh();
-  return () => { disposed = true; host.replaceChildren(); };
+  const disposeLocale = onLocaleChange(() => {
+    const next = document.createElement('div'); next.innerHTML = markup();
+    const selector = '.setting-row strong, .setting-row small, .agent-team-new, .agent-guidance-save, .agent-team-field > span, .agent-team-actions button';
+    const fresh = [...next.querySelectorAll(selector)];
+    host.querySelectorAll(selector).forEach((node, index) => { if (fresh[index]) morph(node, fresh[index].innerHTML, 20); });
+    for (const selector of ['.settings-switch', '.agent-guidance', '.agent-team-list', '.agent-team-editor', 'input[type="text"]', '.agent-team-filter', '.agent-team-models', '.agent-team-lead-effort']) {
+      const target = host.querySelector(selector), copy = next.querySelector(selector);
+      if (target && copy) for (const attr of ['aria-label', 'placeholder']) if (copy.hasAttribute(attr)) target.setAttribute(attr, copy.getAttribute(attr)!);
+    }
+    models.querySelectorAll('.agent-team-lead span').forEach(node => { node.textContent = tr('modules.common.lead'); });
+    host.querySelectorAll('option[value=""]').forEach(option => { option.textContent = tr('modules.common.default_effort'); });
+    renderList(); sync();
+  });
+  return () => { disposed = true; disposeLocale(); host.replaceChildren(); };
 }

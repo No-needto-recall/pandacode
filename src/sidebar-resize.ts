@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import './sidebar-resize.css';
 
 /** Resize the existing grid track without rebuilding navigation or conversation UI. */
@@ -21,7 +22,7 @@ export function initializeSidebarResizing(workspace: HTMLElement, sidebar: HTMLE
   separator.setAttribute('aria-orientation', 'vertical');
   separator.setAttribute('aria-label', right ? 'Resize right sidebar' : 'Resize sidebar');
   separator.setAttribute('aria-description', 'Use Left and Right arrows to resize. Hold Shift for larger steps. Home and End select the smallest and largest size. Double-click to reset.');
-  separator.title = `${right ? 'Resize right sidebar' : 'Resize sidebar'} · Double-click to reset`;
+  separator.title = tr('modules.dynamic.resizeReset', { label: String(right ? 'Resize right sidebar' : 'Resize sidebar') });
   if (!sidebar.id) sidebar.id = 'workspace-sidebar';
   separator.setAttribute('aria-controls', sidebar.id);
   sidebar.append(separator);
@@ -46,7 +47,7 @@ export function initializeSidebarResizing(workspace: HTMLElement, sidebar: HTMLE
     separator.setAttribute('aria-valuemin', String(availableMinimum));
     separator.setAttribute('aria-valuemax', String(availableMaximum));
     separator.setAttribute('aria-valuenow', String(width));
-    separator.setAttribute('aria-valuetext', `${width} pixels`);
+    separator.setAttribute('aria-valuetext', tr('modules.dynamic.pixels', { count: String(width) }));
   }
 
   function persist(): void {

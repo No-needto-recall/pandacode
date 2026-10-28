@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 // PDF, Word and spreadsheet files in a file tab. Loaded only when one is opened: each format's
 // library is its own chunk. Everything renders locally; nothing is fetched.
 import './office-viewer.css';
@@ -13,7 +16,7 @@ const PDF_PAGES = 5000;
 const CANVAS_PIXELS = 16_000_000;
 
 export async function renderOffice(host: HTMLElement, kind: OfficeKind, bytes: ArrayBuffer, path = ''): Promise<() => void> {
-  host.innerHTML = '<div class="office-viewer"><div class="inspector-empty" role="status">Opening…</div></div>';
+  host.innerHTML = `<div class="office-viewer"><div class="inspector-empty" role="status">${escapeI18n(tr('modules.common.opening'))}</div></div>`;
   const viewer = host.firstElementChild as HTMLElement;
   // Web links open in the browser (mountExternalLinks); anything else must not navigate the app.
   // composedPath reaches links inside the Word document's shadow root.
@@ -42,7 +45,7 @@ async function renderPdf(viewer: HTMLElement, bytes: ArrayBuffer): Promise<() =>
   const first = (await doc.getPage(1)).getViewport({ scale: 1 });
   const count = Math.min(doc.numPages, PDF_PAGES);
   viewer.dataset.kind = 'pdf';
-  viewer.innerHTML = `<div class="office-bar">${doc.numPages.toLocaleString()} page${doc.numPages === 1 ? '' : 's'}${count < doc.numPages ? `<span>Showing the first ${count.toLocaleString()}.</span>` : ''}</div><div class="pdf-pages"></div>`;
+  viewer.innerHTML = `<div class="office-bar">${escape(doc.numPages === 1 ? tr('modules.files.onePage', { count: doc.numPages.toLocaleString(getLocale()) }) : tr('modules.files.pages', { count: doc.numPages.toLocaleString(getLocale()) }))}${count < doc.numPages ? `<span>${escape(tr('modules.files.firstPages', { count: count.toLocaleString(getLocale()) }))}</span>` : ''}</div><div class="pdf-pages"></div>`;
   const pages = viewer.querySelector<HTMLElement>('.pdf-pages')!;
   // Pages draw as they come near the screen, so a long PDF opens as fast as a short one.
   const observer = new IntersectionObserver(entries => {
@@ -67,7 +70,7 @@ async function renderPdf(viewer: HTMLElement, bytes: ArrayBuffer): Promise<() =>
   for (let number = 1; number <= count; number++) {
     const slot = document.createElement('div');
     slot.className = 'pdf-page'; slot.dataset.page = String(number);
-    slot.setAttribute('aria-label', `Page ${number}`);
+    slot.setAttribute('aria-label', tr('modules.files.pageNumber', { number }));
     slot.style.aspectRatio = `${first.width} / ${first.height}`;
     pages.append(slot); observer.observe(slot);
   }
@@ -108,8 +111,8 @@ async function renderSheet(viewer: HTMLElement, bytes: ArrayBuffer): Promise<() 
     const tabs = book.SheetNames.map((sheetName, i) => `<button type="button" data-sheet="${i}" aria-pressed="${i === index}">${escape(sheetName)}</button>`).join('');
     // sheetRows trims !ref while parsing; !fullref keeps the real size.
     const full = utils.decode_range(String(sheet['!fullref'] ?? sheet['!ref'] ?? 'A1'));
-    const more = full.e.r - full.s.r + 1 > SHEET_ROWS || full.e.c - full.s.c + 1 > SHEET_COLUMNS ? `<span>Showing the first ${SHEET_ROWS.toLocaleString()} rows and ${SHEET_COLUMNS} columns.</span>` : '';
-    viewer.innerHTML = `<div class="office-bar sheet-tabs" role="group" aria-label="Sheets">${tabs}${more}</div><div class="sheet-scroll"><table class="sheet-grid" aria-label="${escape(name)}"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    const more = full.e.r - full.s.r + 1 > SHEET_ROWS || full.e.c - full.s.c + 1 > SHEET_COLUMNS ? `<span>${escape(tr('modules.files.firstCells', { rows: SHEET_ROWS.toLocaleString(getLocale()), columns: SHEET_COLUMNS }))}</span>` : '';
+    viewer.innerHTML = `<div class="office-bar sheet-tabs" role="group" aria-label="${escapeI18n(tr('modules.common.sheets'))}">${tabs}${more}</div><div class="sheet-scroll"><table class="sheet-grid" aria-label="${escape(name)}"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
   };
   viewer.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLElement>('[data-sheet]');
@@ -135,10 +138,10 @@ async function renderImage(viewer: HTMLElement, bytes: ArrayBuffer, path: string
   image.src = url;
   await image.decode().catch(() => { throw new Error('The image could not be decoded.'); });
   viewer.dataset.kind = 'image';
-  viewer.innerHTML = `<div class="office-bar sheet-tabs">${image.naturalWidth.toLocaleString()} × ${image.naturalHeight.toLocaleString()} px<button type="button" data-zoom aria-pressed="false">Actual size</button></div><div class="image-stage"></div>`;
+  viewer.innerHTML = `<div class="office-bar sheet-tabs">${image.naturalWidth.toLocaleString(getLocale())} × ${image.naturalHeight.toLocaleString(getLocale())} px<button type="button" data-zoom aria-pressed="false">${escapeI18n(tr('modules.common.actual_size'))}</button></div><div class="image-stage"></div>`;
   const zoom = viewer.querySelector<HTMLElement>('[data-zoom]')!;
   const toggle = () => zoom.setAttribute('aria-pressed', String(viewer.toggleAttribute('data-actual')));
-  image.title = 'Click to toggle actual size';
+  image.title = tr('modules.common.click_to_toggle_actual_size');
   image.addEventListener('click', toggle); zoom.addEventListener('click', toggle);
   viewer.querySelector('.image-stage')!.append(image);
   return () => {};

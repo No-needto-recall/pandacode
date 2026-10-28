@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import { call } from './bridge';
 import { icon } from './dom';
 
@@ -69,9 +70,9 @@ export class ProjectRunner {
       catch (error) { if (current()) this.options.notify(String(error)); return; }
       if (!current()) return;
       if (url) { try { await this.options.navigate(url, context); } catch (error) { if (current()) this.options.notify(String(error)); } return; }
-      if (exited()) { this.options.notify('The script exited before its preview was available. Check the Run terminal.'); return; }
+      if (exited()) { this.options.notify(tr('modules.common.the_script_exited_before_its_preview_was_available_check_the_run_terminal')); return; }
       await new Promise(resolve => setTimeout(resolve, Math.min(250 + attempt * 100, 1000)));
     }
-    if (current()) this.options.notify('The script is running. Preview is not ready yet; click Run to check again.');
+    if (current()) this.options.notify(tr('modules.common.the_script_is_running_preview_is_not_ready_yet_click_run_to'));
   }
 }

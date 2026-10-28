@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import './attachments.css';
 import { call, chooseAttachmentFolder, chooseAttachments, preview } from './bridge';
 import { escape, icon } from './dom';
@@ -39,12 +40,16 @@ function id(): string { return crypto.randomUUID(); }
 function baseName(path: string): string { return path.replace(/[\\/]+$/, '').split(/[\\/]/).pop() || path; }
 /** A path the agent can open itself, quoted when it holds spaces. */
 export function quotePath(path: string): string { return /\s/.test(path) ? `"${path.replace(/"/g, '\\"')}"` : path; }
-const alreadyAttached = (error: unknown) => String(error instanceof Error ? error.message : error).includes('is already attached');
+/** Classify duplicates by identity, not the translated presentation text. Native errors are checked before presentation. */
+class DuplicateAttachmentError extends Error {
+  constructor(name: string) { super(tr('modules.attachments.duplicate', { name })); }
+}
+const alreadyAttached = (error: unknown) => error instanceof DuplicateAttachmentError || String(error instanceof Error ? error.message : error).includes('is already attached');
 function formatSize(bytes: number): string { return bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1048576).toFixed(1)} MB`; }
 function documentLabel(document: PromptDocument): string {
   const ext = document.name.split('.').pop()?.toUpperCase();
   const type = ext && ext !== document.name.toUpperCase() && ext.length <= 8 ? ext : 'Text';
-  return `${type} · ${formatSize(document.size)}${document.truncated ? ' · first 32 KB' : ''}`;
+  return `${type} · ${formatSize(document.size)}${document.truncated ? tr('modules.attachments.truncated') : ''}`;
 }
 
 export function mountPromptAttachments(host: AttachmentsHost) {
@@ -58,14 +63,14 @@ export function mountPromptAttachments(host: AttachmentsHost) {
     if (attachment.kind === 'image') {
       const unsupported = host.imagesUnsupported?.(taskId);
       if (unsupported) throw new Error(unsupported);
-      if (attachment.path && current.some(a => a.kind === 'image' && a.path === attachment.path)) throw new Error(`${attachment.name} is already attached.`);
-      if (current.filter(a => a.kind === 'image').length + host.otherImages(taskId) >= MAX_IMAGES) throw new Error(`Attach up to ${MAX_IMAGES} images per message, including browser screenshots.`);
+      if (attachment.path && current.some(a => a.kind === 'image' && a.path === attachment.path)) throw new DuplicateAttachmentError(attachment.name);
+      if (current.filter(a => a.kind === 'image').length + host.otherImages(taskId) >= MAX_IMAGES) throw new Error(tr('modules.attachments.imageLimit', { count: MAX_IMAGES }));
     } else if (attachment.kind === 'document') {
-      if (current.some(a => a.kind === 'document' && a.path === attachment.path)) throw new Error(`${attachment.name} is already attached.`);
-      if (current.filter(a => a.kind === 'document').length >= MAX_DOCUMENTS) throw new Error(`Attach up to ${MAX_DOCUMENTS} documents per message.`);
+      if (current.some(a => a.kind === 'document' && a.path === attachment.path)) throw new DuplicateAttachmentError(attachment.name);
+      if (current.filter(a => a.kind === 'document').length >= MAX_DOCUMENTS) throw new Error(tr('modules.attachments.documentLimit', { count: MAX_DOCUMENTS }));
     } else {
-      if (current.some(a => a.kind === 'folder' && a.path === attachment.path)) throw new Error(`${attachment.name} is already attached.`);
-      if (current.filter(a => a.kind === 'folder').length >= MAX_FOLDERS) throw new Error(`Attach up to ${MAX_FOLDERS} folders per message.`);
+      if (current.some(a => a.kind === 'folder' && a.path === attachment.path)) throw new DuplicateAttachmentError(attachment.name);
+      if (current.filter(a => a.kind === 'folder').length >= MAX_FOLDERS) throw new Error(tr('modules.attachments.folderLimit', { count: MAX_FOLDERS }));
     }
     set(taskId, [...current, attachment]);
     host.rerender(taskId);
@@ -73,7 +78,7 @@ export function mountPromptAttachments(host: AttachmentsHost) {
 
   function target(): string {
     const taskId = host.taskId();
-    const reason = taskId ? host.blocked(taskId) : 'Start a task before attaching anything.';
+    const reason = taskId ? host.blocked(taskId) : tr('modules.attachments.startTask');
     if (reason) throw new Error(reason);
     return taskId;
   }
@@ -82,7 +87,7 @@ export function mountPromptAttachments(host: AttachmentsHost) {
     // Refuse what cannot be sent before the native import writes a copy.
     const unsupported = host.imagesUnsupported?.(taskId);
     if (unsupported) throw new Error(unsupported);
-    if (source.path && list(taskId).some(a => a.kind === 'image' && a.path === source.path)) throw new Error(`${baseName(source.path)} is already attached.`);
+    if (source.path && list(taskId).some(a => a.kind === 'image' && a.path === source.path)) throw new DuplicateAttachmentError(baseName(source.path));
     const imported = await call<{ id: string; name: string; width: number; height: number; thumbnail: string }>('import_prompt_image', { path: source.path, dataUrl: source.dataUrl, name: source.name });
     const reason = host.blocked(taskId); if (reason) throw new Error(reason);
     const image: PromptImage = { kind: 'image', ...imported, source: source.origin, path: source.path, sketchId: source.sketchId };
@@ -108,7 +113,7 @@ export function mountPromptAttachments(host: AttachmentsHost) {
    * agent can still open them. Returns false when there was no prompt to take them. */
   function insertInstead(lines: string[], what: string): boolean {
     if (!lines.length || !host.insertText(lines.join('\n'))) return false;
-    host.notify(lines.length === 1 ? `Inserted ${what} for ${what === 'path' ? baseName(lines[0].replace(/^"|"$/g, '')) : lines[0].split(' (')[0]}` : `Inserted ${what}s for ${lines.length} files`);
+    host.notify(lines.length === 1 ? (what === 'path' ? tr('modules.attachments.insertPath', { name: baseName(lines[0].replace(/^"|"$/g, '')) }) : tr('modules.attachments.insertName', { name: lines[0].split(' (')[0] })) : (what === 'path' ? tr('modules.attachments.insertPaths', { count: lines.length }) : tr('modules.attachments.insertNames', { count: lines.length })));
     return true;
   }
 
@@ -129,7 +134,7 @@ export function mountPromptAttachments(host: AttachmentsHost) {
         attached++;
       } catch (error) { if (dropped && !alreadyAttached(error)) failed.push({ path, error }); else host.report(error); }
     }
-    if (attached) host.notify(attached === 1 ? `Attached ${baseName(paths[0])}` : `Attached ${attached} items`);
+    if (attached) host.notify(attached === 1 ? tr('modules.attachments.attachedName', { name: baseName(paths[0]) }) : tr('modules.attachments.attachedItems', { count: attached }));
     if (!insertInstead(failed.map(item => quotePath(item.path)), 'path')) failed.forEach(item => host.report(item.error));
   }
 
@@ -141,12 +146,12 @@ export function mountPromptAttachments(host: AttachmentsHost) {
     for (const file of files) {
       try {
         if (file.type.startsWith('image/') || IMAGE_EXTENSIONS.test(file.name)) {
-          const dataUrl = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onerror = () => reject(new Error('Could not read the image.')); reader.onload = () => resolve(String(reader.result)); reader.readAsDataURL(file); });
+          const dataUrl = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onerror = () => reject(new Error(tr('modules.attachments.readFailed'))); reader.onload = () => resolve(String(reader.result)); reader.readAsDataURL(file); });
           await addImage(taskId, { dataUrl, name: file.name || (origin === 'paste' ? 'Pasted image.png' : 'Image.png'), origin });
         } else {
           // Browser File objects carry no path, so only text can be read here.
           const text = (await file.text()).slice(0, MAX_INLINE_TEXT + 1);
-          if (!text.trim() || text.includes('\0')) throw new Error(`${file.name} is not a text document. Attach it with the picker instead.`);
+          if (!text.trim() || text.includes('\0')) throw new Error(tr('modules.attachments.notText', { name: file.name }));
           add(taskId, { kind: 'document', id: id(), path: file.name, name: file.name, size: file.size, text: text.slice(0, MAX_INLINE_TEXT), truncated: text.length > MAX_INLINE_TEXT, method: 'text' });
         }
         attached++;
@@ -155,20 +160,20 @@ export function mountPromptAttachments(host: AttachmentsHost) {
     // A browser File carries no path, so the name goes in with a note instead.
     if (!insertInstead(failed.map(item => `${item.file.name} (dropped file; PandaCode could not read it or find its path)`), 'name')) failed.forEach(item => host.report(item.error));
     // A paste shows up in the composer right away; no toast needed.
-    if (attached && origin !== 'paste') host.notify(attached === 1 ? `Attached ${files[0].name}` : `Attached ${attached} items`);
+    if (attached && origin !== 'paste') host.notify(attached === 1 ? tr('modules.attachments.attachedName', { name: files[0].name }) : tr('modules.attachments.attachedItems', { count: attached }));
   }
 
   async function openMenu(anchor: HTMLElement): Promise<void> {
     const taskId = host.taskId();
-    const reason = taskId ? host.blocked(taskId) : 'Start a task before attaching anything.';
+    const reason = taskId ? host.blocked(taskId) : tr('modules.attachments.startTask');
     if (reason) { host.notify(reason); return; }
     // A harness without image input gets documents and folders only.
     const imageless = Boolean(host.imagesUnsupported?.(taskId));
     await host.menu(anchor, [
-      { id: 'files', label: 'Attach files…', description: imageless ? 'PDFs, documents' : 'Images, PDFs, documents', icon: 'attach' },
-      { id: 'folder', label: 'Attach a folder…', description: 'Path and structure', icon: 'folder' },
-      { id: 'project', label: 'Project files', description: 'From the Files tab', icon: 'file' },
-      ...imageless ? [] : [{ id: 'sketch', label: 'Sketch a mockup…', description: 'Draw and attach', icon: 'sketch' }],
+      { id: 'files', label: tr('modules.common.attach_files'), description: imageless ? tr('modules.common.pdfs_documents') : tr('modules.common.images_pdfs_documents'), icon: 'attach' },
+      { id: 'folder', label: tr('modules.common.attach_a_folder'), description: tr('modules.common.path_and_structure'), icon: 'folder' },
+      { id: 'project', label: tr('modules.common.project_files'), description: tr('modules.common.from_the_files_tab'), icon: 'file' },
+      ...imageless ? [] : [{ id: 'sketch', label: tr('modules.common.sketch_a_mockup'), description: tr('modules.common.draw_and_attach'), icon: 'sketch' }],
     ], async choice => {
       if (choice === 'project') { host.projectFiles(); return; }
       if (choice === 'sketch') { host.sketch(taskId); return; }
@@ -180,13 +185,13 @@ export function mountPromptAttachments(host: AttachmentsHost) {
 
   function chips(taskId: string): string {
     return list(taskId).map(item => {
-      const remove = `<button type="button" data-action="detach-prompt" data-id="${escape(item.id)}" aria-label="Remove ${escape(item.name)}">${icon('close')}</button>`;
+      const remove = `<button type="button" data-action="detach-prompt" data-id="${escape(item.id)}" aria-label="${escape(tr('modules.attachments.remove', { name: item.name }))}">${icon('close')}</button>`;
       if (item.kind === 'image') {
-        const edit = item.source === 'sketch' ? `<button type="button" class="prompt-chip-edit" data-action="edit-sketch" data-id="${escape(item.id)}" aria-label="Edit sketch ${escape(item.name)}">${icon('edit')}</button>` : '';
-        return `<span class="prompt-chip prompt-chip-image" data-attachment-id="${escape(item.id)}" data-source="${item.source}"><img src="${escape(item.thumbnail)}" alt="" width="36" height="36"><span class="prompt-chip-text"><span class="prompt-chip-name">${escape(item.name)}</span><small>${item.source === 'sketch' ? 'Mockup · ' : ''}${item.width} × ${item.height}</small></span>${edit}${remove}</span>`;
+        const edit = item.source === 'sketch' ? `<button type="button" class="prompt-chip-edit" data-action="edit-sketch" data-id="${escape(item.id)}" aria-label="${escape(tr('modules.attachments.editSketch', { name: item.name }))}">${icon('edit')}</button>` : '';
+        return `<span class="prompt-chip prompt-chip-image" data-attachment-id="${escape(item.id)}" data-source="${item.source}"><img src="${escape(item.thumbnail)}" alt="" width="36" height="36"><span class="prompt-chip-text"><span class="prompt-chip-name">${escape(item.name)}</span><small>${item.source === 'sketch' ? tr('modules.attachments.mockup') : ''}${item.width} × ${item.height}</small></span>${edit}${remove}</span>`;
       }
       if (item.kind === 'document') return `<span class="prompt-chip prompt-chip-document" data-attachment-id="${escape(item.id)}" title="${escape(item.path)}">${icon('file')}<span class="prompt-chip-text"><span class="prompt-chip-name">${escape(item.name)}</span><small>${escape(documentLabel(item))}</small></span>${remove}</span>`;
-      return `<span class="prompt-chip prompt-chip-folder" data-attachment-id="${escape(item.id)}" title="${escape(item.path)}">${icon('folder')}<span class="prompt-chip-text"><span class="prompt-chip-name">${escape(item.name)}/</span><small>${item.files} ${item.files === 1 ? 'file' : 'files'} · ${item.folders} ${item.folders === 1 ? 'folder' : 'folders'}${item.truncated ? ' · partial' : ''}</small></span>${remove}</span>`;
+      return `<span class="prompt-chip prompt-chip-folder" data-attachment-id="${escape(item.id)}" title="${escape(item.path)}">${icon('folder')}<span class="prompt-chip-text"><span class="prompt-chip-name">${escape(item.name)}/</span><small>${escape(tr('modules.attachments.folderStats', { files: item.files, folders: item.folders }))}${item.truncated ? escape(tr('modules.attachments.partial')) : ''}</small></span>${remove}</span>`;
     }).join('');
   }
 

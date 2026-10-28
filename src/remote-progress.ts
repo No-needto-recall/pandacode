@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { subscribe } from './bridge';
 import { escape, icon } from './dom';
 
@@ -43,8 +45,8 @@ export function remoteStartStrip(sessionId: string): string {
   const failed = start.stage === 'error', determinate = start.stage === 'downloading' && start.percent != null;
   const lead = failed ? icon('alert') : '<span class="support-spinner" aria-hidden="true"></span>';
   const step = failed ? '' : ` aria-description="Step ${STAGES.indexOf(start.stage) + 1} of ${STAGES.length - 1}"`;
-  const bar = determinate ? `<progress class="remote-start-bar" max="100" value="${Math.round(start.percent!)}" aria-label="Download progress"></progress>` : '';
-  const actions = failed ? `<button type="button" class="remote-start-retry" data-remote-start="retry">${icon('refresh')}<span>Retry</span></button><button type="button" class="remote-start-dismiss" data-remote-start="dismiss" aria-label="Dismiss" title="Dismiss">${icon('close')}</button>` : '';
+  const bar = determinate ? `<progress class="remote-start-bar" max="100" value="${Math.round(start.percent!)}" aria-label="${escapeI18n(tr('modules.common.download_progress'))}"></progress>` : '';
+  const actions = failed ? `<button type="button" class="remote-start-retry" data-remote-start="retry">${icon('refresh')}<span>${escapeI18n(tr('modules.common.retry'))}</span></button><button type="button" class="remote-start-dismiss" data-remote-start="dismiss" aria-label="${escapeI18n(tr('modules.common.dismiss'))}" title="${escapeI18n(tr('modules.common.dismiss'))}">${icon('close')}</button>` : '';
   return `<div class="remote-start-strip" data-stage="${start.stage}"><span class="remote-start-status" role="${failed ? 'alert' : 'status'}"${step}>${lead}<span class="remote-start-text"><span class="remote-start-device">${escape(start.device)}</span> · ${escape(startStageText(start))}</span></span>${bar}${actions}</div>`;
 }
 

@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { escape, icon } from './dom';
 import { showPopover, hidePopover } from './popover-motion';
 import type { TerminalActivity, TerminalContext, TerminalController } from './terminal';
@@ -92,8 +94,8 @@ export class TerminalPanel {
     const host = document.createElement('div'); host.className = 'terminal-tab-surface';
     const id = `terminal-tab-${crypto.randomUUID()}`;
     host.id = id; host.setAttribute('role', 'tabpanel'); host.setAttribute('aria-labelledby', `${id}-label`);
-    host.textContent = 'Starting terminal…'; this.host.append(host);
-    const tab: Tab = { id, title: runScript ? 'Run' : harness ? `${harness.provider} console` : `Terminal ${++group.sequence}`, label: this.label,
+    host.textContent = tr('modules.common.starting_terminal'); this.host.append(host);
+    const tab: Tab = { id, title: runScript ? tr('modules.common.run') : harness ? `${harness.provider} console` : `Terminal ${++group.sequence}`, label: this.label,
       context: { ...this.context, ...(harness ? { harness } : {}), ...(runScript ? { runScript: true, runRequestId: requestId } : {}) }, host, removed: false, ready: Promise.resolve() };
     group.tabs.push(tab); group.active = id; group.open = true; this.paint();
     const owner = group;
@@ -172,9 +174,9 @@ export class TerminalPanel {
 
 function closePopover(anchor: HTMLElement, activity: TerminalActivity, choose: (choice: 'minimize' | 'close') => void): () => void {
   const panel = document.createElement('section'); panel.className = 'floating-menu terminal-close-popover';
-  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Close terminal?'); panel.tabIndex = -1;
+  panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', tr('modules.common.close_terminal')); panel.tabIndex = -1;
   const title = activity.uncertain ? 'Keep this terminal running?' : 'Processes are still running';
-  panel.innerHTML = `<strong>${title}</strong><p>Closing may stop ${activity.processNames.length ? escape(activity.processNames.slice(0, 3).join(', ')) : 'running processes'}. Minimize to keep them running.</p><div><button class="primary-button" data-choice="minimize">Minimize instead</button><button class="secondary-button" data-choice="close">Close terminal</button></div>`;
+  panel.innerHTML = `<strong>${title}</strong><p>Closing may stop ${activity.processNames.length ? escape(activity.processNames.slice(0, 3).join(', ')) : 'running processes'}. Minimize to keep them running.</p><div><button class="primary-button" data-choice="minimize">${escapeI18n(tr('modules.common.minimize_instead'))}</button><button class="secondary-button" data-choice="close">${escapeI18n(tr('modules.common.close_terminal_7d02fb'))}</button></div>`;
   let closed = false;
   const position = () => {
     if (!anchor.isConnected) { close(false); return; }

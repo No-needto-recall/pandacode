@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './sidebar-bots.css';
 import type { Bot } from './bots';
 import { escape, icon } from './dom';
@@ -95,19 +98,19 @@ export function botStatus(signals: BotSignals): BotStatus | undefined {
 export function messageTime(at: number, now = Date.now()): string {
   const date = new Date(at), today = new Date(now);
   const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  if (at >= startOfToday) return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  if (at >= startOfToday) return date.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' });
   if (at >= startOfToday - 86_400_000) return 'Yesterday';
-  if (at >= startOfToday - 6 * 86_400_000) return date.toLocaleDateString(undefined, { weekday: 'long' });
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  if (at >= startOfToday - 6 * 86_400_000) return date.toLocaleDateString(getLocale(), { weekday: 'long' });
+  return date.toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' });
 }
 
 export function botsBarHtml(view: SidebarView, count: number, unread: number): string {
   const open = view === 'bots';
-  return `<button type="button" class="sidebar-bots-bar" data-action="toggle-bots-view" aria-pressed="${open}" title="${open ? 'Back to tasks' : 'Show bots'}">${icon('bot')}<span>Bots</span>${unread ? `<span class="sidebar-bots-unread" aria-label="${unread} unread"></span>` : ''}<small>${count || ''}</small>${icon('chevron')}</button>`;
+  return `<button type="button" class="sidebar-bots-bar" data-action="toggle-bots-view" aria-pressed="${open}" title="${open ? 'Back to tasks' : 'Show bots'}">${icon('bot')}<span>${escapeI18n(tr('modules.common.bots'))}</span>${unread ? `<span class="sidebar-bots-unread" aria-label="${unread} unread"></span>` : ''}<small>${count || ''}</small>${icon('chevron')}</button>`;
 }
 
 export function botsPanelHeadHtml(): string {
-  return `<div class="bots-panel-head"><label class="bots-panel-search">${icon('search')}<input type="search" data-bots-search placeholder="Search" aria-label="Search bots and channels" autocomplete="off" spellcheck="false"></label><button type="button" class="bots-mark-read" data-action="mark-bots-read" hidden>Mark all read</button><button type="button" class="icon-button" data-action="new-bot-menu" aria-label="Add bot or channel" title="New bot or channel" aria-haspopup="menu" aria-expanded="false" aria-controls="bot-create-menu">${icon('plus')}</button><div id="bot-create-menu" class="bot-create-menu" role="menu" aria-label="Create" hidden><button type="button" role="menuitem" data-action="new-bot">${icon('bot')}New bot</button><button type="button" role="menuitem" data-action="new-channel">${icon('chat')}New channel</button></div></div><div class="bots-panel-list"></div><span class="sr-only" id="bots-reorder-live" aria-live="polite"></span>`;
+  return `<div class="bots-panel-head"><label class="bots-panel-search">${icon('search')}<input type="search" data-bots-search placeholder="${escapeI18n(tr('modules.common.search'))}" aria-label="${escapeI18n(tr('modules.common.search_bots_and_channels'))}" autocomplete="off" spellcheck="false"></label><button type="button" class="bots-mark-read" data-action="mark-bots-read" hidden>${escapeI18n(tr('modules.common.mark_all_read'))}</button><button type="button" class="icon-button" data-action="new-bot-menu" aria-label="${escapeI18n(tr('modules.common.add_bot_or_channel'))}" title="${escapeI18n(tr('modules.common.new_bot_or_channel'))}" aria-haspopup="menu" aria-expanded="false" aria-controls="bot-create-menu">${icon('plus')}</button><div id="bot-create-menu" class="bot-create-menu" role="menu" aria-label="${escapeI18n(tr('modules.common.create'))}" hidden><button type="button" role="menuitem" data-action="new-bot">${icon('bot')}New bot</button><button type="button" role="menuitem" data-action="new-channel">${icon('chat')}New channel</button></div></div><div class="bots-panel-list"></div><span class="sr-only" id="bots-reorder-live" aria-live="polite"></span>`;
 }
 
 const CLOCK = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
@@ -119,7 +122,7 @@ function statusLabel(status: BotStatus): string {
   switch (status.kind) {
     case 'waiting': return status.reason === 'question' ? 'Needs your answer' : 'Needs approval';
     case 'failed': return 'Last turn failed';
-    case 'limited': return `Usage limit · ${resetLabel(status.until)}`;
+    case 'limited': return tr('modules.dynamic.usageLimit', { reset: String(resetLabel(status.until)) });
     case 'working': return 'Working';
     case 'unread': return `${status.count} unread`;
     case 'responded': return 'Responded';
@@ -137,13 +140,13 @@ function badgeHtml(status: BotStatus | undefined): string {
 function metaHtml(bot: Bot, status: BotStatus | undefined): string {
   if (status?.kind === 'waiting') return `<span class="bot-chip waiting">${status.reason === 'question' ? 'Answer' : 'Review'}</span>`;
   // Only the time fits a narrow sidebar; the full label is the tooltip and the badge's name.
-  if (status?.kind === 'limited') return `<span class="bot-chip limited" title="${escape(`Usage limit · ${resetLabel(status.until)}`)}">${CLOCK}${escape(status.until ? resetLabel(status.until).replace(/^Resets /, '') : 'Limit')}</span>`;
+  if (status?.kind === 'limited') return `<span class="bot-chip limited" title="${escape(tr('modules.dynamic.usageLimit', { reset: String(resetLabel(status.until)) }))}">${CLOCK}${escape(status.until ? resetLabel(status.until).replace(/^Resets /, '') : 'Limit')}</span>`;
   return bot.lastMessage ? `<time>${escape(messageTime(bot.lastMessage.at))}</time>` : '';
 }
 
 function rowHtml(bot: Bot, context: BotsListContext, pinned: boolean, group: 'needs-you' | 'pinned' | 'bots' | 'hidden'): string {
   const selected = context.selectedProject === bot.projectId, status = botStatus(context.signals(bot)), message = bot.lastMessage;
-  const preview = bot.paused ? `Paused since ${new Date(bot.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+  const preview = bot.paused ? `Paused since ${new Date(bot.updatedAt).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' })}`
     : message ? `${message.role === 'user' ? 'You: ' : ''}${message.text}` : bot.role || 'No messages yet';
   // The tag only rides beside the name when no time or chip competes for the line.
   const meta = metaHtml(bot, status);
@@ -154,7 +157,7 @@ function rowHtml(bot: Bot, context: BotsListContext, pinned: boolean, group: 'ne
         <span class="bot-card-avatar">${botAvatarHtml(bot.avatar, bot.name, 'bot-card-face', bot.color)}${badgeHtml(status)}</span>
         <span class="bot-card-text"><span class="bot-card-head"><span class="bot-row-name">${escape(bot.name)}</span>${role}${meta}</span><span class="bot-card-preview">${escape(preview)}</span></span>
       </button>
-      <button type="button" class="icon-button bot-row-settings" data-action="bot-settings" data-bot="${escape(bot.id)}" aria-label="${escape(bot.name)} settings" title="Settings, memory, schedules and channels">${icon('settings')}</button>
+      <button type="button" class="icon-button bot-row-settings" data-action="bot-settings" data-bot="${escape(bot.id)}" aria-label="${escape(tr('modules.bots.namedSettings', { name: bot.name }))}" title="${escape(tr('modules.bots.sidebarSettings'))}">${icon('settings')}</button>
     </div>`;
 }
 
@@ -175,7 +178,7 @@ export function ordered(bots: Bot[]): Bot[] {
 
 export function botsListHtml(context: BotsListContext, query: string): string {
   const channels = context.channels ?? [];
-  if (!context.loaded) return `<div class="bots-skeleton" role="status" aria-label="Loading bots">${'<span class="bot-row-skeleton" aria-hidden="true"><i></i><span><i></i><i></i></span></span>'.repeat(SKELETON_ROWS)}</div>`;
+  if (!context.loaded) return `<div class="bots-skeleton" role="status" aria-label="${escapeI18n(tr('modules.common.loading_bots_aac694'))}">${'<span class="bot-row-skeleton" aria-hidden="true"><i></i><span><i></i><i></i></span></span>'.repeat(SKELETON_ROWS)}</div>`;
   const needle = query.trim().toLowerCase();
   const bots = ordered(context.bots.filter(bot => !needle || `${bot.name} ${bot.role} ${bot.lastMessage?.text ?? ''}`.toLowerCase().includes(needle)));
   const matchingChannels = channels.filter(channel => !needle || channel.name.toLowerCase().includes(needle));
@@ -191,13 +194,13 @@ export function botsListHtml(context: BotsListContext, query: string): string {
   const botGroups = (waiting.length ? groupHtml('Needs you', rows(waiting, 'needs-you'), true) : '')
     + (pinned.length ? groupHtml('Pinned', rows(pinned, 'pinned'), true) : '')
     + (rest.length ? groupHtml('Bots', rows(rest, 'bots'), labelled, 'Other bots') : '')
-    + (hidden.length ? `<div class="bots-group bots-hidden" role="group" aria-label="Hidden"><button type="button" class="bots-group-label bots-group-toggle" data-action="toggle-hidden-bots" aria-expanded="${hiddenOpen}">${icon('chevron')}<span>Hidden (${hidden.length})</span></button>${hiddenOpen ? `<div role="list">${rows(hidden, 'hidden')}</div>` : ''}</div>` : '');
+    + (hidden.length ? `<div class="bots-group bots-hidden" role="group" aria-label="${escapeI18n(tr('modules.common.hidden'))}"><button type="button" class="bots-group-label bots-group-toggle" data-action="toggle-hidden-bots" aria-expanded="${hiddenOpen}">${icon('chevron')}<span>Hidden (${hidden.length})</span></button>${hiddenOpen ? `<div role="list">${rows(hidden, 'hidden')}</div>` : ''}</div>` : '');
   const activeChannels = matchingChannels.filter(channel => !channel.archived);
   const deletedChannels = matchingChannels.filter(channel => channel.archived);
   const channelRows = (items: SharedChannelSummary[]) => items.map(channel => `<button type="button" class="channel-row${context.selectedChannel === channel.id ? ' selected' : ''}"${context.selectedChannel === channel.id ? ' aria-current="page"' : ''} data-action="open-shared-channel" data-channel="${escape(channel.id)}" aria-label="#${escape(channel.name)}">${channelFaceCluster(channel.memberIds, context.bots)}<span>#${escape(channel.name)}</span></button>`).join('');
-  const channelGroups = (activeChannels.length ? `<div class="bots-group bots-group-channels" role="group" aria-label="Channels"><h3 class="bots-group-label">Channels</h3><div role="list">${channelRows(activeChannels)}</div></div>` : '')
-    + (deletedChannels.length ? `<div class="bots-group bots-hidden" role="group" aria-label="Deleted channels"><h3 class="bots-group-label">Deleted channels</h3><div role="list">${channelRows(deletedChannels)}</div></div>` : '');
-  const empty = !bots.length && !channels.length ? `<div class="bots-panel-start"><p>No bots yet</p><button type="button" class="secondary-button" data-action="new-bot-menu">${icon('plus')}<span>Create your first bot or channel</span></button></div>` : '';
-  const noMatch = Boolean((context.bots.length || channels.length) && !bots.length && !matchingChannels.length) ? '<p class="bots-panel-empty">No bots or channels match.</p>' : '';
+  const channelGroups = (activeChannels.length ? `<div class="bots-group bots-group-channels" role="group" aria-label="${escapeI18n(tr('modules.common.channels'))}"><h3 class="bots-group-label">${escapeI18n(tr('modules.common.channels'))}</h3><div role="list">${channelRows(activeChannels)}</div></div>` : '')
+    + (deletedChannels.length ? `<div class="bots-group bots-hidden" role="group" aria-label="${escapeI18n(tr('modules.common.deleted_channels'))}"><h3 class="bots-group-label">${escapeI18n(tr('modules.common.deleted_channels'))}</h3><div role="list">${channelRows(deletedChannels)}</div></div>` : '');
+  const empty = !bots.length && !channels.length ? `<div class="bots-panel-start"><p>${escapeI18n(tr('modules.common.no_bots_yet_33534a'))}</p><button type="button" class="secondary-button" data-action="new-bot-menu">${icon('plus')}<span>${escapeI18n(tr('modules.common.create_your_first_bot_or_channel'))}</span></button></div>` : '';
+  const noMatch = Boolean((context.bots.length || channels.length) && !bots.length && !matchingChannels.length) ? `<p class="bots-panel-empty">${escapeI18n(tr('modules.common.no_bots_or_channels_match'))}</p>` : '';
   return `${empty}${botGroups}${channelGroups}${noMatch}`;
 }

@@ -1,6 +1,8 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 /* Settings → Agent teams → Model routing → Rank models: a tier list that Panda Router weighs most. */
 import './model-tiers.css';
-import { escape, icon } from './dom';
+import { escape, icon, morph } from './dom';
 import { openChoiceMenu } from './choice-menu';
 import { providerLogo } from './provider-logos';
 import { infoMark } from './tooltip';
@@ -21,20 +23,20 @@ export interface ModelTiersOptions {
 const TIERS: Tier[] = ['S', 'A', 'B', 'C', 'D'];
 /** Row order for arrow keys; `null` is the Unranked tray. */
 const ROWS: (Tier | null)[] = [...TIERS, null];
-const HELP = 'Your tiers weigh most in Panda Router\'s picks: a ranked model\'s chance of success is 70% its tier and 30% the router\'s own rating, so a higher tier is usually tried first. Unranked models keep the router\'s own rating.';
-const UNRATED = 'Panda Router has no rating for this model. Ranking it lets the router use it.';
+const HELP = () => tr('modules.tiers.help');
+const UNRATED = () => tr('modules.tiers.unrated');
 /** Pointer travel before a press becomes a drag. */
 const DRAG_SLOP = 4;
-const rowName = (tier: Tier | null) => tier ? `tier ${tier}` : 'Unranked';
+const rowName = (tier: Tier | null) => tier ? tr('modules.tiers.row', { tier }) : tr('modules.common.unranked');
 
 export function modelTiersHtml(): string {
-  return `<div class="settings-group model-tiers" role="group" aria-label="Rank models" aria-busy="true" tabindex="-1">
-    <div class="setting-row"><div><strong>Rank models ${infoMark(HELP, 'About ranking models')}</strong></div>
-      <div class="tier-reset-area"><button type="button" class="secondary-button tier-reset" disabled>Reset</button>
-        <span class="tier-reset-confirm" hidden><span>Clear all tiers?</span><button type="button" class="secondary-button tier-reset-yes">Clear tiers</button><button type="button" class="secondary-button tier-reset-no">Cancel</button></span></div></div>
+  return `<div class="settings-group model-tiers" role="group" aria-label="${escapeI18n(tr('modules.common.rank_models'))}" aria-busy="true" tabindex="-1">
+    <div class="setting-row"><div><strong>${escape(tr('modules.common.rank_models'))} ${infoMark(HELP(), tr('modules.common.about_ranking_models'))}</strong></div>
+      <div class="tier-reset-area"><button type="button" class="secondary-button tier-reset" disabled>${escapeI18n(tr('modules.common.reset'))}</button>
+        <span class="tier-reset-confirm" hidden><span>${escapeI18n(tr('modules.common.clear_all_tiers'))}</span><button type="button" class="secondary-button tier-reset-yes">${escapeI18n(tr('modules.common.clear_tiers'))}</button><button type="button" class="secondary-button tier-reset-no">${escapeI18n(tr('modules.common.cancel'))}</button></span></div></div>
     <div class="tier-list">${ROWS.map(tier => tier
-      ? `<div class="tier-row" data-tier="${tier}"><div class="tier-label" aria-hidden="true">${tier}</div><div class="tier-body" role="group" aria-label="Tier ${tier}"></div></div>`
-      : `<div class="tier-row tier-unranked" data-tier=""><div class="tier-tray-title" aria-hidden="true">Unranked</div><div class="tier-body" role="group" aria-label="Unranked"><p class="tier-empty">Loading…</p></div></div>`).join('')}</div>
+      ? `<div class="tier-row" data-tier="${tier}"><div class="tier-label" aria-hidden="true">${tier}</div><div class="tier-body" role="group" aria-label="${escape(tr('finish.panels.tierName', { tier }))}"></div></div>`
+      : `<div class="tier-row tier-unranked" data-tier=""><div class="tier-tray-title" aria-hidden="true">${escapeI18n(tr('modules.common.unranked'))}</div><div class="tier-body" role="group" aria-label="${escapeI18n(tr('modules.common.unranked'))}"><p class="tier-empty">${escapeI18n(tr('modules.common.loading'))}</p></div></div>`).join('')}</div>
     <p class="sr-only tier-live" aria-live="polite"></p>
   </div>`;
 }
@@ -59,12 +61,12 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
   const nameOf = (key: string) => models.find(m => m.key === key)?.name ?? key;
   const announce = (text: string) => { live.textContent = text; };
   const chip = (m: TierModel) => {
-    const tier = placeOf(m.key), unrated = m.rated ? '' : ', unrated';
+    const tier = placeOf(m.key);
     return `<span class="tier-chip-wrap" data-key="${escape(m.key)}"${held?.key === m.key ? ' data-held' : ''}>`
-      + `<button type="button" class="tier-chip" data-key="${escape(m.key)}" aria-pressed="${held?.key === m.key}" aria-label="${escape(m.name)}, ${rowName(tier)}${unrated}"${loaded ? '' : ' disabled'}>`
+      + `<button type="button" class="tier-chip" data-key="${escape(m.key)}" aria-pressed="${held?.key === m.key}" aria-label="${escape(tr(m.rated ? 'finish.panels.rankedModel' : 'finish.panels.unratedModel', { name: m.name, tier: rowName(tier) }))}"${loaded ? '' : ' disabled'}>`
       + `<span class="tier-logos">${m.providers.map(p => providerLogo(p, 'tier-logo')).join('')}</span><span class="tier-name">${escape(m.name)}</span>`
-      + (m.rated ? '' : `<span class="tier-unrated" data-tip="${escape(UNRATED)}" aria-hidden="true"></span>`) + '</button>'
-      + `<button type="button" class="tier-chip-menu" data-key="${escape(m.key)}" aria-haspopup="menu" aria-label="Move ${escape(m.name)} to…"${loaded ? '' : ' disabled'}>${icon('more')}</button></span>`;
+      + (m.rated ? '' : `<span class="tier-unrated" data-tip="${escape(UNRATED())}" aria-hidden="true"></span>`) + '</button>'
+      + `<button type="button" class="tier-chip-menu" data-key="${escape(m.key)}" aria-haspopup="menu" aria-label="${escape(tr('finish.panels.moveModel', { name: m.name }))}"${loaded ? '' : ' disabled'}>${icon('more')}</button></span>`;
   };
   const render = () => {
     if (dragging) { renderLater = true; return; }
@@ -74,9 +76,10 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
     reset.disabled = !loaded || Object.keys(shown).length === 0;
     list.querySelectorAll<HTMLElement>('.tier-row').forEach(row => {
       const tier = (row.dataset.tier || null) as Tier | null;
+      row.querySelector('.tier-body')!.setAttribute('aria-label', tier ? tr('finish.panels.tierName', { tier }) : tr('modules.common.unranked'));
       const chips = models.filter(m => placeOf(m.key) === tier).map(chip).join('');
-      const error = tier || !loadError ? '' : `<p class="tier-empty tier-error" role="alert">Models could not load: ${escape(loadError)} <button type="button" class="secondary-button tier-retry">Retry</button></p>`;
-      row.querySelector('.tier-body')!.innerHTML = error + (chips || (tier || loadError ? '' : `<p class="tier-empty">${loaded ? 'Every model is ranked.' : 'Loading…'}</p>`));
+      const error = tier || !loadError ? '' : `<p class="tier-empty tier-error" role="alert">${escape(tr('finish.panels.modelsLoadError', { error: loadError }))} <button type="button" class="secondary-button tier-retry">${escapeI18n(tr('modules.common.retry'))}</button></p>`;
+      row.querySelector('.tier-body')!.innerHTML = error + (chips || (tier || loadError ? '' : `<p class="tier-empty">${escape(loaded ? tr('modules.tiers.allRanked') : tr('modules.common.loading'))}</p>`));
     });
     if (focusKey && focusClass) list.querySelector<HTMLElement>(`.${focusClass.split(' ')[0]}[data-key="${CSS.escape(focusKey)}"]`)?.focus();
   };
@@ -89,7 +92,7 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
       if (mine === version && !disposed) { shown = saved; render(); }
     } catch (cause) {
       if (disposed) return;
-      if (mine === version) { shown = saved; render(); announce('Your tiers could not be saved.'); }
+      if (mine === version) { shown = saved; render(); announce(tr('finish.panels.tiersSaveError')); }
       options.fail(cause);
     }
   };
@@ -103,7 +106,7 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
     if ((shown[key] ?? null) === tier) { render(); return; }
     const { [key]: _, ...rest } = shown;
     save(tier ? { ...rest, [key]: tier } : rest);
-    announce(`${nameOf(key)} moved to ${rowName(tier)}.`);
+    announce(tr('finish.panels.moved', { name: nameOf(key), tier: rowName(tier) }));
   };
   const focusChip = (key: string, part: 'tier-chip' | 'tier-chip-menu') => list.querySelector<HTMLElement>(`.${part}[data-key="${CSS.escape(key)}"]`)?.focus();
 
@@ -117,7 +120,7 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
       event.preventDefault();
       held = { key, from: shown[key] ?? null, at: shown[key] ?? null };
       render();
-      announce(`Picked up ${nameOf(key)} in ${rowName(held.from)}. Use the up and down arrows or S, A, B, C, D or U to move it, Enter to drop, Escape to cancel.`);
+      announce(tr('finish.panels.picked', { name: nameOf(key), tier: rowName(held.from) }));
       return;
     }
     const letter = event.key.length === 1 ? event.key.toUpperCase() : '';
@@ -126,7 +129,7 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
       event.preventDefault();
       held = { ...held, at: step ? ROWS[Math.min(ROWS.length - 1, Math.max(0, ROWS.indexOf(held.at) + step))] : letter === 'U' ? null : letter as Tier };
       render();
-      announce(`${nameOf(key)}: ${rowName(held.at)}.`);
+      announce(tr('finish.panels.position', { name: nameOf(key), tier: rowName(held.at) }));
     } else if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       const at = held.at; held = null; move(key, at);
@@ -134,7 +137,7 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
       // Keeps Settings open.
       event.preventDefault(); event.stopPropagation();
       const from = held.from; held = null; render();
-      announce(`${nameOf(key)} stays in ${rowName(from)}.`);
+      announce(tr('finish.panels.stays', { name: nameOf(key), tier: rowName(from) }));
     }
   });
   list.addEventListener('focusout', event => {
@@ -177,8 +180,8 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
     let moved: string | null = null;
     closeMenu?.();
     closeMenu = openChoiceMenu({
-      anchor: trigger, title: `Move ${nameOf(key)} to`,
-      items: ROWS.map(tier => ({ id: tier ?? 'U', label: tier ? `Tier ${tier}` : 'Unranked', selected: tier === current })),
+      anchor: trigger, title: tr('modules.dynamic.moveModel', { name: String(nameOf(key)) }),
+      items: ROWS.map(tier => ({ id: tier ?? 'U', label: tier ? tr('finish.panels.tierName', { tier }) : tr('modules.common.unranked'), selected: tier === current })),
       onSelect: id => { moved = key; move(key, id === 'U' ? null : id as Tier); },
       // The trigger was redrawn in the chip's new row; focus that copy.
       onClose: () => { closeMenu = null; if (moved) focusChip(moved, 'tier-chip-menu'); moved = null; },
@@ -190,7 +193,7 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
   confirm.querySelector('.tier-reset-no')!.addEventListener('click', () => { endReset(); reset.focus(); });
   // Reset is disabled now, so focus lands on the first chip, else the group.
   confirm.querySelector('.tier-reset-yes')!.addEventListener('click', () => {
-    save({}); announce('All tiers cleared.'); endReset();
+    save({}); announce(tr('finish.panels.tiersCleared')); endReset();
     (list.querySelector<HTMLElement>('.tier-chip') ?? group).focus();
   });
 
@@ -224,7 +227,14 @@ export function mountModelTiers(group: HTMLElement, options: ModelTiersOptions):
   const setHealth = (list: Unhealthy[]) => { paused = list; loadPool(); };
 
   render();
-  return { dispose: () => { disposed = true; closeMenu?.(); }, setExclusions, setHealth };
+  const disposeLocale = onLocaleChange(() => {
+    const next = document.createElement('div'); next.innerHTML = modelTiersHtml();
+    for (const selector of ['.setting-row strong', '.tier-reset', '.tier-reset-confirm > span', '.tier-reset-yes', '.tier-reset-no', '.tier-tray-title']) { const node = group.querySelector(selector), copy = next.querySelector(selector); if (node && copy) morph(node, copy.innerHTML, 20); }
+    group.setAttribute('aria-label', tr('modules.common.rank_models'));
+    group.querySelector('.tier-unranked .tier-body')!.setAttribute('aria-label', tr('modules.common.unranked'));
+    render();
+  });
+  return { dispose: () => { disposed = true; disposeLocale(); closeMenu?.(); }, setExclusions, setHealth };
 }
 
 /** Each installed harness's discovered models (its built-in list when discovery fails), as tier pool entries. */

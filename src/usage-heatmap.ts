@@ -1,14 +1,15 @@
+import { getLocale } from './i18n.ts';
 import './usage-heatmap.css';
 
 export interface DailyTokens { date: string; tokens: number; }
 interface Day { date: Date; key: string; tokens: number; level: number; }
 
 const MIN_WEEKS = 20, MAX_WEEKS = 53, LEVELS = 4, DAY_MS = 86_400_000;
-const count = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
-const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
-const dayLabel = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-const monthLabel = new Intl.DateTimeFormat(undefined, { month: 'short' });
-const weekdayLabel = new Intl.DateTimeFormat(undefined, { weekday: 'short' });
+const count = { format: (value: number) => new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 }).format(value) };
+const compact = { format: (value: number) => new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(value) };
+const dayLabel = { format: (value: number | Date) => new Intl.DateTimeFormat(getLocale(), { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(value) };
+const monthLabel = { format: (value: number | Date) => new Intl.DateTimeFormat(getLocale(), { month: 'short' }).format(value) };
+const weekdayLabel = { format: (value: number | Date) => new Intl.DateTimeFormat(getLocale(), { weekday: 'short' }).format(value) };
 let instances = 0;
 
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text = ''): HTMLElementTagNameMap[K] {

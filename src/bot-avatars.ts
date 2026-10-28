@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 /** Bot icons: panda faces on colored badges, or an image the user uploaded (stored as a
  *  small data: URL). Legacy bots keep their emoji or the first letter of their name.
  *  `panda:N` picks face N % FACES.length on color N; a bot's own color (`#rrggbb`) tints the badge. */
@@ -52,7 +54,7 @@ export function botAvatarHtml(avatar: string, name: string, cls = '', color = ''
 }
 
 function customSwatch(url: string, pressed: boolean): string {
-  return `<button type="button" class="avatar-swatch" data-avatar-choice="custom" aria-pressed="${pressed}" aria-label="Uploaded image"><img alt="" src="${url}"></button>`;
+  return `<button type="button" class="avatar-swatch" data-avatar-choice="custom" aria-pressed="${pressed}" aria-label="${escapeI18n(tr('modules.common.uploaded_image'))}"><img alt="" src="${url}"></button>`;
 }
 
 /** One face per kind, on the current color: picking a face never changes the color. */
@@ -60,15 +62,15 @@ export function avatarPicker(current: string, color = ''): string {
   const index = pandaIndex(current);
   const shown = (face: number) => index >= 0 && index % FACES.length === face ? current : `panda:${face}`;
   const swatches = FACES.map((face, i) => `<button type="button" class="avatar-swatch" data-avatar-choice="${shown(i)}" aria-pressed="${shown(i) === current}" aria-label="${face.name} panda">${pandaSvg(shown(i))}</button>`).join('');
-  return `<div class="avatar-picker" role="group" aria-label="Face" style="${COLOR.test(color) ? `--panda-bg:${color}` : ''}"><input type="hidden" name="avatar" value="${escape(current)}">${swatches}`
-    + `${IMAGE.test(current) ? customSwatch(current, true) : ''}<button type="button" class="avatar-upload" data-avatar-upload-button>Upload…</button>`
+  return `<div class="avatar-picker" role="group" aria-label="${escapeI18n(tr('modules.common.face'))}" style="${COLOR.test(color) ? `--panda-bg:${color}` : ''}"><input type="hidden" name="avatar" value="${escape(current)}">${swatches}`
+    + `${IMAGE.test(current) ? customSwatch(current, true) : ''}<button type="button" class="avatar-upload" data-avatar-upload-button>${escapeI18n(tr('modules.common.upload'))}</button>`
     + `<input type="file" hidden accept="${UPLOAD_TYPES.join(',')}" data-avatar-upload><span class="avatar-error" role="alert" hidden></span></div>`;
 }
 
 /** Automatic (the panda's own color) and each preset hue. */
 export function colorPicker(current: string): string {
   const swatch = (value: string, label: string, fill: string) => `<button type="button" class="color-swatch${value ? '' : ' auto'}" data-color-choice="${value}" aria-pressed="${value === current}" aria-label="${label}" title="${label}" style="${fill}"></button>`;
-  return `<div class="color-picker" role="group" aria-label="Color"><input type="hidden" name="color" value="${escape(COLOR.test(current) ? current : '')}">`
+  return `<div class="color-picker" role="group" aria-label="${escapeI18n(tr('modules.common.color'))}"><input type="hidden" name="color" value="${escape(COLOR.test(current) ? current : '')}">`
     + swatch('', 'Automatic', '') + PANDAS.map(p => swatch(p.color, p.name, `background:${p.color}`)).join('') + '</div>';
 }
 

@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /* One list of machines for the VM panel: local VMs from Tart and cloud sandboxes from
  * connected providers, with what each can do. Pure, so the panel only renders. */
 import type { Vm, VmStatus } from './vm-panel';
@@ -42,15 +43,15 @@ export function machines(status: VmStatus | undefined, cloud: CloudMachine[]): M
 
 /** Things the New menu can make: local images once Tart is set up, and cloud kinds per connected provider. */
 export function createOptions(status: VmStatus | undefined, connections: CloudConnection[]): CreateOption[] {
-  const local = status?.installed ? status.images.map(image => ({ id: `image:${image.id}`, label: image.name, description: `Local · ${image.downloadGb} GB download · ${memory(image.memoryMb)}`, cloud: false })) : [];
+  const local = status?.installed ? status.images.map(image => ({ id: `image:${image.id}`, label: image.name, description: tr('modules.dynamic.localMachine', { size: String(image.downloadGb), details: String(memory(image.memoryMb)) }), cloud: false })) : [];
   const on = (provider: CloudConnection['provider']) => connections.some(c => c.provider === provider && c.connected);
   const cloud: CreateOption[] = [
-    ...(on('daytona') ? [{ id: 'cloud:daytona', label: 'Daytona desktop', description: 'Linux with a screen · billed by Daytona', cloud: true }] : []),
-    ...(connections.some(c => c.provider === 'cloudflare' && c.connected && c.sandboxes) ? [{ id: 'cloud:cloudflare', label: 'Cloudflare container', description: 'Linux, commands only · your Cloudflare account', cloud: true }] : []),
+    ...(on('daytona') ? [{ id: 'cloud:daytona', label: tr('modules.common.daytona_desktop'), description: tr('modules.common.linux_with_a_screen_billed_by_daytona'), cloud: true }] : []),
+    ...(connections.some(c => c.provider === 'cloudflare' && c.connected && c.sandboxes) ? [{ id: 'cloud:cloudflare', label: tr('modules.common.cloudflare_container'), description: tr('modules.common.linux_commands_only_your_cloudflare_account'), cloud: true }] : []),
     ...(on('aws') ? [
-      { id: 'cloud:aws-linux', label: 'AWS Linux desktop', description: 'Ubuntu on EC2 · billed while running', cloud: true },
-      { id: 'cloud:aws-windows', label: 'AWS Windows desktop', description: 'Windows Server on EC2 · about 10 min to set up', cloud: true },
-      { id: 'cloud:agentcore', label: 'AWS AgentCore session', description: 'Commands only · ends after an hour', cloud: true },
+      { id: 'cloud:aws-linux', label: tr('modules.common.aws_linux_desktop'), description: tr('modules.common.ubuntu_on_ec2_billed_while_running'), cloud: true },
+      { id: 'cloud:aws-windows', label: tr('modules.common.aws_windows_desktop'), description: tr('modules.common.windows_server_on_ec2_about_10_min_to_set_up'), cloud: true },
+      { id: 'cloud:agentcore', label: tr('modules.common.aws_agentcore_session'), description: tr('modules.common.commands_only_ends_after_an_hour'), cloud: true },
     ] : []),
   ];
   return [...local, ...cloud];

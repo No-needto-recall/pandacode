@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 import './capabilities-panel.css';
 import { preview } from './bridge';
 import { escape, icon } from './dom';
@@ -15,18 +18,18 @@ export type CacheAlignment = {
 };
 export type CapabilityCall = <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
 
-const tokenCount = (value: number | null) => value == null ? '—' : new Intl.NumberFormat().format(value);
+const tokenCount = (value: number | null) => value == null ? '—' : new Intl.NumberFormat(getLocale()).format(value);
 const deliveryLabel = (value: string) => value === 'cachedSystemPrompt'
-  ? 'Cached system prompt'
+  ? tr('modules.capabilities.cachedPrompt')
   : value === 'messageInjection'
-    ? 'Message injection'
+    ? tr('modules.capabilities.injection')
     : value;
 
 function inventoryTable(data: CapabilityInventory | null, loading: boolean, failed: boolean): string {
-  if (loading) return '<p class="capabilities-table-status" role="status">Reading local harness metadata…</p>';
-  if (failed) return '<p class="capabilities-table-status" role="alert">Could not read the capability inventory. Try refreshing.</p>';
-  if (!data?.harnesses.length) return '<p class="capabilities-table-status">No installed harnesses were found.</p>';
-  if (!data.matrix.length) return '<p class="capabilities-table-status">No commands, integrations, hooks, plugins, or skills were discovered.</p>';
+  if (loading) return `<p class="capabilities-table-status" role="status">${escapeI18n(tr('modules.common.reading_local_harness_metadata'))}</p>`;
+  if (failed) return `<p class="capabilities-table-status" role="alert">${escapeI18n(tr('modules.common.could_not_read_the_capability_inventory_try_refreshing'))}</p>`;
+  if (!data?.harnesses.length) return `<p class="capabilities-table-status">${escapeI18n(tr('modules.common.no_installed_harnesses_were_found'))}</p>`;
+  if (!data.matrix.length) return `<p class="capabilities-table-status">${escapeI18n(tr('modules.common.no_commands_integrations_hooks_plugins_or_skills_were_discovered'))}</p>`;
 
   const entryByKey = new Map(data.entries.map(entry => [entry.harness + '\u0000' + entry.kind + '\u0000' + entry.name, entry]));
   const headings = data.harnesses.map(harness => `<th scope="col">${escape(harness.name)}</th>`).join('');
@@ -35,35 +38,35 @@ function inventoryTable(data: CapabilityInventory | null, loading: boolean, fail
       const entry = entryByKey.get(cell.harness + '\u0000' + row.kind + '\u0000' + row.name);
       const command = entry?.command ? `<small class="capabilities-command">${escape(entry.command)}</small>` : '';
       const source = entry ? `<small class="capabilities-source">${escape(entry.source)}</small>` : '';
-      const label = cell.state === 'native' ? 'Native' : cell.state === 'discovered' ? 'Discovered' : 'Missing';
+      const label = cell.state === 'native' ? tr('modules.capabilities.native') : cell.state === 'discovered' ? tr('modules.capabilities.discovered') : tr('modules.capabilities.missing');
       return `<td><span class="capabilities-state" data-state="${escape(cell.state)}">${label}</span>${command}${source}</td>`;
     }).join('');
     return `<tr><th scope="row"><span>${escape(row.name)}</span><small>${escape(row.kind)}</small></th>${states}</tr>`;
   }).join('');
-  return `<div class="capabilities-table-scroll"><table class="capabilities-table" aria-label="Capability alignment">
-    <thead><tr><th scope="col">Capability</th>${headings}</tr></thead><tbody>${rows}</tbody>
+  return `<div class="capabilities-table-scroll"><table class="capabilities-table" aria-label="${escapeI18n(tr('modules.common.capability_alignment'))}">
+    <thead><tr><th scope="col">${escapeI18n(tr('modules.common.capability'))}</th>${headings}</tr></thead><tbody>${rows}</tbody>
   </table></div>${data.warnings.length ? `<p class="capabilities-table-status" role="status">${escape(data.warnings.join(' '))}</p>` : ''}`;
 }
 
 function cacheTable(data: CacheAlignment | null, loading: boolean, failed: boolean): string {
-  if (loading) return '<p class="capabilities-table-status" role="status">Reading cache alignment…</p>';
-  if (failed) return '<p class="capabilities-table-status" role="alert">Could not read cache alignment. Try refreshing.</p>';
-  if (!data?.harnesses.length) return '<p class="capabilities-table-status">No installed harnesses were found.</p>';
+  if (loading) return `<p class="capabilities-table-status" role="status">${escapeI18n(tr('modules.common.reading_cache_alignment'))}</p>`;
+  if (failed) return `<p class="capabilities-table-status" role="alert">${escapeI18n(tr('modules.common.could_not_read_cache_alignment_try_refreshing'))}</p>`;
+  if (!data?.harnesses.length) return `<p class="capabilities-table-status">${escapeI18n(tr('modules.common.no_installed_harnesses_were_found'))}</p>`;
   const rows = data.harnesses.map(harness => {
     const observed = harness.cacheTokens === 'observed';
-    const stateLabel = harness.state === 'supported' ? 'Supported' : harness.state === 'partial' ? 'Partial' : harness.state;
-    const read = observed ? tokenCount(harness.cacheReadTokens) : 'Not exposed';
-    const created = observed ? tokenCount(harness.cacheCreationTokens) : 'Not exposed';
+    const stateLabel = harness.state === 'supported' ? tr('modules.capabilities.supported') : harness.state === 'partial' ? tr('modules.capabilities.partial') : harness.state;
+    const read = observed ? tokenCount(harness.cacheReadTokens) : tr('modules.capabilities.notExposed');
+    const created = observed ? tokenCount(harness.cacheCreationTokens) : tr('modules.capabilities.notExposed');
     return `<tr>
       <th scope="row">${escape(harness.name)}</th>
       <td>${escape(deliveryLabel(harness.instructionDelivery))}</td>
       <td><span class="capabilities-state" data-state="${escape(harness.state)}">${escape(stateLabel)}</span></td>
-      <td><span class="capabilities-token-label" title="${escape(harness.cacheTokenSource)}">${observed ? 'Observed' : 'Not exposed'}</span><span class="capabilities-token-value">${escape(read)}</span></td>
-      <td><span class="capabilities-token-label" title="${escape(harness.cacheTokenSource)}">${observed ? 'Observed' : 'Not exposed'}</span><span class="capabilities-token-value">${escape(created)}</span></td>
+      <td><span class="capabilities-token-label" title="${escape(harness.cacheTokenSource)}">${observed ? tr('modules.capabilities.observed') : tr('modules.capabilities.notExposed')}</span><span class="capabilities-token-value">${escape(read)}</span></td>
+      <td><span class="capabilities-token-label" title="${escape(harness.cacheTokenSource)}">${observed ? tr('modules.capabilities.observed') : tr('modules.capabilities.notExposed')}</span><span class="capabilities-token-value">${escape(created)}</span></td>
     </tr>`;
   }).join('');
-  return `<div class="capabilities-table-scroll"><table class="capabilities-table capabilities-cache-table" aria-label="Cache alignment">
-    <thead><tr><th scope="col">Harness</th><th scope="col">Stable instructions</th><th scope="col">Alignment</th><th scope="col">Cache reads</th><th scope="col">Cache creation</th></tr></thead>
+  return `<div class="capabilities-table-scroll"><table class="capabilities-table capabilities-cache-table" aria-label="${escapeI18n(tr('modules.common.cache_alignment'))}">
+    <thead><tr><th scope="col">${escapeI18n(tr('modules.common.harness'))}</th><th scope="col">${escapeI18n(tr('modules.common.stable_instructions'))}</th><th scope="col">${escapeI18n(tr('modules.common.alignment'))}</th><th scope="col">${escapeI18n(tr('modules.common.cache_reads'))}</th><th scope="col">${escapeI18n(tr('modules.common.cache_creation'))}</th></tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
@@ -81,17 +84,17 @@ export function mount(host: HTMLElement, call: CapabilityCall, taskId?: string):
   const draw = () => {
     if (disposed) return;
     host.innerHTML = `<div class="settings-group capabilities-panel" aria-labelledby="capabilities-heading">
-      <div class="capabilities-panel-head"><div><strong id="capabilities-heading">Capability and cache alignment</strong><small>Read-only metadata from local harness configs and recorded usage.</small></div>
-        <button type="button" class="secondary-button capabilities-refresh" ${loading ? 'disabled' : ''}>${icon('refresh')}Refresh</button>
+      <div class="capabilities-panel-head"><div><strong id="capabilities-heading">${escapeI18n(tr('modules.common.capability_and_cache_alignment'))}</strong><small>${escapeI18n(tr('modules.common.read_only_metadata_from_local_harness_configs_and_recorded_usage'))}</small></div>
+        <button type="button" class="secondary-button capabilities-refresh" ${loading ? 'disabled' : ''}>${icon('refresh')}${escape(tr('modules.common.refresh'))}</button>
       </div>
       <section class="capabilities-section" aria-labelledby="capabilities-inventory-heading">
-        <h3 id="capabilities-inventory-heading">Capability inventory</h3>
+        <h3 id="capabilities-inventory-heading">${escapeI18n(tr('modules.common.capability_inventory'))}</h3>
         ${inventoryTable(inventory, loading && !inventory, inventoryFailed)}
       </section>
       <section class="capabilities-section" aria-labelledby="capabilities-cache-heading">
-        <h3 id="capabilities-cache-heading">Cache alignment</h3>
+        <h3 id="capabilities-cache-heading">${escapeI18n(tr('modules.common.cache_alignment'))}</h3>
         ${cacheTable(cache, loading && !cache, cacheFailed)}
-        <p class="capabilities-note">${preview ? 'Browser preview values are samples.' : 'Counts are observed from local usage records.'} No prompt text or cache key is shown.</p>
+        <p class="capabilities-note">${escape(preview ? tr('modules.capabilities.preview') : tr('modules.capabilities.observedCounts'))}</p>
       </section>
     </div>`;
   };
@@ -117,11 +120,12 @@ export function mount(host: HTMLElement, call: CapabilityCall, taskId?: string):
   const onClick = (event: MouseEvent) => {
     if ((event.target as Element | null)?.closest('.capabilities-refresh')) void refresh();
   };
+  const disposeLocale = onLocaleChange(draw);
   host.addEventListener('click', onClick);
   draw();
   void refresh();
   return () => {
-    disposed = true;
+    disposed = true; disposeLocale();
     request++;
     host.removeEventListener('click', onClick);
   };

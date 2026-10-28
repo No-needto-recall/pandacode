@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './ui-size.css';
 import { preview } from './bridge';
 import { commandKey } from './platform';
@@ -49,7 +51,7 @@ export function changeUiScale(direction: -1 | 1): void { setUiScale(scale + dire
 
 export function uiSizeControls(): string {
   const modifier = commandKey;
-  return `<div class="setting-row text-size-setting"><div><strong>Interface size</strong><small>${modifier} + / − to resize · ${modifier} 0 to reset</small></div><div class="text-size-controls" role="group" aria-label="Interface size"><button type="button" data-action="ui-size-decrease" aria-label="Decrease interface size" title="Decrease interface size (${modifier} −)" ${scale === minimum ? 'disabled' : ''}>A−</button><output data-ui-size-value aria-label="Current interface size" aria-live="polite">${Math.round(scale * 100)}%</output><button type="button" data-action="ui-size-increase" aria-label="Increase interface size" title="Increase interface size (${modifier} +)" ${scale === maximum ? 'disabled' : ''}>A+</button><button type="button" class="text-size-reset" data-action="ui-size-reset" aria-label="Reset interface size" title="Reset interface size (${modifier} 0)">Reset</button></div></div>`;
+  return `<div class="setting-row text-size-setting"><div><strong>${escapeI18n(tr('modules.common.interface_size'))}</strong><small>${modifier} + / − to resize · ${modifier} 0 to reset</small></div><div class="text-size-controls" role="group" aria-label="${escapeI18n(tr('modules.common.interface_size'))}"><button type="button" data-action="ui-size-decrease" aria-label="${escapeI18n(tr('modules.common.decrease_interface_size'))}" title="Decrease interface size (${modifier} −)" ${scale === minimum ? 'disabled' : ''}>A−</button><output data-ui-size-value aria-label="${escapeI18n(tr('modules.common.current_interface_size'))}" aria-live="polite">${Math.round(scale * 100)}%</output><button type="button" data-action="ui-size-increase" aria-label="${escapeI18n(tr('modules.common.increase_interface_size'))}" title="Increase interface size (${modifier} +)" ${scale === maximum ? 'disabled' : ''}>A+</button><button type="button" class="text-size-reset" data-action="ui-size-reset" aria-label="${escapeI18n(tr('modules.common.reset_interface_size'))}" title="Reset interface size (${modifier} 0)">${escapeI18n(tr('modules.common.reset'))}</button></div></div>`;
 }
 
 export function initializeUiSizing(): () => void {

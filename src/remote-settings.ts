@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 /* Settings → Remote access: sign in with GitHub, allow this computer to be driven, and
  * manage the account's devices and what each may do (scoped pairing, remote/grants.rs).
  * Nothing reaches the network until the user signs in. */
@@ -7,14 +10,14 @@ import { infoMark } from './tooltip';
 import { APPROVE_SCOPES, SCOPE_HELP, SCOPE_LABELS, groupFingerprint, type DeviceGrant, type GrantScope, type PairCode } from './remote-pairing-prompt';
 import type { RemoteDevice, RemoteHost, RemoteSignIn, RemoteStatus } from './remote-types';
 
-const FULL_TIP = 'When off, your other computers cannot start or switch a task here to Full access (no approvals); a remote task without a mode starts in Ask.';
-const ALLOW_TIP = 'Remote prompts follow this computer’s approval settings; they get no more power than prompts typed here.';
-const NOTIFY_TIP = 'The relay sends the phone a push that says only how many tasks need attention; approving still happens in the app over the end-to-end encrypted channel.';
-const KEY_TIP = 'Another computer shows this key when it asks you to approve this one. Approve only if the keys match.';
-const CODE_TIP = 'A one-time code skips the approval prompt for one new device. It works once, for 10 minutes, and gives the access you pick. Enter it on the other computer under Pair with a code.';
-const PAIR_TIP = 'Enter the 6-digit code that the other computer shows under Pairing code. It gives this computer the access that computer chose.';
+const FULL_TIP = () => tr('modules.remote.full_tip');
+const ALLOW_TIP = () => tr('modules.remote.allow_tip');
+const NOTIFY_TIP = () => tr('modules.remote.notify_tip');
+const KEY_TIP = () => tr('modules.remote.key_tip');
+const CODE_TIP = () => tr('modules.remote.code_tip');
+const PAIR_TIP = () => tr('modules.remote.pair_tip');
 
-const scopeOptions = (selected: GrantScope, waiting: string) => [...(selected === 'pending' ? [{ id: 'pending', label: waiting }] : []), ...APPROVE_SCOPES, { id: 'blocked', label: 'Blocked' }]
+const scopeOptions = (selected: GrantScope, waiting: string) => [...(selected === 'pending' ? [{ id: 'pending', label: waiting }] : []), ...APPROVE_SCOPES, { id: 'blocked', label: tr('modules.common.blocked') }]
   .map(scope => `<option value="${scope.id}"${scope.id === selected ? ' selected' : ''}>${scope.label}</option>`).join('');
 const pickOptions = (selected: string) => APPROVE_SCOPES.map(scope => `<option value="${scope.id}"${scope.id === selected ? ' selected' : ''}>${scope.label}</option>`).join('');
 const groupCode = (code: string) => code.length > 3 ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
@@ -25,23 +28,23 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
   const picks: Record<string, string> = {};
   const message = (e: unknown) => e instanceof Error ? e.message : String(e);
   const fail = (e: unknown) => { error = message(e); render(); };
-  const failure = (title: string, detail: string) => `<div class="remote-load-error" role="alert">${icon('alert')}<span><strong>${escape(title)}</strong><small>${escape(detail)}</small></span><button type="button" class="secondary-button" data-retry>Retry</button></div>`;
+  const failure = (title: string, detail: string) => `<div class="remote-load-error" role="alert">${icon('alert')}<span><strong>${escape(title)}</strong><small>${escape(detail)}</small></span><button type="button" class="secondary-button" data-retry>${escapeI18n(tr('modules.common.retry'))}</button></div>`;
   const grantOf = (id: string) => grants.find(grant => grant.deviceId === id);
 
   function deviceRow(device: RemoteDevice): string {
     const grant = device.current ? undefined : grantOf(device.id);
     const waiting = grant?.scope === 'pending' && grant.requested;
-    const revoke = device.current ? '' : `<button type="button" class="secondary-button" data-revoke="${escape(device.id)}" aria-label="Revoke ${escape(device.name)}">Revoke</button>`;
+    const revoke = device.current ? '' : `<button type="button" class="secondary-button" data-revoke="${escape(device.id)}" aria-label="${escape(tr('modules.remote.revoke', { name: device.name }))}">${escapeI18n(tr('modules.common.revoke'))}</button>`;
     const access = !grant ? '' : waiting
-      ? `<select data-pick="${escape(device.id)}" aria-label="Approve ${escape(device.name)} as">${pickOptions(picks[device.id] ?? 'control')}</select><button type="button" class="primary-button" data-approve="${escape(device.id)}" aria-label="Approve ${escape(device.name)}">Approve</button><button type="button" class="secondary-button" data-block="${escape(device.id)}" aria-label="Block ${escape(device.name)}">Block</button>`
-      : `<select data-grant="${escape(device.id)}" aria-label="Access for ${escape(device.name)}">${scopeOptions(grant.scope, 'Not approved')}</select>`;
-    const detail = waiting ? `${escape(device.platform)} · asks for access · key <code>${escape(groupFingerprint(device.fingerprint))}</code>` : `${escape(device.platform)} · ${device.host ? 'remote control on' : 'remote control off'} · key <code>${escape(device.fingerprint)}</code>`;
-    return `<div class="setting-row remote-device${waiting ? ' remote-pending' : ''}" data-device="${escape(device.id)}"><div><strong><span class="remote-dot" data-online="${device.online}" role="img" aria-label="${device.online ? 'Online' : 'Offline'}"></span>${escape(device.name)}${device.current ? ' <span class="remote-badge">This computer</span>' : ''}</strong><small>${detail}</small></div><span class="remote-device-actions">${access}${revoke}</span></div>`;
+      ? `<select data-pick="${escape(device.id)}" aria-label="${escape(tr('modules.remote.approveAs', { name: device.name }))}">${pickOptions(picks[device.id] ?? 'control')}</select><button type="button" class="primary-button" data-approve="${escape(device.id)}" aria-label="${escape(tr('modules.remote.approve', { name: device.name }))}">${escapeI18n(tr('modules.common.approve'))}</button><button type="button" class="secondary-button" data-block="${escape(device.id)}" aria-label="${escape(tr('modules.remote.block', { name: device.name }))}">${escapeI18n(tr('modules.common.block'))}</button>`
+      : `<select data-grant="${escape(device.id)}" aria-label="${escape(tr('modules.remote.access', { name: device.name }))}">${scopeOptions(grant.scope, tr('modules.remote.notApproved'))}</select>`;
+    const detail = waiting ? escape(tr('modules.remote.pendingDevice', { platform: device.platform, key: groupFingerprint(device.fingerprint) })) : escape(device.host ? tr('modules.remote.deviceEnabled', { platform: device.platform, key: device.fingerprint }) : tr('modules.remote.deviceDisabled', { platform: device.platform, key: device.fingerprint }));
+    return `<div class="setting-row remote-device${waiting ? ' remote-pending' : ''}" data-device="${escape(device.id)}"><div><strong><span class="remote-dot" data-online="${device.online}" role="img" aria-label="${device.online ? tr('modules.remote.online') : tr('modules.remote.offline')}"></span>${escape(device.name)}${device.current ? ` <span class="remote-badge">${escapeI18n(tr('modules.common.this_computer'))}</span>` : ''}</strong><small>${detail}</small></div><span class="remote-device-actions">${access}${revoke}</span></div>`;
   }
   function deviceList(): string {
-    if (devicesError) return failure('Couldn’t load devices.', devicesError);
-    if (!devicesLoaded) return '<p class="dialog-loading" role="status">Loading devices…</p>';
-    if (!devices.length) return '<p class="remote-note">No devices yet.</p>';
+    if (devicesError) return failure(tr('modules.remote.devicesError'), devicesError);
+    if (!devicesLoaded) return `<p class="dialog-loading" role="status">${escapeI18n(tr('modules.common.loading_devices'))}</p>`;
+    if (!devices.length) return `<p class="remote-note">${escapeI18n(tr('modules.common.no_devices_yet'))}</p>`;
     const waiting = (device: RemoteDevice) => { const grant = grantOf(device.id); return !device.current && grant?.scope === 'pending' && grant.requested; };
     return [...devices.filter(waiting), ...devices.filter(device => !waiting(device))].map(deviceRow).join('');
   }
@@ -49,31 +52,31 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
   function pairRow(): string {
     const list = hosts();
     if (!pairTarget || !list.some(device => device.id === pairTarget)) pairTarget = list.find(device => device.online)?.id ?? list[0]?.id ?? '';
-    const select = `<select id="remote-pair-host" aria-label="Computer to pair with" ${list.length ? '' : 'disabled'}>${list.length ? list.map(device => `<option value="${escape(device.id)}"${device.id === pairTarget ? ' selected' : ''}>${escape(device.name)}</option>`).join('') : '<option>No computers with remote control on</option>'}</select>`;
-    return `<div class="setting-row"><div><strong>Pair with a code ${infoMark(PAIR_TIP, 'About pairing with a code')}</strong><small>Enter the code shown on the other computer.</small></div><span class="remote-device-actions">${select}<input type="text" id="remote-pair-input" class="remote-pair-input" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="000 000" aria-label="Pairing code from the other computer" value="${escape(groupCode(pairInput))}"><button type="button" class="secondary-button" data-pair ${pairing || !list.length ? 'disabled' : ''}>Pair</button></span></div>`;
+    const select = `<select id="remote-pair-host" aria-label="${escapeI18n(tr('modules.common.computer_to_pair_with'))}" ${list.length ? '' : 'disabled'}>${list.length ? list.map(device => `<option value="${escape(device.id)}"${device.id === pairTarget ? ' selected' : ''}>${escape(device.name)}</option>`).join('') : `<option>${escapeI18n(tr('modules.common.no_computers_with_remote_control_on'))}</option>`}</select>`;
+    return `<div class="setting-row"><div><strong>${escape(tr('modules.remote.pairCode'))} ${infoMark(PAIR_TIP(), tr('modules.common.about_pairing_with_a_code'))}</strong><small>${escapeI18n(tr('modules.common.enter_the_code_shown_on_the_other_computer'))}</small></div><span class="remote-device-actions">${select}<input type="text" id="remote-pair-input" class="remote-pair-input" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="000 000" aria-label="${escapeI18n(tr('modules.common.pairing_code_from_the_other_computer'))}" value="${escape(groupCode(pairInput))}"><button type="button" class="secondary-button" data-pair ${pairing || !list.length ? 'disabled' : ''}>${escapeI18n(tr('modules.common.pair'))}</button></span></div>`;
   }
   function codeRow(): string {
-    const shown = pairCode ? `<div class="remote-code"><div class="remote-code-row"><output class="remote-user-code" aria-label="Pairing code">${escape(groupCode(pairCode.code))}</output><button type="button" class="secondary-button" data-code-cancel>Cancel</button></div><p class="remote-note" role="status">Gives ${SCOPE_LABELS[pairCode.scope].toLowerCase()} once. Expires at ${new Date(pairCode.expiresAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.</p></div>` : '';
-    return `<div class="setting-row"><div><strong>Pairing code ${infoMark(CODE_TIP, 'About pairing codes')}</strong><small>Add a device without the approval prompt.</small></div><span class="remote-device-actions"><select id="remote-code-scope" aria-label="Access the pairing code gives">${pickOptions(codeScope)}</select><button type="button" class="secondary-button" data-code-new>Show pairing code</button></span></div>${shown}`;
+    const shown = pairCode ? `<div class="remote-code"><div class="remote-code-row"><output class="remote-user-code" aria-label="${escapeI18n(tr('modules.common.pairing_code'))}">${escape(groupCode(pairCode.code))}</output><button type="button" class="secondary-button" data-code-cancel>${escapeI18n(tr('modules.common.cancel'))}</button></div><p class="remote-note" role="status">${escape(tr('modules.remote.codeScope', { scope: SCOPE_LABELS[pairCode.scope].toLowerCase(), time: new Date(pairCode.expiresAt).toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' }) }))}</p></div>` : '';
+    return `<div class="setting-row"><div><strong>${escape(tr('modules.common.pairing_code'))} ${infoMark(CODE_TIP(), tr('modules.common.about_pairing_codes'))}</strong><small>${escapeI18n(tr('modules.common.add_a_device_without_the_approval_prompt'))}</small></div><span class="remote-device-actions"><select id="remote-code-scope" aria-label="${escapeI18n(tr('modules.common.access_the_pairing_code_gives'))}">${pickOptions(codeScope)}</select><button type="button" class="secondary-button" data-code-new>${escapeI18n(tr('modules.common.show_pairing_code'))}</button></span></div>${shown}`;
   }
   function body(): string {
     if (!status) {
-      if (statusError) return failure('Couldn’t load remote access.', statusError);
-      if (loading) return '<p class="dialog-loading" role="status">Loading…</p>';
+      if (statusError) return failure(tr('modules.remote.statusError'), statusError);
+      if (loading) return `<p class="dialog-loading" role="status">${escapeI18n(tr('modules.common.loading'))}</p>`;
     }
-    if (!status) return failure('Couldn’t load remote access.', 'Try again.');
-    if (!status.configured) return '<p class="remote-note" role="status">Remote access is not configured in this build.</p>';
+    if (!status) return failure(tr('modules.remote.statusError'), tr('modules.remote.retry'));
+    if (!status.configured) return `<p class="remote-note" role="status">${escapeI18n(tr('modules.common.remote_access_is_not_configured_in_this_build'))}</p>`;
     if (!status.signedIn) {
-      const flow = code ? `<div class="remote-code"><p>Enter this code at <strong>${escape(code.verificationUri)}</strong>:</p><div class="remote-code-row"><output class="remote-user-code" aria-label="Device code">${escape(code.userCode)}</output><button type="button" class="secondary-button" data-copy>${icon('copy')}Copy code</button></div><p class="remote-note" role="status">Waiting for you to approve in the browser… The code expires at ${new Date(expires).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.</p><button type="button" class="secondary-button" data-cancel>Cancel</button></div>` : '';
-      return `<div class="setting-row"><div><strong>PandaCode Connect</strong><small>Sign in with GitHub to reach your other computers. Task content is end-to-end encrypted; the relay sees only ciphertext.</small></div><button type="button" class="secondary-button" data-sign-in ${signingIn ? 'disabled' : ''}>${icon('github')}Sign in with GitHub</button></div>${flow}`;
+      const flow = code ? `<div class="remote-code"><p>${escape(tr('modules.remote.enterCodeAt', { url: code.verificationUri }))}</p><div class="remote-code-row"><output class="remote-user-code" aria-label="${escapeI18n(tr('modules.common.device_code'))}">${escape(code.userCode)}</output><button type="button" class="secondary-button" data-copy>${icon('copy')}${escape(tr('modules.remote.copyCode'))}</button></div><p class="remote-note" role="status">${escape(tr('modules.remote.waitApproval', { time: new Date(expires).toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' }) }))}</p><button type="button" class="secondary-button" data-cancel>${escapeI18n(tr('modules.common.cancel'))}</button></div>` : '';
+      return `<div class="setting-row"><div><strong>PandaCode Connect</strong><small>${escapeI18n(tr('modules.common.sign_in_with_github_to_reach_your_other_computers_task_content_is'))}</small></div><button type="button" class="secondary-button" data-sign-in ${signingIn ? 'disabled' : ''}>${icon('github')}${escape(tr('modules.remote.signIn'))}</button></div>${flow}`;
     }
-    return `<div class="setting-row"><div><strong>${escape(status.account?.login ?? 'Signed in')}</strong><small>Signed in with GitHub · ${status.connected ? 'connected' : 'connecting…'}</small></div><button type="button" class="secondary-button" data-sign-out>Sign out</button></div>
-      <div class="setting-row"><div><strong>Allow remote control of this computer ${infoMark(ALLOW_TIP, 'About remote control')}</strong><small>Your other signed-in computers can see and drive tasks here.</small></div><input type="checkbox" class="settings-switch" id="remote-host" aria-label="Allow remote control of this computer" ${status.hostEnabled ? 'checked' : ''}></div>
-      <div class="setting-row"><div><strong>Notify my phone ${infoMark(NOTIFY_TIP, 'About phone notifications')}</strong><small>Pushes a generic notice when a hosted task needs approval or finishes. The relay never sees task content.</small></div><input type="checkbox" class="settings-switch" id="remote-notify" aria-label="Notify my phone" ${status.notifyEnabled ? 'checked' : ''}></div>
-      <div class="setting-row"><div><strong>Full access for remote tasks ${infoMark(FULL_TIP, 'About full access for remote tasks')}</strong><small>Off: remote tasks always ask before acting.</small></div><input type="checkbox" class="settings-switch" id="remote-full-access" aria-label="Full access for remote tasks" ${status.remoteFullAccess ? 'checked' : ''}></div>
-      <div class="setting-row"><div><strong>This computer’s key ${infoMark(KEY_TIP, 'About this computer’s key')}</strong><small><code class="remote-key">${escape(groupFingerprint(status.device.fingerprint))}</code></small></div></div>
+    return `<div class="setting-row"><div><strong>${escape(status.account?.login ?? tr('modules.remote.signedIn'))}</strong><small>${escape(status.connected ? tr('modules.remote.connected') : tr('modules.remote.connecting'))}</small></div><button type="button" class="secondary-button" data-sign-out>${escapeI18n(tr('modules.common.sign_out'))}</button></div>
+      <div class="setting-row"><div><strong>${escape(tr('modules.common.allow_remote_control_of_this_computer'))} ${infoMark(ALLOW_TIP(), tr('modules.common.about_remote_control'))}</strong><small>${escapeI18n(tr('modules.common.your_other_signed_in_computers_can_see_and_drive_tasks_here'))}</small></div><input type="checkbox" class="settings-switch" id="remote-host" aria-label="${escapeI18n(tr('modules.common.allow_remote_control_of_this_computer'))}" ${status.hostEnabled ? 'checked' : ''}></div>
+      <div class="setting-row"><div><strong>${escape(tr('modules.common.notify_my_phone'))} ${infoMark(NOTIFY_TIP(), tr('modules.common.about_phone_notifications'))}</strong><small>${escapeI18n(tr('modules.common.pushes_a_generic_notice_when_a_hosted_task_needs_approval_or_finishes'))}</small></div><input type="checkbox" class="settings-switch" id="remote-notify" aria-label="${escapeI18n(tr('modules.common.notify_my_phone'))}" ${status.notifyEnabled ? 'checked' : ''}></div>
+      <div class="setting-row"><div><strong>${escape(tr('modules.common.full_access_for_remote_tasks'))} ${infoMark(FULL_TIP(), tr('modules.common.about_full_access_for_remote_tasks'))}</strong><small>${escapeI18n(tr('modules.common.off_remote_tasks_always_ask_before_acting'))}</small></div><input type="checkbox" class="settings-switch" id="remote-full-access" aria-label="${escapeI18n(tr('modules.common.full_access_for_remote_tasks'))}" ${status.remoteFullAccess ? 'checked' : ''}></div>
+      <div class="setting-row"><div><strong>${escape(tr('modules.remote.computerKey'))} ${infoMark(KEY_TIP(), tr('modules.common.about_this_computer_s_key'))}</strong><small><code class="remote-key">${escape(groupFingerprint(status.device.fingerprint))}</code></small></div></div>
       ${status.hostEnabled ? codeRow() : ''}${pairRow()}
-      <h3 class="settings-heading">Devices ${infoMark(SCOPE_HELP, 'About device access')}</h3>${grantsError ? `<p class="remote-note" role="status">Access levels could not be loaded: ${escape(grantsError)}</p>` : ''}<div class="settings-group remote-devices">${deviceList()}</div>`;
+      <h3 class="settings-heading">${escape(tr('modules.remote.devices'))} ${infoMark(SCOPE_HELP(), tr('modules.common.about_device_access'))}</h3>${grantsError ? `<p class="remote-note" role="status">${escape(tr('modules.remote.grantsError', { error: grantsError }))}</p>` : ''}<div class="settings-group remote-devices">${deviceList()}</div>`;
   }
   function render(): void {
     if (disposed) return;
@@ -82,6 +85,7 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
     main.innerHTML = `<div class="settings-group remote-settings">${body()}</div>${error ? `<p class="remote-error" role="alert">${escape(error)}</p>` : ''}`;
     if (keep) { const again = main.querySelector<HTMLElement>(`#${CSS.escape(keep)}`); again?.focus(); if (again instanceof HTMLInputElement && caret !== null) again.setSelectionRange(caret, caret); }
   }
+  const disposeLocale = onLocaleChange(render);
   const apply = (next: RemoteStatus) => { status = next; if (next.signedIn) { code = undefined; signingIn = false; } else { pairCode = undefined; grants = []; } };
   async function loadGrants(): Promise<void> {
     grantsError = '';
@@ -138,7 +142,7 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
     if (target.hasAttribute('data-retry')) void load();
     else if (target.hasAttribute('data-sign-in')) void signIn();
     else if (target.hasAttribute('data-cancel')) cancelSignIn();
-    else if (target.hasAttribute('data-copy') && code) void navigator.clipboard.writeText(code.userCode).then(() => host.notify('Code copied'), () => host.notify('Couldn’t copy; select the code instead'));
+    else if (target.hasAttribute('data-copy') && code) void navigator.clipboard.writeText(code.userCode).then(() => host.notify(tr('modules.common.code_copied')), () => host.notify(tr('modules.common.couldn_t_copy_select_the_code_instead')));
     else if (target.hasAttribute('data-sign-out')) void host.call<RemoteStatus>('remote_sign_out').then(next => { apply(next); devices = []; devicesLoaded = true; devicesError = ''; error = ''; render(); }, fail);
     else if (target.dataset.revoke) void host.call('remote_revoke_device', { deviceId: target.dataset.revoke }).then(() => { devices = devices.filter(d => d.id !== target.dataset.revoke); render(); }, fail);
     else if (target.dataset.approve) setGrant(target.dataset.approve, row?.querySelector<HTMLSelectElement>('select[data-pick]')?.value ?? 'control');
@@ -148,7 +152,7 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
     else if (target.hasAttribute('data-pair') && !pairing) {
       const name = devices.find(device => device.id === pairTarget)?.name ?? 'that computer';
       error = ''; pairing = true; render();
-      void host.call<{ scope: GrantScope }>('remote_pair_redeem', { deviceId: pairTarget, code: pairInput }).then(result => { pairInput = ''; host.notify(`Paired with ${name}: ${(SCOPE_LABELS[result.scope] ?? result.scope).toLowerCase()}`); }, e => { error = message(e); }).finally(() => { pairing = false; render(); });
+      void host.call<{ scope: GrantScope }>('remote_pair_redeem', { deviceId: pairTarget, code: pairInput }).then(result => { pairInput = ''; host.notify(tr('modules.dynamic.paired', { name: String(name), scope: String((SCOPE_LABELS[result.scope] ?? result.scope).toLowerCase()) })); }, e => { error = message(e); }).finally(() => { pairing = false; render(); });
     }
   });
   root.addEventListener('input', event => {
@@ -171,9 +175,9 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
     host.listen('remote://status', next => { if (!signingIn || next.signedIn) { apply(next); render(); } }),
     host.listen('remote://presence', next => { if (Array.isArray(next)) { devices = next; devicesLoaded = true; devicesError = ''; void loadGrants().then(render); } }),
     host.listen('remote://device-grants', next => { if (Array.isArray(next)) { grants = next; grantsError = ''; render(); } }),
-    host.listen('remote://pair-code-used', () => { if (pairCode) { host.notify('Pairing code used'); showCode(undefined); } }),
+    host.listen('remote://pair-code-used', () => { if (pairCode) { host.notify(tr('modules.common.pairing_code_used')); showCode(undefined); } }),
   ];
-  root.innerHTML = '<div class="remote-main"></div><section class="remote-diagnostics-section" hidden><h3 class="settings-heading">Diagnostics</h3><div class="settings-group remote-diagnostics-body"></div></section>';
+  root.innerHTML = `<div class="remote-main"></div><section class="remote-diagnostics-section" hidden><h3 class="settings-heading">${escapeI18n(tr('modules.common.diagnostics'))}</h3><div class="settings-group remote-diagnostics-body"></div></section>`;
   const main = root.querySelector<HTMLElement>('.remote-main')!;
   const section = root.querySelector<HTMLElement>('.remote-diagnostics-section')!;
   void import('./remote-diagnostics').then(module => {
@@ -183,5 +187,5 @@ export function mountRemoteSettings(root: HTMLElement, host: RemoteHost): () => 
     section.hidden = false;
   }).catch(() => undefined);
   void load();
-  return () => { disposed = true; window.clearTimeout(expiry); for (const u of unlisten) void u.then(fn => fn(), () => undefined); };
+  return () => { disposed = true; disposeLocale(); window.clearTimeout(expiry); for (const u of unlisten) void u.then(fn => fn(), () => undefined); };
 }

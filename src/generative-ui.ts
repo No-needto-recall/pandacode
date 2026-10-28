@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /// <reference types="vite/client" />
 import css from './generative-ui.css?inline';
 import richCss from './rich-markdown.css?inline';
@@ -49,7 +50,7 @@ class GenerativeView extends HTMLElement {
       // Agents also write HTML and SVG as examples: the light-DOM source (slotted, not copied) is one click away.
       if (kind === 'html' || kind === 'svg') root.append(sourceToggle());
     } catch {
-      if (this.drawn === key) { const note = document.createElement('p'); note.className = 'gu-error'; note.textContent = 'This view could not be shown.'; root.replaceChildren(note); }
+      if (this.drawn === key) { const note = document.createElement('p'); note.className = 'gu-error'; note.textContent = tr('modules.common.this_view_could_not_be_shown'); root.replaceChildren(note); }
     }
   }
 }
@@ -58,7 +59,7 @@ function sourceToggle(): HTMLElement {
   const details = document.createElement('details');
   details.className = 'gu-source';
   const summary = document.createElement('summary');
-  summary.setAttribute('aria-label', 'Source');
+  summary.setAttribute('aria-label', tr('modules.common.source'));
   details.append(summary, document.createElement('slot'));
   return details;
 }
@@ -67,7 +68,7 @@ function placeholder(): HTMLElement {
   const note = document.createElement('div');
   note.className = 'gu-pending';
   note.setAttribute('role', 'status');
-  note.setAttribute('aria-label', 'Building view');
+  note.setAttribute('aria-label', tr('modules.common.building_view'));
   return note;
 }
 

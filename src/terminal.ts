@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import { paletteTerminal } from './palette';
 import { call, subscribe } from './bridge';
 import { Terminal } from '@xterm/xterm';
@@ -51,15 +52,15 @@ export async function mountTerminal(container: HTMLElement, context: TerminalCon
     controls.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:none';
     const hint = document.createElement('span');
     hint.textContent = context.harness.provider === 'kimi'
-      ? 'Uses Kimi’s saved permissions. Review them in the console before pressing Enter.'
-      : command ? 'When the console is ready, insert the command and press Enter.' : 'Native harness console. Type a command to continue.';
+      ? tr('modules.common.uses_kimi_s_saved_permissions_review_them_in_the_console_before_pressing')
+      : command ? tr('modules.common.when_the_console_is_ready_insert_the_command_and_press_enter') : tr('modules.common.native_harness_console_type_a_command_to_continue');
     hint.style.cssText = 'color:var(--muted);font-size:.78rem;flex:1';
     controls.append(hint);
     insertButton = document.createElement('button');
     insertButton.type = 'button'; insertButton.className = 'secondary-button';
     insertButton.hidden = !command;
-    insertButton.textContent = command ? `Insert ${command.split(/\s/, 1)[0]}` : '';
-    insertButton.setAttribute('aria-label', `Insert ${command ?? ''} in the harness console`);
+    insertButton.textContent = command ? tr('modules.dynamic.insert', { command: String(command.split(/\s/, 1)[0]) }) : '';
+    insertButton.setAttribute('aria-label', tr('modules.dynamic.insertConsole', { command: String(command ?? '') }));
     insertButton.disabled = true;
     controls.append(insertButton);
     frame.prepend(controls);
@@ -103,7 +104,7 @@ export async function mountTerminal(container: HTMLElement, context: TerminalCon
     // Paste into the visible TUI composer only. Never send Enter automatically:
     // authentication, workspace trust or onboarding may still be on screen.
     void call('write_terminal', { terminalId, data: `\x1b[200~${text}\x1b[201~` }).then(() => {
-      if (!disposed && revision === commandRevision) { insertButton!.textContent = 'Inserted · press Enter'; focus(); }
+      if (!disposed && revision === commandRevision) { insertButton!.textContent = tr('modules.common.inserted_press_enter'); focus(); }
     }).catch(error => {
       if (!disposed && revision === commandRevision) { inserted = false; insertButton!.disabled = exited || !hasOutput; }
       reportError(error);
@@ -127,8 +128,8 @@ export async function mountTerminal(container: HTMLElement, context: TerminalCon
     validateCommand(value);
     if (!insertButton || !value) return;
     ++commandRevision; command = value; inserted = false; insertButton.hidden = false;
-    insertButton.textContent = `Insert ${value.split(/\s/, 1)[0]}`;
-    insertButton.setAttribute('aria-label', `Insert ${value} in the harness console`);
+    insertButton.textContent = tr('modules.dynamic.insert', { command: String(value.split(/\s/, 1)[0]) });
+    insertButton.setAttribute('aria-label', tr('modules.dynamic.insertConsole', { command: String(value) }));
     insertButton.disabled = exited || disposed || !hasOutput;
   }, activity: () => exited || disposed ? Promise.resolve({ running: false, processNames: [], uncertain: false }) : call<TerminalActivity>('get_terminal_activity', { terminalId }), dispose: async () => {
     if (disposed) return; disposed = true;

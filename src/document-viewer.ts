@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { escape, markdown } from './dom';
 import { captureFileLinkContext, decorateFileLinks, workspaceImagePath } from './file-links';
 import { trackSegment } from './motion';
@@ -32,13 +35,13 @@ export function setDocumentView(path: string, view: DocumentView): void {
 function stats(content: string): string {
   const words = content.match(/\S+/g)?.length ?? 0;
   const minutes = Math.max(1, Math.round(words / WORDS_PER_MINUTE));
-  return `${words.toLocaleString()} word${words === 1 ? '' : 's'} · ${minutes} min read`;
+  return words === 1 ? tr('modules.files.readingOne', { words: words.toLocaleString(getLocale()), minutes }) : tr('modules.files.readingMany', { words: words.toLocaleString(getLocale()), minutes });
 }
 
 function codeLines(content: string): string {
   const lines = content.split('\n', LINE_LIMIT).map((line, i) => `<div class="code-line"><span class="line-number">${i + 1}</span><code>${escape(line) || ' '}</code></div>`).join('');
   const capped = content.split('\n', LINE_LIMIT + 1).length > LINE_LIMIT;
-  return `<div class="code-preview">${lines}</div>${capped ? '<div class="inspector-hint">Preview limited to 2,000 lines.</div>' : ''}`;
+  return `<div class="code-preview">${lines}</div>${capped ? `<div class="inspector-hint">${escapeI18n(tr('modules.common.preview_limited_to_2_000_lines'))}</div>` : ''}`;
 }
 
 function paragraphs(content: string): string {
@@ -89,9 +92,9 @@ async function renderHtmlDocument(reader: HTMLElement, path: string, content: st
 
 function toolbar(kind: Kind, view: DocumentView, wrap: boolean, content: string): string {
   const segment = (value: DocumentView, label: string) => `<button type="button" data-doc-view="${value}" aria-pressed="${view === value}">${label}</button>`;
-  const toggle = kind === 'code' ? '' : `<div class="doc-view-switch" role="group" aria-label="Document view">${segment('rendered', 'Rendered')}${segment('raw', 'Raw')}</div>`;
+  const toggle = kind === 'code' ? '' : `<div class="doc-view-switch" role="group" aria-label="${escapeI18n(tr('modules.common.document_view'))}">${segment('rendered', 'Rendered')}${segment('raw', 'Raw')}</div>`;
   const words = kind === 'code' ? '' : `<span class="doc-stats">${stats(content)}</span>`;
-  const wrapButton = kind !== 'code' && view === 'rendered' ? '' : `<button type="button" class="doc-wrap" data-doc-wrap aria-pressed="${wrap}">Wrap</button>`;
+  const wrapButton = kind !== 'code' && view === 'rendered' ? '' : `<button type="button" class="doc-wrap" data-doc-wrap aria-pressed="${wrap}">${escapeI18n(tr('modules.common.wrap'))}</button>`;
   return `<div class="doc-toolbar">${toggle}${words}${wrapButton}</div>`;
 }
 

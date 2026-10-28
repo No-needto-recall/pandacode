@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './github-pull.css';
 import { escape, icon, markdownHtml } from './dom';
 import { trackSegment } from './motion';
@@ -44,7 +47,7 @@ function ago(iso: string): string {
   if (minutes < 60) return `${minutes}m ago`;
   if (minutes < 60 * 24) return `${Math.round(minutes / 60)}h ago`;
   if (minutes < 60 * 24 * 30) return `${Math.round(minutes / 1440)}d ago`;
-  return new Date(at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(at).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 }
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
@@ -76,7 +79,7 @@ export function createPullView(host: PullHost) {
   /** Show the task's PR in `target`; a repeat call for the same PR keeps the view as it is. */
   function show(target: HTMLElement, session: Session): void {
     const link = session.pullRequest;
-    if (!link) { dispose(); target.innerHTML = `<div class="inspector-empty">${icon('pull')}<h3>No pull request</h3><p>Link one from the branch menu.</p></div>`; return; }
+    if (!link) { dispose(); target.innerHTML = `<div class="inspector-empty">${icon('pull')}<h3>${escapeI18n(tr('modules.common.no_pull_request'))}</h3><p>${escapeI18n(tr('modules.common.link_one_from_the_branch_menu'))}</p></div>`; return; }
     const key = `${session.id}:${link.number}`;
     if (mounted?.key === key && mounted.root.parentElement === target) { mounted.session = session; return; }
     dispose();
@@ -103,21 +106,21 @@ export function createPullView(host: PullHost) {
     } catch (error) {
       if (mounted !== view || view.request !== request) return;
       const url = view.session.pullRequest?.url ?? '';
-      view.root.innerHTML = `<div class="inspector-empty" role="alert">${icon('alert')}<h3>Unable to load the pull request</h3><p class="pull-error">${escape(error instanceof Error ? error.message : String(error))}</p><div class="pull-error-actions"><button class="secondary-button" data-pull-action="refresh">${icon('refresh')}Retry</button>${url ? `<button class="secondary-button" data-pull-action="open" data-url="${escape(url)}">${icon('globe')}Open on GitHub</button>` : ''}</div></div>`;
+      view.root.innerHTML = `<div class="inspector-empty" role="alert">${icon('alert')}<h3>${escapeI18n(tr('modules.common.unable_to_load_the_pull_request'))}</h3><p class="pull-error">${escape(error instanceof Error ? error.message : String(error))}</p><div class="pull-error-actions"><button class="secondary-button" data-pull-action="refresh">${icon('refresh')}Retry</button>${url ? `<button class="secondary-button" data-pull-action="open" data-url="${escape(url)}">${icon('globe')}Open on GitHub</button>` : ''}</div></div>`;
     } finally { if (mounted === view && view.request === request) view.root.removeAttribute('aria-busy'); }
   }
 
   /** Open PRs offer Merge; it asks once for the method before anything reaches GitHub. */
   function mergeControls(detail: PullDetail, view: NonNullable<typeof mounted>): string {
     if (detail.state !== 'open') return '';
-    if (detail.mergeable === 'conflicting') return `<div class="pull-merge"><button class="primary-button" disabled title="Resolve the merge conflicts first">${icon('pull')}Merge</button><small>Resolve the conflicts before merging.</small></div>`;
+    if (detail.mergeable === 'conflicting') return `<div class="pull-merge"><button class="primary-button" disabled title="${escapeI18n(tr('modules.common.resolve_the_merge_conflicts_first'))}">${icon('pull')}Merge</button><small>${escapeI18n(tr('modules.common.resolve_the_conflicts_before_merging'))}</small></div>`;
     if (view.merge === 'idle') return `<div class="pull-merge"><button class="primary-button" data-pull-action="merge-start">${icon('pull')}Merge</button></div>`;
     const busy = view.merge === 'merging';
     const options = (Object.keys(MERGE_LABEL) as MergeMethod[]).map(method => `<option value="${method}" ${method === view.method ? 'selected' : ''}>${MERGE_LABEL[method]}</option>`).join('');
     return `<div class="pull-merge pull-merge-confirm" role="group" aria-label="Merge pull request #${detail.number}">
-      <select data-pull-merge-method aria-label="Merge method" ${busy ? 'disabled' : ''}>${options}</select>
+      <select data-pull-merge-method aria-label="${escapeI18n(tr('modules.common.merge_method'))}" ${busy ? 'disabled' : ''}>${options}</select>
       <button class="primary-button" data-pull-action="merge-confirm" ${busy ? 'disabled' : ''}>${busy ? 'Merging…' : `Confirm merge`}</button>
-      <button class="secondary-button" data-pull-action="merge-cancel" ${busy ? 'disabled' : ''}>Cancel</button>
+      <button class="secondary-button" data-pull-action="merge-cancel" ${busy ? 'disabled' : ''}>${escapeI18n(tr('modules.common.cancel'))}</button>
     </div>`;
   }
 
@@ -128,13 +131,13 @@ export function createPullView(host: PullHost) {
     try {
       const saved = await host.call<Session>('github_merge_pull_request', { sessionId: view.session.id, method: view.method });
       if (mounted === view) { view.session = saved; view.merge = 'idle'; }
-      host.notify(`Merged pull request #${detail.number}`);
+      host.notify(tr('modules.dynamic.mergedPull', { number: String(detail.number) }));
       host.merged(saved);
       if (mounted === view) await load(true);
     } catch (error) {
       if (mounted !== view) return;
       view.merge = 'confirm'; await render(view, detail);
-      host.notify(`Couldn’t merge #${detail.number}: ${error instanceof Error ? error.message : String(error)}`);
+      host.notify(tr('modules.dynamic.mergePullFailed', { number: String(detail.number), error: String(error instanceof Error ? error.message : String(error)) }));
     }
   }
 
@@ -150,9 +153,9 @@ export function createPullView(host: PullHost) {
     ].join('');
     return `<header class="pull-header">
       <div class="pull-topline"><span class="pull-state pull-state-${escape(state)}">${icon('pull')}${STATE_LABEL[state] ?? escape(state)}</span><span class="pull-number">#${detail.number}</span>
-        <span class="pull-actions"><button class="icon-button" data-pull-action="refresh" aria-label="Refresh pull request" title="Refresh">${icon('refresh')}</button><button class="icon-button" data-pull-action="open" data-url="${escape(detail.url)}" aria-label="Open on GitHub" title="Open on GitHub">${icon('globe')}</button><button class="icon-button" data-pull-action="unlink" aria-label="Unlink pull request" title="Unlink from this task">${icon('close')}</button></span></div>
+        <span class="pull-actions"><button class="icon-button" data-pull-action="refresh" aria-label="${escapeI18n(tr('modules.common.refresh_pull_request'))}" title="${escapeI18n(tr('modules.common.refresh'))}">${icon('refresh')}</button><button class="icon-button" data-pull-action="open" data-url="${escape(detail.url)}" aria-label="${escapeI18n(tr('modules.common.open_on_github'))}" title="${escapeI18n(tr('modules.common.open_on_github'))}">${icon('globe')}</button><button class="icon-button" data-pull-action="unlink" aria-label="${escapeI18n(tr('modules.common.unlink_pull_request'))}" title="${escapeI18n(tr('modules.common.unlink_from_this_task'))}">${icon('close')}</button></span></div>
       <h3 class="pull-title">${escape(detail.title)}</h3>
-      <p class="pull-meta">${detail.author ? `<strong>${escape(detail.author)}</strong> · ` : ''}<code title="${escape(detail.head)}">${escape(detail.head)}</code><span class="pull-into" aria-label="into">→</span><code>${escape(detail.base)}</code></p>
+      <p class="pull-meta">${detail.author ? `<strong>${escape(detail.author)}</strong> · ` : ''}<code title="${escape(detail.head)}">${escape(detail.head)}</code><span class="pull-into" aria-label="${escapeI18n(tr('modules.common.into'))}">→</span><code>${escape(detail.base)}</code></p>
       <p class="pull-stats"><span class="pull-added">+${detail.additions}</span><span class="pull-removed">−${detail.deletions}</span><span>${plural(detail.changedFiles, 'file')}</span><span>${plural(detail.commits.length, 'commit')}</span><span>${escape(state === 'merged' ? `merged ${ago(detail.mergedAt)}` : `updated ${ago(detail.updatedAt)}`)}</span></p>
       ${badges ? `<div class="pull-badges">${badges}</div>` : ''}
       ${detail.labels.length ? `<div class="pull-labels">${detail.labels.map(label => `<span>${escape(label)}</span>`).join('')}</div>` : ''}
@@ -161,19 +164,19 @@ export function createPullView(host: PullHost) {
   }
 
   async function overview(detail: PullDetail): Promise<string> {
-    const body = detail.body.trim() ? await markdownHtml(detail.body + (detail.bodyTruncated ? '\n\n*Description shortened; the rest is on GitHub.*' : '')) : '<p class="pull-muted">No description provided.</p>';
-    const checks = detail.checks.length ? `<section class="pull-section"><h4>Checks</h4><ul class="pull-checks">${detail.checks.map(check => `<li class="pull-tone-${escape(check.state)}">${icon(check.state === 'success' ? 'check' : check.state === 'failure' ? 'close' : check.state === 'pending' ? 'refresh' : 'minimize')}${check.url ? `<button data-pull-action="open" data-url="${escape(check.url)}" title="Open details">${escape(check.name)}</button>` : `<span>${escape(check.name)}</span>`}</li>`).join('')}</ul></section>` : '';
+    const body = detail.body.trim() ? await markdownHtml(detail.body + (detail.bodyTruncated ? '\n\n*Description shortened; the rest is on GitHub.*' : '')) : `<p class="pull-muted">${escapeI18n(tr('modules.common.no_description_provided'))}</p>`;
+    const checks = detail.checks.length ? `<section class="pull-section"><h4>${escapeI18n(tr('modules.common.checks'))}</h4><ul class="pull-checks">${detail.checks.map(check => `<li class="pull-tone-${escape(check.state)}">${icon(check.state === 'success' ? 'check' : check.state === 'failure' ? 'close' : check.state === 'pending' ? 'refresh' : 'minimize')}${check.url ? `<button data-pull-action="open" data-url="${escape(check.url)}" title="${escapeI18n(tr('modules.common.open_details'))}">${escape(check.name)}</button>` : `<span>${escape(check.name)}</span>`}</li>`).join('')}</ul></section>` : '';
     const entries = await Promise.all(detail.timeline.map(async entry => {
       const verdict = entry.kind === 'review' ? VERDICT_LABEL[entry.state] ?? 'reviewed' : 'commented';
       const text = entry.body.trim() ? `<div class="pull-comment-body markdown">${await markdownHtml(entry.body)}</div>` : '';
       return `<li class="pull-comment pull-verdict-${escape(entry.state || 'comment')}"><p class="pull-comment-meta"><strong>${escape(entry.author || 'Someone')}</strong> ${verdict} · ${escape(ago(entry.createdAt))}</p>${text}</li>`;
     }));
-    const conversation = entries.length ? `<section class="pull-section"><h4>Conversation <small>${entries.length}</small></h4><ol class="pull-timeline">${entries.join('')}</ol></section>` : '';
-    return `<section class="pull-section"><h4>Description</h4><div class="pull-body markdown">${body}</div></section>${checks}${conversation}`;
+    const conversation = entries.length ? `<section class="pull-section"><h4>${escapeI18n(tr('modules.common.conversation'))} <small>${entries.length}</small></h4><ol class="pull-timeline">${entries.join('')}</ol></section>` : '';
+    return `<section class="pull-section"><h4>${escapeI18n(tr('modules.common.description'))}</h4><div class="pull-body markdown">${body}</div></section>${checks}${conversation}`;
   }
 
   function files(detail: PullDetail, view: NonNullable<typeof mounted>): string {
-    if (!detail.files.length) return '<p class="pull-muted pull-pad">No files changed.</p>';
+    if (!detail.files.length) return `<p class="pull-muted pull-pad">${escapeI18n(tr('modules.common.no_files_changed'))}</p>`;
     return `<ul class="pull-files">${detail.files.map(file => {
       const open = view.viewers.has(file.path);
       const name = file.path.split('/').pop() ?? file.path, folder = file.path.includes('/') ? file.path.slice(0, file.path.lastIndexOf('/')) : '';
@@ -182,7 +185,7 @@ export function createPullView(host: PullHost) {
   }
 
   function commits(detail: PullDetail): string {
-    if (!detail.commits.length) return '<p class="pull-muted pull-pad">No commits.</p>';
+    if (!detail.commits.length) return `<p class="pull-muted pull-pad">${escapeI18n(tr('modules.common.no_commits'))}</p>`;
     return `<ol class="pull-commits">${[...detail.commits].reverse().map(commit => `<li><span class="pull-commit-headline">${escape(commit.headline)}</span><span class="pull-commit-meta"><code>${escape(commit.oid)}</code>${commit.author ? ` · ${escape(commit.author)}` : ''} · ${escape(ago(commit.date))}</span></li>`).join('')}</ol>`;
   }
 
@@ -191,7 +194,7 @@ export function createPullView(host: PullHost) {
     if (mounted !== view) return;
     view.viewers.forEach(viewer => viewer.dispose()); view.viewers.clear();
     const tab = (id: Section, label: string) => `<button role="tab" data-pull-action="section" data-section="${id}" aria-selected="${view.section === id}">${label}</button>`;
-    view.root.innerHTML = `${header(detail, view)}<div class="pull-tabs" role="tablist" aria-label="Pull request sections">${tab('overview', 'Overview')}${tab('files', `Files <small>${detail.files.length}</small>`)}${tab('commits', `Commits <small>${detail.commits.length}</small>`)}</div><div class="pull-content" role="tabpanel">${content}</div>`;
+    view.root.innerHTML = `${header(detail, view)}<div class="pull-tabs" role="tablist" aria-label="${escapeI18n(tr('modules.common.pull_request_sections'))}">${tab('overview', 'Overview')}${tab('files', `Files <small>${detail.files.length}</small>`)}${tab('commits', `Commits <small>${detail.commits.length}</small>`)}</div><div class="pull-content" role="tabpanel">${content}</div>`;
     const tabs = view.root.querySelector<HTMLElement>('.pull-tabs')!;
     trackSegment(tabs, tabs.querySelector<HTMLElement>('[aria-selected="true"]'));
   }
@@ -202,7 +205,7 @@ export function createPullView(host: PullHost) {
     const viewer = view.viewers.get(path);
     if (viewer) { viewer.dispose(); view.viewers.delete(path); diffHost.hidden = true; diffHost.replaceChildren(); button.setAttribute('aria-expanded', 'false'); return; }
     button.setAttribute('aria-expanded', 'true');
-    diffHost.hidden = false; diffHost.innerHTML = '<p class="pull-muted pull-pad" role="status">Loading diff…</p>';
+    diffHost.hidden = false; diffHost.innerHTML = `<p class="pull-muted pull-pad" role="status">${escapeI18n(tr('modules.common.loading_diff'))}</p>`;
     try {
       let pending = diffs.get(view.key);
       if (!pending) { pending = host.call<PullDiff>('github_pull_request_diff', { sessionId: view.session.id }); diffs.set(view.key, pending); pending.catch(() => diffs.delete(view.key)); }

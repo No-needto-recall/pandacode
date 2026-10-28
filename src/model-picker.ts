@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 import type { ContextUsage, Provider, ProviderId, ProviderModel } from './types';
 import { advertisedModelsOnly, fallbackModel, modelChoices, tokenCount } from './model-catalog';
 import { escape, icon } from './dom';
@@ -67,8 +69,8 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
   const panel = document.createElement('section');
   panel.className = 'model-menu floating-menu';
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Harness and model');
-  panel.innerHTML = `<div class="model-menu-search">${icon('search')}<input type="search" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="${uid}-list" aria-label="Search harnesses and models" autocomplete="off" spellcheck="false" maxlength="200"></div><div class="model-menu-body"><div class="model-menu-rail" role="tablist" aria-orientation="vertical" aria-label="Harnesses"></div><div class="model-menu-list" id="${uid}-list" role="listbox" aria-label="Models"></div></div><p class="model-menu-catalog-error" role="status" hidden></p><p class="model-menu-error" role="alert" hidden></p><div class="model-menu-settings" hidden></div><p class="model-menu-pending" role="status" hidden>Applying…</p>`;
+  panel.setAttribute('aria-label', tr('modules.common.harness_and_model'));
+  panel.innerHTML = `<div class="model-menu-search">${icon('search')}<input type="search" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="${uid}-list" aria-label="${escapeI18n(tr('modules.common.search_harnesses_and_models'))}" autocomplete="off" spellcheck="false" maxlength="200"></div><div class="model-menu-body"><div class="model-menu-rail" role="tablist" aria-orientation="vertical" aria-label="${escapeI18n(tr('modules.common.harnesses'))}"></div><div class="model-menu-list" id="${uid}-list" role="listbox" aria-label="${escapeI18n(tr('modules.common.models'))}"></div></div><p class="model-menu-catalog-error" role="status" hidden></p><p class="model-menu-error" role="alert" hidden></p><div class="model-menu-settings" hidden></div><p class="model-menu-pending" role="status" hidden>${escapeI18n(tr('modules.common.applying'))}</p>`;
   const search = panel.querySelector<HTMLInputElement>('input')!;
   const rail = panel.querySelector<HTMLElement>('.model-menu-rail')!;
   const list = panel.querySelector<HTMLElement>('.model-menu-list')!;
@@ -80,7 +82,8 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
   const anchorAction = anchor.dataset.action;
   const originalExpanded = anchor.getAttribute('aria-expanded');
   let pending = false;
-  let providersStatus = options.loadProviders ? 'Loading…' : '';
+  let providersStatus = options.loadProviders ? tr('modules.common.loading') : '';
+  let providersPending = Boolean(options.loadProviders);
   let closed = false;
   let activeKey = '';
   let positionFrame = 0;
@@ -90,6 +93,15 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
   let pendingEffort: string | null | undefined;
   let hoveredEffort: string | null | undefined;
   let view = teamSelected ? 'teams' : currentConnection ? `c:${currentConnection}` : `h:${current.provider}`;
+
+  const disposeLocale = onLocaleChange(() => {
+    if (providersPending) providersStatus = tr('modules.common.loading');
+    panel.setAttribute('aria-label', tr('modules.common.harness_and_model'));
+    search.setAttribute('aria-label', tr('modules.common.search_harnesses_and_models'));
+    pendingStatus.textContent = tr('modules.common.applying');
+    settingsKey = '';
+    renderChoices(); renderSettings();
+  });
 
   function restoreFocus(): void {
     let target: HTMLElement | null = anchor.isConnected ? anchor : null;
@@ -101,6 +113,7 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
   function close(shouldRestoreFocus = true): void {
     if (closed) return;
     closed = true;
+    disposeLocale();
     cancelAnimationFrame(positionFrame);
     document.removeEventListener('pointerdown', onOutside, true);
     document.removeEventListener('keydown', onEscape, true);
@@ -193,7 +206,7 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
   }
 
   function teamRow(team: PickerTeam): string {
-    return `<button type="button" role="option" tabindex="-1" class="model-menu-option model-menu-team${team.selected ? ' model-menu-current' : ''}" data-team="${escape(team.id)}" data-provider="team" data-model="${escape(team.id)}" data-available="true" aria-label="${escape(`Agent team · ${team.name}`)}" title="${escape(`${team.name} · ${team.detail}`)}" ${team.selected ? 'aria-current="true"' : ''}>${teamLogos(team)}<span class="model-menu-name">${escape(team.name)}</span><span class="model-menu-meta">${escape(team.detail)}</span>${team.selected ? icon('check', 'model-menu-check') : ''}</button>`;
+    return `<button type="button" role="option" tabindex="-1" class="model-menu-option model-menu-team${team.selected ? ' model-menu-current' : ''}" data-team="${escape(team.id)}" data-provider="team" data-model="${escape(team.id)}" data-available="true" aria-label="${escape(tr('modules.picker.team', { name: team.name }))}" title="${escape(`${team.name} · ${team.detail}`)}" ${team.selected ? 'aria-current="true"' : ''}>${teamLogos(team)}<span class="model-menu-name">${escape(team.name)}</span><span class="model-menu-meta">${escape(team.detail)}</span>${team.selected ? icon('check', 'model-menu-check') : ''}</button>`;
   }
 
   /** One line: name left, context (or the harness in mixed lists) right, a check on the current model. */
@@ -201,11 +214,11 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
     const { group, model, custom } = row;
     const disabled = group.locked || group.unavailable;
     const selected = isCurrent(row);
-    const accessible = custom ? `Use "${model.id}" with ${group.name}` : `${group.name} · ${model.name}`;
+    const accessible = custom ? tr('modules.picker.custom', { model: model.id, harness: group.name }) : `${group.name} · ${model.name}`;
     const context = model.contextWindow ? tokenCount(model.contextWindow) : '';
-    const title = [model.contextWindow ? `${context} context` : '', model.description || (model.name !== model.id && model.id !== 'default' ? model.id : '')].filter(Boolean).join(' · ');
+    const title = [model.contextWindow ? tr('modules.picker.context', { count: context }) : '', model.description || (model.name !== model.id && model.id !== 'default' ? model.id : '')].filter(Boolean).join(' · ');
     const meta = mixed ? group.name : context;
-    const name = custom ? `Use “${escape(query)}”` : escape(model.name);
+    const name = custom ? escape(tr('modules.picker.use', { model: query })) : escape(model.name);
     return `<button type="button" role="option" tabindex="-1" class="model-menu-option${selected ? ' model-menu-current' : ''}${custom ? ' model-menu-custom' : ''}" data-provider="${group.provider.id}" data-model="${escape(model.id)}"${group.connection ? ` data-connection="${escape(group.connection.id)}"` : ''} data-available="${!disabled}" aria-label="${escape(accessible)}" title="${escape(custom ? accessible : title)}" ${selected ? 'aria-current="true"' : ''} ${disabled ? 'aria-disabled="true" disabled' : ''}>${mixed ? providerLogo(group.provider.id) : ''}<span class="model-menu-name" title="${custom ? escape(query) : escape(model.name)}">${name}</span>${meta ? `<span class="model-menu-meta">${escape(meta)}</span>` : ''}${selected ? icon('check', 'model-menu-check') : custom ? icon('plus', 'model-menu-check') : ''}</button>`;
   }
 
@@ -232,14 +245,14 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
       const groupMatches = includes([group.provider.id, group.provider.name, group.name], normalized);
       hits.set(group.key, models(group).filter(model => groupMatches || includes([model.id, model.name], normalized)).map(model => ({ group, model })));
     }
-    search.placeholder = `Search ${new Set(all.flatMap(group => models(group).map(model => `${group.provider.id}:${model.id}`))).size} models, ${all.filter(group => !group.connection).length} harnesses…`;
+    search.placeholder = tr('modules.picker.search', { models: new Set(all.flatMap(group => models(group).map(model => `${group.provider.id}:${model.id}`))).size, harnesses: all.filter(group => !group.connection).length });
 
     // Rail: a tab per view; while searching it is a hit map.
     const inUse = (key: string) => !teamSelected && key === (currentConnection ? `c:${currentConnection}` : `h:${current.provider}`);
     let railHtml = '';
-    if (recent.length) railHtml += railItem('recent', icon('undo'), 'Recent', '', query ? ' is-dim' : '', !query && view === 'recent');
-    if (teams.length) railHtml += railItem('teams', icon('worktree'), 'Teams', String(query ? matchedTeams.length || '' : teams.length), `${teamSelected ? ' has-current' : ''}${query && !matchedTeams.length ? ' is-dim' : ''}`, !query && view === 'teams', `Teams, ${teams.length}`);
-    if (all.length) railHtml += '<div class="model-menu-rail-heading" role="presentation">Harnesses</div>';
+    if (recent.length) railHtml += railItem('recent', icon('undo'), tr('modules.picker.recent'), '', query ? ' is-dim' : '', !query && view === 'recent');
+    if (teams.length) railHtml += railItem('teams', icon('worktree'), tr('modules.picker.teams'), String(query ? matchedTeams.length || '' : teams.length), `${teamSelected ? ' has-current' : ''}${query && !matchedTeams.length ? ' is-dim' : ''}`, !query && view === 'teams', tr('modules.picker.teamCount', { count: teams.length }));
+    if (all.length) railHtml += `<div class="model-menu-rail-heading" role="presentation">${escapeI18n(tr('modules.common.harnesses'))}</div>`;
     railHtml += all.map(group => {
       const count = query ? hits.get(group.key)!.length : 0;
       const classes = `${group.connection ? ' is-connection' : ''}${inUse(group.key) ? ' has-current' : ''}${group.locked || group.unavailable || (query && !count) ? ' is-dim' : ''}`;
@@ -259,7 +272,7 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
       markup += matchedTeams.map(teamRow).join('');
       const rows = all.flatMap(group => hits.get(group.key)!);
       total += rows.length;
-      if (!total) markup += '<p class="model-menu-empty">No matching models.</p>';
+      if (!total) markup += `<p class="model-menu-empty">${escapeI18n(tr('modules.common.no_matching_models'))}</p>`;
       markup += rows.map(row => modelRow(row, true, query)).join('');
       // One custom ID row: the viewed harness, else the current one, unless the query names a harness or an existing model.
       const takesCustom = (group?: Group): group is Group => Boolean(group) && !advertisedModelsOnly(group!.provider.id) && !group!.locked && !group!.unavailable && !models(group!).some(model => [model.id, model.name].some(value => value.toLowerCase() === normalized));
@@ -268,21 +281,21 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
       if (custom) { total++; markup += modelRow({ group: custom, model: fallbackModel(custom.provider.id, query), custom: true }, true, query); }
     } else if (view === 'recent') {
       total = recent.length;
-      markup = heading(icon('undo'), 'Recent') + recent.map(row => modelRow(row, true, '')).join('');
+      markup = heading(icon('undo'), tr('modules.picker.recent')) + recent.map(row => modelRow(row, true, '')).join('');
     } else if (view === 'teams') {
       total = teams.length;
-      markup = heading(icon('worktree'), 'Agent teams', '<span>Lead and workers</span>') + teams.map(teamRow).join('');
+      markup = heading(icon('worktree'), tr('modules.picker.agentTeams'), `<span>${escapeI18n(tr('modules.common.lead_and_workers'))}</span>`) + teams.map(teamRow).join('');
     } else {
       const group = all.find(group => group.key === view);
       if (group) {
         const visible = shortList(group.provider.id, models(group));
         total = visible.length;
-        const status = group.locked ? '<span>New task required</span>' : group.unavailable ? '<span>Unavailable</span>' : `<span data-catalog-loading="${group.provider.id}" hidden>Loading…</span>`;
+        const status = group.locked ? `<span>${escapeI18n(tr('modules.common.new_task_required'))}</span>` : group.unavailable ? `<span>${escapeI18n(tr('modules.common.unavailable'))}</span>` : `<span data-catalog-loading="${group.provider.id}" hidden>${escapeI18n(tr('modules.common.loading'))}</span>`;
         markup = heading(providerLogo(group.provider.id), group.name, status) + visible.map(model => modelRow({ group, model }, false, '')).join('');
       }
     }
     if (providersStatus) markup = `<button type="button" role="option" tabindex="-1" class="model-menu-option" data-available="false" disabled>${icon('monitor')}<span class="model-menu-name">${escape(providersStatus)}</span></button>`;
-    else if (!total) markup = '<p class="model-menu-empty">No matching models.</p>';
+    else if (!total) markup = `<p class="model-menu-empty">${escapeI18n(tr('modules.common.no_matching_models'))}</p>`;
     // Loading and saving are in-place updates: retain rows and scroll position.
     const changed = markup !== listMarkup;
     if (changed) { list.innerHTML = markup; listMarkup = markup; }
@@ -362,10 +375,10 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
     settings.hidden = !canSetEffort && !teamSelected;
     const disabled = pending || !provider?.installed;
     const defaultEffort = efforts.find(effort => effort.id === model.defaultReasoningEffort);
-    const choices = [{ id: '', name: 'Default', description: `Use the harness's saved setting.${defaultEffort ? ` Reported model default: ${defaultEffort.name}.` : ''}` }, ...efforts];
+    const choices = [{ id: '', name: tr('modules.picker.default'), description: defaultEffort ? tr('modules.picker.effortDefaultModel', { effort: defaultEffort.name }) : tr('modules.picker.effortDefault') }, ...efforts];
     const markup = teamSelected
-      ? '<div class="model-menu-effort-row"><span class="model-menu-effort-label">Effort</span><span class="model-menu-effort-note">Set per worker</span></div>'
-      : canSetEffort ? `<div class="model-menu-effort-row"><span class="model-menu-effort-label" id="${uid}-effort">Effort</span><div class="model-menu-effort" role="radiogroup" aria-labelledby="${uid}-effort">${choices.map(effort => `<button type="button" role="radio" data-effort="${escape(effort.id)}" title="${escape(effort.description || effort.name)}"${effort.id && effort.id === model.defaultReasoningEffort ? ' data-model-default=""' : ''}>${escape(effort.name)}</button>`).join('')}</div></div><p class="model-menu-effort-hint"></p>` : '';
+      ? `<div class="model-menu-effort-row"><span class="model-menu-effort-label">${escapeI18n(tr('modules.common.effort'))}</span><span class="model-menu-effort-note">${escapeI18n(tr('modules.common.set_per_worker'))}</span></div>`
+      : canSetEffort ? `<div class="model-menu-effort-row"><span class="model-menu-effort-label" id="${uid}-effort">${escapeI18n(tr('modules.common.effort'))}</span><div class="model-menu-effort" role="radiogroup" aria-labelledby="${uid}-effort">${choices.map(effort => `<button type="button" role="radio" data-effort="${escape(effort.id)}" title="${escape(effort.description || effort.name)}"${effort.id && effort.id === model.defaultReasoningEffort ? ' data-model-default=""' : ''}>${escape(effort.name)}</button>`).join('')}</div></div><p class="model-menu-effort-hint"></p>` : '';
     if (markup !== settingsKey) {
       const focused = settings.contains(document.activeElement);
       settings.innerHTML = markup;
@@ -404,7 +417,7 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
     const supported = provider.models.find(model => model.id === current.model)?.reasoningEfforts ?? [];
     if (effort !== null && !supported.some(choice => choice.id === effort)) {
       if (effort === current.reasoningEffort) return;
-      error.textContent = 'This reasoning effort is no longer available. Choose another level.';
+      error.textContent = tr('modules.common.this_reasoning_effort_is_no_longer_available_choose_another_level');
       error.hidden = false;
       renderSettings();
       return;
@@ -572,10 +585,12 @@ export function openModelPicker(options: ModelPickerOptions): () => void {
     void options.loadProviders().then(found => {
       if (closed) return;
       providers = found.map(provider => ({ ...provider, models: [...provider.models] }));
-      providersStatus = providers.length ? '' : 'No harnesses on this computer';
+      providersPending = false;
+      providersStatus = providers.length ? '' : tr('modules.picker.noHarness');
       loadCatalogs();
     }).catch(failure => {
       if (closed) return;
+      providersPending = false;
       providersStatus = failure instanceof Error ? failure.message : String(failure);
       renderChoices();
     });

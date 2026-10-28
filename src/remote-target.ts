@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { escape, icon } from './dom';
 import type { RemoteRepoCheck, RemoteTarget } from './remote-types';
 import type { Session } from './types';
@@ -20,7 +23,7 @@ export function lastSeenText(target: Pick<RemoteTarget, 'lastSeen'>): string {
   if (elapsed < 60_000) return 'last seen just now';
   if (elapsed < 3_600_000) return `last seen ${Math.floor(elapsed / 60_000)}m ago`;
   if (elapsed < 86_400_000) return `last seen ${Math.floor(elapsed / 3_600_000)}h ago`;
-  return `last seen ${new Date(time).toLocaleDateString()}`;
+  return `last seen ${new Date(time).toLocaleDateString(getLocale())}`;
 }
 export function offlineText(target: RemoteTarget): string { return `Offline · ${lastSeenText(target)}`; }
 
@@ -40,14 +43,14 @@ export function computerControl(session: Session, fresh: boolean, targets: Remot
   const missing = !cloud && !target && chosen !== LOCAL && !cloudProvider(chosen);
   const name = cloud ? `Cloud · ${cloud.label}` : target?.name ?? (missing ? chosenName ?? 'That computer' : 'This computer');
   const status = offline ? ` · ${escape(offlineText(target))}` : missing ? ' · Not paired' : '';
-  return `<button type="button" id="composer-computer" class="composer-computer" data-action="computer-menu" aria-label="Computer: ${escape(name)}${status}" aria-haspopup="menu" aria-expanded="false" title="Where this task runs">${icon('monitor')}<span>${escape(name)}${offline ? ' · Offline' : missing ? ' · Not paired' : ''}</span>${icon('down')}</button>`;
+  return `<button type="button" id="composer-computer" class="composer-computer" data-action="computer-menu" aria-label="Computer: ${escape(name)}${status}" aria-haspopup="menu" aria-expanded="false" title="${escapeI18n(tr('modules.common.where_this_task_runs'))}">${icon('monitor')}<span>${escape(name)}${offline ? ' · Offline' : missing ? ' · Not paired' : ''}</span>${icon('down')}</button>`;
 }
 
 export function computerItems(targets: RemoteTarget[], chosen: string, clouds: CloudTarget[] = []) {
   return [
-    { id: LOCAL, label: 'This computer', icon: 'monitor', selected: chosen === LOCAL },
+    { id: LOCAL, label: tr('modules.common.this_computer'), icon: 'monitor', selected: chosen === LOCAL },
     ...targets.map(target => ({ id: target.deviceId, label: target.name, description: target.online ? target.platform : offlineText(target), icon: 'monitor', selected: target.deviceId === chosen, disabled: !target.online })),
-    ...(targets.length ? [] : [{ id: CONNECT_SETUP, label: 'Set up other computers…', icon: 'settings' }]),
+    ...(targets.length ? [] : [{ id: CONNECT_SETUP, label: tr('modules.common.set_up_other_computers'), icon: 'settings' }]),
     ...cloudItems(clouds, chosen),
   ];
 }
@@ -63,5 +66,5 @@ export function behindText(check: RemoteRepoCheck): string {
 }
 
 export function behindDialog(name: string, check: RemoteRepoCheck): string {
-  return `<form id="remote-behind-form"><p class="dialog-description">${escape(behindText(check))} ${escape(name)} will start from GitHub’s ${escape(check.branch)}.</p><div class="dialog-footer"><button type="button" class="secondary-button" data-action="close-dialog">Cancel</button><button type="submit" class="primary-button">Continue</button></div></form>`;
+  return `<form id="remote-behind-form"><p class="dialog-description">${escape(behindText(check))} ${escape(name)} will start from GitHub’s ${escape(check.branch)}.</p><div class="dialog-footer"><button type="button" class="secondary-button" data-action="close-dialog">${escapeI18n(tr('modules.common.cancel'))}</button><button type="submit" class="primary-button">${escapeI18n(tr('modules.common.continue'))}</button></div></form>`;
 }

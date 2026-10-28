@@ -1,3 +1,5 @@
+import { getLocale } from './i18n.ts';
+import { t as tr } from './i18n.ts';
 import './team-messages.css';
 import { call } from './bridge';
 import type { TeamMessagePage, TeamSnapshot } from './architect-types';
@@ -19,8 +21,8 @@ export class TeamMessages {
   constructor(team: TeamSnapshot) {
     this.team = team;
     this.host.className = 'team-messages';
-    const summary = document.createElement('summary'); summary.textContent = 'Team messages';
-    this.list.setAttribute('aria-label', 'Messages between teammates');
+    const summary = document.createElement('summary'); summary.textContent = tr('modules.common.team_messages');
+    this.list.setAttribute('aria-label', tr('modules.common.messages_between_teammates'));
     this.status.className = 'team-messages-status'; this.status.setAttribute('role', 'status');
     this.more.type = 'button'; this.more.className = 'secondary-button'; this.more.hidden = true;
     this.host.append(summary, this.list, this.status, this.more);
@@ -46,7 +48,7 @@ export class TeamMessages {
     if (this.disposed || this.busy || !force && (this.hasMore || this.loadedRevision >= this.team.revision)) return;
     this.busy = true; this.failed = false; this.more.disabled = true;
     const revision = this.team.revision;
-    this.status.textContent = this.cursor ? '' : 'Loading team messages…';
+    this.status.textContent = this.cursor ? '' : tr('modules.common.loading_team_messages');
     try {
       const page = await call<TeamMessagePage>('architect_team_messages', { sessionId: this.team.sessionId, afterId: this.cursor, limit: 50 });
       if (this.disposed) return;
@@ -57,19 +59,19 @@ export class TeamMessages {
         const heading = document.createElement('div'); heading.className = 'team-message-heading';
         const route = document.createElement('strong'); route.textContent = `${this.name(message.sender)} → ${this.name(message.recipient)}`;
         const time = document.createElement('time'); time.dateTime = new Date(message.createdAt).toISOString();
-        time.textContent = new Date(message.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        time.textContent = new Date(message.createdAt).toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' });
         const body = document.createElement('p'); body.textContent = message.message;
         heading.append(route, time); row.append(heading, body); fragment.append(row);
       }
       this.list.append(fragment);
       this.cursor = page.nextCursor; this.hasMore = page.hasMore; this.loadedRevision = revision;
-      this.status.textContent = this.cursor ? '' : 'No messages yet. Teammates can share questions and handoffs here.';
-      this.more.hidden = !this.hasMore; this.more.textContent = 'More messages';
+      this.status.textContent = this.cursor ? '' : tr('modules.common.no_messages_yet_teammates_can_share_questions_and_handoffs_here');
+      this.more.hidden = !this.hasMore; this.more.textContent = tr('modules.common.more_messages');
     } catch {
       if (this.disposed) return;
       this.failed = true;
-      this.status.textContent = 'Couldn’t load team messages.';
-      this.more.textContent = 'Retry'; this.more.hidden = false;
+      this.status.textContent = tr('modules.common.couldn_t_load_team_messages');
+      this.more.textContent = tr('modules.common.retry'); this.more.hidden = false;
     } finally {
       this.busy = false; this.more.disabled = false;
       if (!this.disposed && this.host.open && !this.failed && !this.hasMore && this.team.revision > revision) void this.load();

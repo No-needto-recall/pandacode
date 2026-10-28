@@ -110,12 +110,12 @@ button .icon{pointer-events:none}
    (pulled up by its height), and its first row sits just below the fade, so nothing is hidden at
    rest. With the sidebar collapsed the header's leading buttons (and the traffic lights) sit over
    the pane, so the first row clears the header instead. Anything in flow above the transcript (file
-   tabs, details, JEV activity) keeps the old stacked layout, and so does a shared bot channel, whose
-   own header row would otherwise sit under the workspace header. scroll-padding keeps focus and
+   tabs, details, JEV activity) keeps the old stacked layout, as do bot conversations and shared
+   channels, whose visible header controls must stay clear of the first message. scroll-padding keeps focus and
    scrollIntoView below the fade. */
 .workspace:not(.board-view,.github-view)>.main-pane>.work-area{overflow:visible}
-.workspace:not(.board-view,.github-view) .conversation-pane:not(.new-task-page,.channel-thread):not(:has(>:is(.task-details-heading,.jev-activity):not([hidden]))){--header-under:var(--titlebar-height);--header-fade-under:var(--header-fade);--transcript-top:var(--header-fade)}
-.workspace.sidebar-collapsed:not(.board-view,.github-view) .conversation-pane:not(.new-task-page,.channel-thread):not(:has(>:is(.task-details-heading,.jev-activity):not([hidden]))){--header-fade-under:var(--titlebar-height);--transcript-top:var(--titlebar-height)}
+.workspace:not(.board-view,.github-view) .conversation-pane:not(.new-task-page,.channel-thread,.bot-thread):not(:has(>:is(.task-details-heading,.jev-activity):not([hidden]))){--header-under:var(--titlebar-height);--header-fade-under:var(--header-fade);--transcript-top:var(--header-fade)}
+.workspace.sidebar-collapsed:not(.board-view,.github-view) .conversation-pane:not(.new-task-page,.channel-thread,.bot-thread):not(:has(>:is(.task-details-heading,.jev-activity):not([hidden]))){--header-fade-under:var(--titlebar-height);--transcript-top:var(--titlebar-height)}
 .conversation-pane>.transcript{margin-top:calc(-1 * var(--header-under,0px));padding-top:var(--transcript-top,28px);scroll-padding-top:calc(var(--header-fade-under,0px) + 12px)}
 :root{--floating-bar-shadow:0 1px 3px rgb(0 0 0 / .08),0 6px 20px rgb(0 0 0 / .12)}
 html[data-theme="dark"]{--floating-bar-shadow:0 1px 3px rgb(0 0 0 / .4),0 8px 24px rgb(0 0 0 / .35)}

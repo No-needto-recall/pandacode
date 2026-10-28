@@ -1,8 +1,9 @@
+import { t, onLocaleChange } from './i18n';
 import './styles.css';
 import './motion.css';
 import './agents-dock.css';
 import { call } from './bridge';
-import { icon } from './dom';
+import { escape, icon } from './dom';
 import './theme';
 import { palette } from './palette';
 import { renderAgentRows, startElapsedTick, subscribeDockEvent, type AgentsDockSnapshot } from './agents-dock';
@@ -13,9 +14,9 @@ const root = document.querySelector<HTMLElement>('#agents-dock-root')!;
 const getWindow = async () => (await import('@tauri-apps/api/window')).getCurrentWindow();
 
 // Both states are built once and updated in place, so a focused control is never replaced.
-root.innerHTML = `<button type="button" class="agents-dock-orb" data-tauri-drag-region aria-expanded="false" aria-controls="agents-dock-panel" title="Running agents">${icon('bot')}<span class="agents-dock-window-count" aria-hidden="true" hidden></span></button>
-  <section class="agents-dock-window-panel" id="agents-dock-panel" role="dialog" aria-label="Running agents" hidden>
-    <header class="agents-dock-window-head" data-tauri-drag-region><strong></strong><button type="button" data-action="collapse" aria-label="Collapse widget" title="Collapse (Esc)">${icon('minimize')}</button><button type="button" data-action="unpin" aria-label="Unpin widget" title="Unpin widget">${icon('close')}</button></header>
+root.innerHTML = `<button type="button" class="agents-dock-orb" data-tauri-drag-region aria-expanded="false" aria-controls="agents-dock-panel" title="${escape(t('shell.dockWindow.running'))}">${icon('bot')}<span class="agents-dock-window-count" aria-hidden="true" hidden></span></button>
+  <section class="agents-dock-window-panel" id="agents-dock-panel" role="dialog" aria-label="${escape(t('shell.dockWindow.running'))}" hidden>
+    <header class="agents-dock-window-head" data-tauri-drag-region><strong></strong><button type="button" data-action="collapse" aria-label="${escape(t('shell.dockWindow.collapse'))}" title="${escape(t('shell.dockWindow.collapseHint'))}">${icon('minimize')}</button><button type="button" data-action="unpin" aria-label="${escape(t('shell.dockWindow.unpin'))}" title="${escape(t('shell.dockWindow.unpin'))}">${icon('close')}</button></header>
     <div class="agents-dock-window-list"></div>
   </section>`;
 const orb = root.querySelector<HTMLButtonElement>('.agents-dock-orb')!;
@@ -31,9 +32,16 @@ let intentTimer = 0;
 let collapseTimer = 0;
 
 function draw(): void {
+  document.title = t('shell.dockWindow.running');
+  orb.title = t('shell.dockWindow.running');
+  panel.setAttribute('aria-label', t('shell.dockWindow.running'));
+  const collapse = root.querySelector<HTMLButtonElement>('[data-action="collapse"]')!;
+  collapse.setAttribute('aria-label', t('shell.dockWindow.collapse')); collapse.title = t('shell.dockWindow.collapseHint');
+  const unpin = root.querySelector<HTMLButtonElement>('[data-action="unpin"]')!;
+  unpin.setAttribute('aria-label', t('shell.dockWindow.unpin')); unpin.title = t('shell.dockWindow.unpin');
   const total = snapshot.agents.length;
   const running = snapshot.agents.filter(agent => agent.status === 'running').length;
-  const label = total ? `Running agents, ${total} active. Press to expand.` : 'Running agents. Press to expand.';
+  const label = total ? t('shell.dockWindow.expandCount', { count: total }) : t('shell.dockWindow.expand');
   if (orb.getAttribute('aria-label') !== label) orb.setAttribute('aria-label', label);
   orb.classList.toggle('is-working', running > 0);
   orb.setAttribute('aria-expanded', String(expanded));
@@ -41,7 +49,7 @@ function draw(): void {
   orbCount.hidden = !total;
   orbCount.textContent = String(total);
   panel.hidden = !expanded;
-  heading.textContent = `Running agents · ${total}`;
+  heading.textContent = t('shell.dockWindow.heading', { count: total });
   renderAgentRows(list, snapshot.agents, receivedAt, 'agents-dock-window-empty');
 }
 const accept = (value: AgentsDockSnapshot) => { snapshot = value; receivedAt = Date.now(); draw(); };
@@ -95,11 +103,13 @@ root.addEventListener('pointerdown', onPointerDown);
 root.addEventListener('click', onClick);
 document.addEventListener('keydown', onKeyDown);
 void call<AgentsDockSnapshot>('agents_dock_snapshot').then(accept).catch(() => draw());
-const unsubscribe = subscribeDockEvent<AgentsDockSnapshot>('agents-dock-changed', accept);
+const unsubscribe = subscribeDockEvent<AgentsDockSnapshot>('agents-dock-changed', accept).catch(() => () => undefined);
 const stopTick = startElapsedTick(list);
+const stopLocale = onLocaleChange(draw);
 draw();
 
 window.addEventListener('beforeunload', () => {
+  stopLocale();
   stopped = true; window.clearTimeout(intentTimer); window.clearTimeout(collapseTimer); stopTick();
   root.removeEventListener('pointerenter', onPointerEnter); root.removeEventListener('pointerleave', onPointerLeave);
   root.removeEventListener('pointerdown', onPointerDown); root.removeEventListener('click', onClick);

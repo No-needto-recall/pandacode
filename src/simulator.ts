@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './simulator.css';
 import { icon } from './dom';
 import { isWindows } from './platform';
@@ -30,7 +32,7 @@ export type AndroidSetup = { step: number; total: number; label: string; done: b
 
 const KEYS: Record<string, string> = { Enter: 'return', Backspace: 'backspace', Tab: 'tab', Escape: 'escape', ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', Delete: 'delete' };
 const TYPE_DELAY = 140, SCROLL_DELAY = 90, SETUP = 'android-setup', ADD_DUO = 'add-duo', DUO_TYPE = 'com.apple.CoreSimulator.SimDeviceType.iPhone-Duo';
-const POSES: { id: DuoPose; label: string; description: string }[] = [{ id: 'closed', label: 'Closed', description: 'Cover display' }, { id: 'book', label: 'Book', description: 'Inner display, half open' }, { id: 'open', label: 'Open', description: 'Inner display, flat' }];
+const POSES: { id: DuoPose; label: string; description: string }[] = [{ id: 'closed', get label() { return tr('modules.simulator.closed'); }, get description() { return tr('modules.common.cover_display'); } }, { id: 'book', get label() { return tr('modules.common.book'); }, get description() { return tr('modules.common.inner_display_half_open'); } }, { id: 'open', get label() { return tr('modules.simulator.open'); }, get description() { return tr('modules.common.inner_display_flat'); } }];
 const poseName = (pose: DuoPose | null | undefined) => POSES.find(p => p.id === pose)?.label ?? 'Closed';
 const sleep = (ms: number) => new Promise(resolve => window.setTimeout(resolve, ms));
 const isDark = () => document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
@@ -46,22 +48,22 @@ const forPlatform = (status: SimStatus): SimStatus => {
 };
 
 export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
-  root.innerHTML = `<div class="sim-stage-wrap"><button type="button" class="sim-reset" data-sim="reset" aria-label="Face forward" title="Face forward">${icon('reset')}</button><div class="sim-stage" tabindex="0" role="application" aria-label="iOS Simulator. Click the screen to tap, drag on it to swipe, type to enter text. Drag around the device to turn it." aria-describedby="sim-hint" title="Drag to turn · Scroll to zoom · Click the screen to tap · Double-click to face forward"></div></div>
-    <p class="sr-only" id="sim-hint">Drag around the device to turn it, scroll to zoom, click the screen to tap, double-click to face forward.</p>
+  root.innerHTML = `<div class="sim-stage-wrap"><button type="button" class="sim-reset" data-sim="reset" aria-label="${escapeI18n(tr('modules.common.face_forward'))}" title="${escapeI18n(tr('modules.common.face_forward'))}">${icon('reset')}</button><div class="sim-stage" tabindex="0" role="application" aria-label="${escapeI18n(tr('modules.common.ios_simulator_click_the_screen_to_tap_drag_on_it_to_swipe'))}" aria-describedby="sim-hint" title="${escapeI18n(tr('modules.common.drag_to_turn_scroll_to_zoom_click_the_screen_to_tap_double'))}"></div></div>
+    <p class="sr-only" id="sim-hint">${escapeI18n(tr('modules.common.drag_around_the_device_to_turn_it_scroll_to_zoom_click_the'))}</p>
     <p class="sim-status" role="status" hidden></p>
-    <div class="sim-axe" role="note" hidden><span>Touch and typing need <strong>AXe</strong>.</span><code></code><button type="button" class="secondary-button" data-sim="copy-axe">${icon('copy')}Copy</button></div>
+    <div class="sim-axe" role="note" hidden><span>${escape(tr('modules.simulator.axe'))}</span><code></code><button type="button" class="secondary-button" data-sim="copy-axe">${icon('copy')}${escape(tr('modules.simulator.copy'))}</button></div>
     <div class="sim-dock">
-      <button type="button" class="sim-device" data-sim="device" aria-haspopup="menu" aria-label="Choose simulator">${icon('phone')}<span class="sim-device-name">Simulator</span><small class="sim-device-runtime"></small>${icon('down')}</button>
-      <div class="sim-actions" role="toolbar" aria-label="Simulator controls">
-        <button type="button" class="icon-button" data-sim="power" aria-label="Boot simulator" title="Boot">${icon('stop')}</button>
-        <button type="button" class="icon-button" data-sim="back" aria-label="Back" title="Back" hidden>${icon('back')}</button>
-        <button type="button" class="icon-button" data-sim="home" aria-label="Home" title="Home">${icon('circle')}</button>
-        <button type="button" class="icon-button" data-sim="recents" aria-label="Recent apps" title="Recent apps" hidden>${icon('square')}</button>
-        <button type="button" class="icon-button" data-sim="lock" aria-label="Lock" title="Lock">${icon('lock')}</button>
-        <button type="button" class="icon-button" data-sim="pose" aria-haspopup="menu" aria-label="iPhone Duo pose: Closed" title="Closed" hidden>${icon('panel')}</button>
-        <button type="button" class="icon-button" data-sim="appearance" aria-label="Toggle dark appearance" title="Light / dark">${icon('moon')}</button>
-        <button type="button" class="icon-button" data-sim="capture" aria-label="Copy screenshot" title="Copy screenshot">${icon('camera')}</button>
-        <button type="button" class="icon-button sim-finish" data-sim="finish" aria-haspopup="menu" aria-label="Device finish" title="Finish"><span class="sim-finish-dot"></span></button>
+      <button type="button" class="sim-device" data-sim="device" aria-haspopup="menu" aria-label="${escapeI18n(tr('modules.common.choose_simulator'))}">${icon('phone')}<span class="sim-device-name">${escapeI18n(tr('modules.common.simulator'))}</span><small class="sim-device-runtime"></small>${icon('down')}</button>
+      <div class="sim-actions" role="toolbar" aria-label="${escapeI18n(tr('modules.common.simulator_controls'))}">
+        <button type="button" class="icon-button" data-sim="power" aria-label="${escapeI18n(tr('modules.common.boot_simulator'))}" title="${escapeI18n(tr('modules.common.boot'))}">${icon('stop')}</button>
+        <button type="button" class="icon-button" data-sim="back" aria-label="${escapeI18n(tr('modules.common.back'))}" title="${escapeI18n(tr('modules.common.back'))}" hidden>${icon('back')}</button>
+        <button type="button" class="icon-button" data-sim="home" aria-label="${escapeI18n(tr('modules.common.home'))}" title="${escapeI18n(tr('modules.common.home'))}">${icon('circle')}</button>
+        <button type="button" class="icon-button" data-sim="recents" aria-label="${escapeI18n(tr('modules.common.recent_apps'))}" title="${escapeI18n(tr('modules.common.recent_apps'))}" hidden>${icon('square')}</button>
+        <button type="button" class="icon-button" data-sim="lock" aria-label="${escapeI18n(tr('modules.common.lock'))}" title="${escapeI18n(tr('modules.common.lock'))}">${icon('lock')}</button>
+        <button type="button" class="icon-button" data-sim="pose" aria-haspopup="menu" aria-label="${escape(tr('modules.simulator.poseClosed'))}" title="${escapeI18n(tr('modules.simulator.closed'))}" hidden>${icon('panel')}</button>
+        <button type="button" class="icon-button" data-sim="appearance" aria-label="${escapeI18n(tr('modules.common.toggle_dark_appearance'))}" title="${escapeI18n(tr('modules.common.light_dark'))}">${icon('moon')}</button>
+        <button type="button" class="icon-button" data-sim="capture" aria-label="${escapeI18n(tr('modules.common.copy_screenshot'))}" title="${escapeI18n(tr('modules.common.copy_screenshot'))}">${icon('camera')}</button>
+        <button type="button" class="icon-button sim-finish" data-sim="finish" aria-haspopup="menu" aria-label="${escapeI18n(tr('modules.common.device_finish'))}" title="${escapeI18n(tr('modules.common.finish'))}"><span class="sim-finish-dot"></span></button>
       </div>
     </div>`;
   const stage = root.querySelector<HTMLElement>('.sim-stage')!;
@@ -116,12 +118,12 @@ export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
 
   function render(): void {
     const chosen = current();
-    root.querySelector('.sim-device-name')!.textContent = chosen?.name ?? (status?.available ? 'No simulators' : 'Simulator');
+    root.querySelector('.sim-device-name')!.textContent = chosen?.name ?? (status?.available ? tr('modules.common.no_simulators') : tr('modules.common.simulator'));
     root.querySelector('.sim-device-runtime')!.textContent = chosen ? `${chosen.runtime} · ${chosen.state === 'Booted' ? 'Running' : chosen.state}` : '';
     button('device').title = chosen ? `${chosen.name} · ${chosen.runtime}` : '';
     const power = button('power');
     power.innerHTML = icon(booted() ? 'stop' : 'play');
-    power.setAttribute('aria-label', booted() ? 'Shut down simulator' : 'Boot simulator'); power.title = booted() ? 'Shut down' : 'Boot';
+    power.setAttribute('aria-label', booted() ? 'Shut down simulator' : 'Boot simulator'); power.title = booted() ? tr('modules.common.shut_down') : tr('modules.common.boot');
     power.disabled = !chosen || busy;
     for (const name of ['home', 'lock', 'appearance', 'capture', 'back', 'recents']) button(name).disabled = !booted() || busy;
     // Android navigates with Back and Recents beside Home.
@@ -129,10 +131,10 @@ export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
     button('back').hidden = !android; button('recents').hidden = !android;
     button('appearance').innerHTML = icon(appearance === 'dark' ? 'sun' : 'moon');
     const pose = button('pose'), shown = poseName(status?.pose);
-    pose.hidden = !chosen?.duo; pose.setAttribute('aria-label', `iPhone Duo pose: ${shown}`); pose.title = shown; pose.disabled = !booted() || busy;
+    pose.hidden = !chosen?.duo; pose.setAttribute('aria-label', tr('modules.dynamic.duoPose', { pose: String(shown) })); pose.title = shown; pose.disabled = !booted() || busy;
     const look = chosenFinish(spec());
     button('finish').style.setProperty('--finish', look.color);
-    button('finish').setAttribute('aria-label', `Device finish: ${look.name}`); button('finish').title = look.name;
+    button('finish').setAttribute('aria-label', tr('modules.dynamic.finish', { finish: String(look.name) })); button('finish').title = look.name;
     button('finish').disabled = !chosen;
     const axeNote = root.querySelector<HTMLElement>('.sim-axe')!;
     axeNote.hidden = !status || !status.available || status.axe;
@@ -194,7 +196,7 @@ export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
 
   async function input(value: Input): Promise<void> {
     const udid = status?.selected; if (!udid || !booted()) return;
-    if (status && !status.axe && current()?.platform !== 'android') { if (!warnedAxe) { warnedAxe = true; host.notify(`Touch input needs AXe: ${status.axeInstall}`); } return; }
+    if (status && !status.axe && current()?.platform !== 'android') { if (!warnedAxe) { warnedAxe = true; host.notify(tr('modules.dynamic.axeNeeded', { command: String(status.axeInstall) })); } return; }
     try { await host.call<string>('simulator_input', { udid, input: value }); }
     catch (error) { host.notify(error instanceof Error ? error.message : String(error)); }
   }
@@ -253,15 +255,15 @@ export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
     try {
       const png = await host.call<ArrayBuffer>('simulator_capture', { udid });
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': new Blob([png], { type: 'image/png' }) })]);
-      host.notify('Simulator screenshot copied');
+      host.notify(tr('modules.common.simulator_screenshot_copied'));
     } catch (error) { host.notify(error instanceof Error ? error.message : String(error)); }
   }
   function chooseDevice(anchor: HTMLElement): void {
     if (!status) return;
     const items: ChoiceItem[] = status.devices.map(d => ({ id: d.udid, label: d.name, description: `${d.duo ? 'Foldable · ' : ''}${d.runtime} · ${d.state === 'Booted' ? 'Running' : d.state}`, icon: 'phone', selected: d.udid === status?.selected }));
-    if (status.available && !isWindows && !status.devices.some(d => d.duo)) items.push({ id: ADD_DUO, label: 'Add iPhone Duo', description: status.duoAvailable ? 'Foldable · creates a simulator' : 'Needs Xcode 27.1 or later', icon: 'plus', disabled: !status.duoAvailable });
+    if (status.available && !isWindows && !status.devices.some(d => d.duo)) items.push({ id: ADD_DUO, label: tr('modules.common.add_iphone_duo'), description: status.duoAvailable ? tr('modules.common.foldable_creates_a_simulator') : tr('modules.common.needs_xcode_27_1_or_later'), icon: 'plus', disabled: !status.duoAvailable });
     // One-click setup uses Homebrew, so Windows points to Android Studio instead.
-    if (!status.android && !isWindows) items.push({ id: SETUP, label: settingUp ? 'Setting up Android…' : 'Set up Android emulator…', description: 'Downloads about 2 GB with Homebrew', icon: 'download', disabled: settingUp });
+    if (!status.android && !isWindows) items.push({ id: SETUP, label: settingUp ? tr('modules.common.setting_up_android') : tr('modules.common.set_up_android_emulator'), description: tr('modules.common.downloads_about_2_gb_with_homebrew'), icon: 'download', disabled: settingUp });
     if (!items.length) return;
     host.choose(anchor, 'Devices', items, id => {
       if (id === SETUP) { void setupAndroid(); return; }
@@ -325,7 +327,7 @@ export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
     const stop = await host.listen?.('android-setup', event => { if (!event.done) say(`Android setup ${event.step}/${event.total} · ${event.label}`); });
     try {
       const avd = await host.call<string>('android_setup');
-      host.notify('Android emulator ready');
+      host.notify(tr('modules.common.android_emulator_ready'));
       say('');
       await refresh();
       status = await call('simulator_select', { udid: `android:${avd}` });
@@ -365,7 +367,7 @@ export function mountSimulator(root: HTMLElement, host: SimulatorHost) {
         });
         break;
       }
-      case 'copy-axe': void navigator.clipboard.writeText(status?.axeInstall ?? '').then(() => host.notify('Install command copied')); break;
+      case 'copy-axe': void navigator.clipboard.writeText(status?.axeInstall ?? '').then(() => host.notify(tr('modules.common.install_command_copied'))); break;
     }
   });
   const themeWatch = new MutationObserver(() => device?.setDark(isDark()));

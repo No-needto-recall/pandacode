@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './browser.css';
 import { call, preview, subscribe } from './bridge';
 import { escape, icon } from './dom';
@@ -38,10 +40,10 @@ export async function mountBrowser(host: HTMLElement, options: Options): Promise
   const tool = (action: string, label: string, symbol: string) => `<button type="button" class="browser-tool" data-browser-action="${action}" aria-label="${label}" title="${label}">${icon(symbol)}</button>`;
   host.innerHTML = `<div class="browser-toolbar">
     ${tool('back', 'Go back', 'back')}${tool('forward', 'Go forward', 'forward')}${tool('reload', 'Reload page', 'refresh')}
-    <form class="browser-address"><span>${icon('globe')}</span><input aria-label="Browser URL" placeholder="Enter URL or localhost port" autocomplete="off" spellcheck="false" inputmode="url"><button type="submit" aria-label="Open URL">${icon('arrow')}</button></form>
+    <form class="browser-address"><span>${icon('globe')}</span><input aria-label="${escapeI18n(tr('modules.common.browser_url'))}" placeholder="${escapeI18n(tr('modules.common.enter_url_or_localhost_port'))}" autocomplete="off" spellcheck="false" inputmode="url"><button type="submit" aria-label="${escapeI18n(tr('modules.common.open_url'))}">${icon('arrow')}</button></form>
     ${tool('pick', 'Attach an element', 'select')}${tool('capture', 'Attach screenshot', 'camera')}
   </div><div class="browser-location"><button type="button" data-browser-action="home">${icon('server')}Local servers</button><span class="browser-page-title"></span><button type="button" class="browser-watch-jev" data-browser-action="watch-jev" hidden>${icon('spark')}Watch Jev</button>${options.test ? tool('test', 'Test with Jev', 'spark') : ''}${tool('close', 'Close browser', 'close')}</div>
-  <div class="browser-notice" role="status" hidden></div><div class="browser-viewport"><section class="browser-home"><div class="browser-home-heading"><h2>Local servers</h2>${tool('refresh-ports', 'Refresh local servers', 'refresh')}</div><div class="browser-servers" aria-label="Local servers"></div><p class="browser-home-hint">Open a server, or enter any website above.</p></section><div class="browser-guest-placeholder" hidden></div></div>`;
+  <div class="browser-notice" role="status" hidden></div><div class="browser-viewport"><section class="browser-home"><div class="browser-home-heading"><h2>${escapeI18n(tr('modules.common.local_servers'))}</h2>${tool('refresh-ports', 'Refresh local servers', 'refresh')}</div><div class="browser-servers" aria-label="${escapeI18n(tr('modules.common.local_servers'))}"></div><p class="browser-home-hint">${escapeI18n(tr('modules.common.open_a_server_or_enter_any_website_above'))}</p></section><div class="browser-guest-placeholder" hidden></div></div>`;
   const query = <T extends HTMLElement = HTMLElement>(selector: string) => host.querySelector<T>(selector)!;
   const address = query<HTMLInputElement>('.browser-address input'), viewport = query('.browser-viewport');
   const notice = query('.browser-notice'), placeholder = query('.browser-guest-placeholder');
@@ -101,7 +103,7 @@ export async function mountBrowser(host: HTMLElement, options: Options): Promise
     }, 16);
   }
   function renderServers(): void {
-    query('.browser-servers').innerHTML = servers.length ? servers.map(server => `<button class="browser-server" type="button" data-server-url="${escape(server.url)}"><span class="browser-server-icon">${icon('terminal')}</span><span><strong>${escape(server.process || 'Local server')}</strong><small>${escape(new URL(server.url).host)}</small></span><span class="browser-server-dot" aria-label="Listening"></span>${icon('chevron')}</button>`).join('') : '<div class="browser-no-servers">No local servers found.<small>Start your app in the terminal, then refresh.</small></div>';
+    query('.browser-servers').innerHTML = servers.length ? servers.map(server => `<button class="browser-server" type="button" data-server-url="${escape(server.url)}"><span class="browser-server-icon">${icon('terminal')}</span><span><strong>${escape(server.process || 'Local server')}</strong><small>${escape(new URL(server.url).host)}</small></span><span class="browser-server-dot" aria-label="${escapeI18n(tr('modules.common.listening'))}"></span>${icon('chevron')}</button>`).join('') : `<div class="browser-no-servers">${escapeI18n(tr('modules.common.no_local_servers_found'))}<small>${escapeI18n(tr('modules.common.start_your_app_in_the_terminal_then_refresh'))}</small></div>`;
   }
   async function refreshServers(): Promise<void> {
     const ticket = ++request;

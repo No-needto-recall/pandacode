@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './conversation-import.css';
 import { escape, icon } from './dom';
 import { trackSegment } from './motion';
@@ -36,7 +39,7 @@ function age(at: number, now = Date.now()): string {
   if (Math.abs(minutes) < 60) return relative.format(minutes, 'minute');
   if (Math.abs(minutes) < 1440) return relative.format(Math.round(minutes / 60), 'hour');
   if (Math.abs(minutes) < 43200) return relative.format(Math.round(minutes / 1440), 'day');
-  return new Date(at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(at).toLocaleDateString(getLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function folderName(path: string): string { return path.split(/[\\/]/).filter(Boolean).pop() ?? path; }
 
@@ -47,13 +50,13 @@ export function mountConversationImport(host: HTMLElement, options: ImportOption
   let loading = false, importing = false, disposed = false, request = 0, searchTimer = 0;
   const selected = new Set<string>();
   host.classList.add('conversation-import');
-  host.innerHTML = `<p class="dialog-description">Bring conversations you started in Claude Code or Codex into PandaCode. Each continues its own session, in the project for its folder.</p>
-    <div class="import-controls"><div class="import-sources" role="group" aria-label="Import from">${SOURCES.map(item => `<button type="button" data-source="${item.id}" aria-pressed="${item.id === source}">${providerLogo(item.id)}<span>${item.label}</span></button>`).join('')}</div>
-      <label class="import-search">${icon('search')}<input type="search" placeholder="Search conversations" aria-label="Search conversations" autocomplete="off"></label></div>
-    <div class="import-bar"><label class="import-all"><input type="checkbox" aria-label="Select all shown conversations"><span>Select all</span></label><span class="import-count" role="status"></span></div>
-    <div class="import-list" role="group" aria-label="Conversations"></div>
+  host.innerHTML = `<p class="dialog-description">${escapeI18n(tr('modules.common.bring_conversations_you_started_in_claude_code_or_codex_into_pandacode_each'))}</p>
+    <div class="import-controls"><div class="import-sources" role="group" aria-label="${escapeI18n(tr('modules.common.import_from'))}">${SOURCES.map(item => `<button type="button" data-source="${item.id}" aria-pressed="${item.id === source}">${providerLogo(item.id)}<span>${item.label}</span></button>`).join('')}</div>
+      <label class="import-search">${icon('search')}<input type="search" placeholder="${escapeI18n(tr('modules.common.search_conversations'))}" aria-label="${escapeI18n(tr('modules.common.search_conversations'))}" autocomplete="off"></label></div>
+    <div class="import-bar"><label class="import-all"><input type="checkbox" aria-label="${escapeI18n(tr('modules.common.select_all_shown_conversations'))}"><span>${escapeI18n(tr('modules.common.select_all'))}</span></label><span class="import-count" role="status"></span></div>
+    <div class="import-list" role="group" aria-label="${escapeI18n(tr('modules.common.conversations'))}"></div>
     <p class="import-error" role="alert" hidden></p>
-    <div class="dialog-footer"><button type="button" class="secondary-button" data-action="close-dialog">Cancel</button><button type="button" class="primary-button import-commit" disabled>Import</button></div>`;
+    <div class="dialog-footer"><button type="button" class="secondary-button" data-action="close-dialog">${escapeI18n(tr('modules.common.cancel'))}</button><button type="button" class="primary-button import-commit" disabled>${escapeI18n(tr('modules.common.import'))}</button></div>`;
   const sources = host.querySelector<HTMLElement>('.import-sources')!;
   const search = host.querySelector<HTMLInputElement>('input[type=search]')!;
   const list = host.querySelector<HTMLElement>('.import-list')!;
@@ -70,21 +73,21 @@ export function mountConversationImport(host: HTMLElement, options: ImportOption
     all.indeterminate = chosen > 0 && chosen < choices.length;
     all.disabled = !choices.length || importing;
     commit.disabled = !selected.size || importing;
-    commit.textContent = importing ? 'Importing…' : selected.size ? `Import ${selected.size} ${selected.size === 1 ? 'conversation' : 'conversations'}` : 'Import';
-    count.textContent = loading ? 'Loading…' : items.length ? `${items.length}${cursor ? '+' : ''} found${selected.size ? ` · ${selected.size} selected` : ''}` : '';
+    commit.textContent = importing ? tr('modules.common.importing') : selected.size ? `Import ${selected.size} ${selected.size === 1 ? 'conversation' : 'conversations'}` : tr('modules.common.import');
+    count.textContent = loading ? tr('modules.common.loading') : items.length ? `${items.length}${cursor ? '+' : ''} found${selected.size ? ` · ${selected.size} selected` : ''}` : '';
   }
   function row(item: Importable): string {
     const meta = [escape(folderName(item.folder) || 'Unknown folder'), item.messages ? `${item.messages} messages` : '', age(item.updatedAt)].filter(Boolean).join(' · ');
     const state = item.importedTaskId ? `<button type="button" class="import-open" data-open="${escape(item.importedTaskId)}">In PandaCode${icon('forward')}</button>`
-      : item.unavailable ? `<span class="import-unavailable" title="${escape(item.unavailable)}">Unavailable</span>` : '';
+      : item.unavailable ? `<span class="import-unavailable" title="${escape(item.unavailable)}">${escapeI18n(tr('modules.common.unavailable'))}</span>` : '';
     const disabled = Boolean(item.importedTaskId || item.unavailable);
     return `<label class="import-row ${disabled ? 'disabled' : ''}" data-id="${escape(item.id)}" title="${escape(item.folder)}"><input type="checkbox" value="${escape(item.id)}" ${selected.has(item.id) ? 'checked' : ''} ${disabled || importing ? 'disabled' : ''}>
       <span class="import-copy"><strong>${escape(item.title)}</strong><small>${meta}${item.unavailable ? ` · ${escape(item.unavailable)}` : ''}</small></span>${state}</label>`;
   }
   function render(): void {
     const installed = options.installed.includes(source);
-    list.innerHTML = loading && !items.length ? '<p class="import-empty">Reading conversations…</p>'
-      : items.length ? items.map(row).join('') + (cursor ? '<button type="button" class="secondary-button import-more">Load more</button>' : '')
+    list.innerHTML = loading && !items.length ? `<p class="import-empty">${escapeI18n(tr('modules.common.reading_conversations'))}</p>`
+      : items.length ? items.map(row).join('') + (cursor ? `<button type="button" class="secondary-button import-more">${escapeI18n(tr('modules.common.load_more'))}</button>` : '')
         : `<p class="import-empty">${escape(note ?? (installed ? 'No conversations match.' : `${SOURCES.find(item => item.id === source)!.label} is not installed on this computer.`))}</p>`;
     sync();
   }
@@ -135,7 +138,7 @@ export function mountConversationImport(host: HTMLElement, options: ImportOption
       render(); return;
     }
     if (input.type === 'checkbox' && input.value) {
-      if (input.checked && selected.size >= MAX_SELECTION) { input.checked = false; error.textContent = `Import up to ${MAX_SELECTION} conversations at a time.`; error.hidden = false; return; }
+      if (input.checked && selected.size >= MAX_SELECTION) { input.checked = false; error.textContent = tr('modules.dynamic.importLimit', { count: String(MAX_SELECTION) }); error.hidden = false; return; }
       if (input.checked) selected.add(input.value); else selected.delete(input.value);
       sync();
     }

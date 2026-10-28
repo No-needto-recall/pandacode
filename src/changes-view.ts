@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import type { GitFile, GitStatus } from './types';
 import type { DiffViewerController } from './diff-viewer';
 import { escape, fileIcon, icon } from './dom';
@@ -109,8 +111,8 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
       ${iconButton('menu', 'More actions', icon('more'), 'aria-haspopup="menu"')}
     </div>
     <form class="cv-commit" hidden>
-      <input class="cv-commit-input" type="text" placeholder="Commit message" aria-label="Commit message" autocomplete="off" spellcheck="true">
-      <button type="submit" class="cv-commit-submit">Commit</button>
+      <input class="cv-commit-input" type="text" placeholder="${escapeI18n(tr('modules.common.commit_message'))}" aria-label="${escapeI18n(tr('modules.common.commit_message'))}" autocomplete="off" spellcheck="true">
+      <button type="submit" class="cv-commit-submit">${escapeI18n(tr('modules.common.commit'))}</button>
     </form>
     <div class="cv-body" tabindex="-1"></div>`;
   const q = <T extends HTMLElement>(s: string) => host.querySelector<T>(s)!;
@@ -180,7 +182,7 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
     delsLabel.textContent = n ? `-${dels}` : '';
     const allFolded = n > 0 && [...entries.keys()].every(p => collapsed.has(p));
     foldButton.innerHTML = allFolded ? UNFOLD : FOLD;
-    foldButton.title = allFolded ? 'Expand all' : 'Collapse all';
+    foldButton.title = allFolded ? tr('modules.common.expand_all') : tr('modules.common.collapse_all');
     foldButton.setAttribute('aria-label', foldButton.title);
     foldButton.setAttribute('aria-pressed', String(allFolded));
     foldButton.disabled = !n;
@@ -203,7 +205,7 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
         <span class="cv-pill"></span>
         ${iconButton('file-menu', 'File actions', icon('more'), 'aria-haspopup="menu"')}
       </div>
-      <div class="cv-file-body"><div class="cv-placeholder">Loading diff…</div></div>`;
+      <div class="cv-file-body"><div class="cv-placeholder">${escapeI18n(tr('modules.common.loading_diff'))}</div></div>`;
     return el;
   }
 
@@ -219,7 +221,7 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
     entry.load = 'idle';
     entry.raw = entry.patch = '';
     entry.adds = entry.dels = 0;
-    entry.body.innerHTML = '<div class="cv-placeholder">Loading diff…</div>';
+    entry.body.innerHTML = `<div class="cv-placeholder">${escapeI18n(tr('modules.common.loading_diff'))}</div>`;
     setStat(entry);
   }
 
@@ -257,7 +259,7 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
       if (disposed || token !== entry.token || (quiet && entry.load === 'loaded')) return;
       drop(entry);
       entry.load = 'error';
-      entry.body.innerHTML = `<div class="cv-placeholder cv-error">${icon('alert')}<span>${escape(reason instanceof Error ? reason.message : String(reason || 'Unable to load diff'))}</span><button type="button" class="cv-link" data-cv-action="retry-file">Retry</button></div>`;
+      entry.body.innerHTML = `<div class="cv-placeholder cv-error">${icon('alert')}<span>${escape(reason instanceof Error ? reason.message : String(reason || 'Unable to load diff'))}</span><button type="button" class="cv-link" data-cv-action="retry-file">${escapeI18n(tr('modules.common.retry'))}</button></div>`;
     }
   }
 
@@ -309,9 +311,9 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
     branchLabel.hidden = !branch;
     branchLabel.textContent = branch;
     branchLabel.title = branch && `Branch ${branch}`;
-    if (error) message(`${icon('alert')}<span>${escape(error)}</span><button type="button" class="cv-link" data-cv-action="retry">Retry</button>`, 'cv-state-error');
-    else if (!status) message('<span>Loading changes…</span>');
-    else if (!status.isRepo) message(`${icon('branch')}<span>Not a Git repository</span>`);
+    if (error) message(`${icon('alert')}<span>${escape(error)}</span><button type="button" class="cv-link" data-cv-action="retry">${escapeI18n(tr('modules.common.retry'))}</button>`, 'cv-state-error');
+    else if (!status) message(`<span>${escapeI18n(tr('modules.common.loading_changes'))}</span>`);
+    else if (!status.isRepo) message(`${icon('branch')}<span>${escapeI18n(tr('modules.common.not_a_git_repository'))}</span>`);
     else {
       const wanted = visible();
       if (!wanted.length) message(`${icon('check')}<span>${scope === 'all' ? 'Working tree clean' : scope === 'staged' ? 'No staged changes' : 'No unstaged changes'}</span>`, 'cv-state-clean');
@@ -389,7 +391,7 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
       await deps.commit(text);
       if (!disposed) closeCommit();
     } catch (reason) {
-      deps.notify(reason instanceof Error && reason.message ? reason.message : 'Commit failed');
+      deps.notify(reason instanceof Error && reason.message ? reason.message : tr('modules.common.commit_failed'));
     } finally {
       committing = false;
       if (!disposed) totals();
@@ -397,17 +399,17 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
   }
 
   function copy(path: string): void {
-    void navigator.clipboard.writeText(path).then(() => deps.notify('Copied path'), () => deps.notify('Unable to copy path'));
+    void navigator.clipboard.writeText(path).then(() => deps.notify(tr('modules.common.copied_path')), () => deps.notify(tr('modules.common.unable_to_copy_path')));
   }
 
   function fileMenu(anchor: HTMLElement, path: string): void {
     const file = files().find(f => f.path === path);
     if (!file) return;
     const items = [
-      ...(isUnstaged(file) ? [{ id: 'stage', label: 'Stage file', icon: 'plus' }] : []),
-      ...(isStaged(file) ? [{ id: 'unstage', label: 'Unstage file', icon: 'minimize' }] : []),
-      { id: 'open', label: 'Open file', icon: 'file', disabled: file.working === 'D' || (file.index === 'D' && file.working === ' ') },
-      { id: 'copy', label: 'Copy path', icon: 'copy' },
+      ...(isUnstaged(file) ? [{ id: 'stage', label: tr('modules.common.stage_file'), icon: 'plus' }] : []),
+      ...(isStaged(file) ? [{ id: 'unstage', label: tr('modules.common.unstage_file'), icon: 'minimize' }] : []),
+      { id: 'open', label: tr('modules.common.open_file'), icon: 'file', disabled: file.working === 'D' || (file.index === 'D' && file.working === ' ') },
+      { id: 'copy', label: tr('modules.common.copy_path'), icon: 'copy' },
     ];
     deps.choose(anchor, path, items, id => {
       if (id === 'stage' || id === 'unstage') void run(deps.stage([path], id === 'stage'), id === 'stage' ? 'Unable to stage file' : 'Unable to unstage file');
@@ -438,11 +440,11 @@ export function mountChangesView(host: HTMLElement, deps: ChangesViewDeps): Chan
       case 'menu': {
         const staged = stagedFiles().map(f => f.path), unstaged = unstagedFiles().map(f => f.path);
         deps.choose(target, 'Changes', [
-          { id: 'stage-all', label: 'Stage all', icon: 'plus', disabled: !unstaged.length },
-          { id: 'unstage-all', label: 'Unstage all', icon: 'minimize', disabled: !staged.length },
-          { id: 'commit', label: 'Commit…', icon: 'check', disabled: !status?.isRepo },
-          { id: 'refresh', label: 'Refresh', icon: 'refresh' },
-          ...(deps.worktree ? [{ id: 'worktree', label: 'Create isolated worktree…', icon: 'branch' }] : []),
+          { id: 'stage-all', label: tr('modules.common.stage_all'), icon: 'plus', disabled: !unstaged.length },
+          { id: 'unstage-all', label: tr('modules.common.unstage_all'), icon: 'minimize', disabled: !staged.length },
+          { id: 'commit', label: tr('modules.common.commit_c3cbaf'), icon: 'check', disabled: !status?.isRepo },
+          { id: 'refresh', label: tr('modules.common.refresh'), icon: 'refresh' },
+          ...(deps.worktree ? [{ id: 'worktree', label: tr('modules.common.create_isolated_worktree'), icon: 'branch' }] : []),
         ], id => {
           if (id === 'stage-all' && unstaged.length) void run(deps.stage(unstaged, true), 'Unable to stage files');
           else if (id === 'unstage-all' && staged.length) void run(deps.stage(staged, false), 'Unable to unstage files');

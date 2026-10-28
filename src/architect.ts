@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './architect.css';
 import { renderTurnChanges, captureChangeCards, restoreChangeCards } from './turn-changes';
 import { call } from './bridge';
@@ -50,9 +53,9 @@ export function openArchitectSetup(anchor: HTMLElement, load: () => Promise<Setu
   panel.className = 'architect-setup-popover floating-menu';
   panel.id = `team-setup-${crypto.randomUUID()}`;
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Architect & workers');
+  panel.setAttribute('aria-label', tr('modules.common.architect_workers'));
   panel.tabIndex = -1;
-  panel.innerHTML = `<header class="architect-setup-heading"><h2>Architect & workers</h2><button type="button" class="icon-button" aria-label="Close dialog">${icon('close')}</button></header><div class="architect-setup-scroll"><div id="architect-setup-host"><p class="architect-loading" role="status">Loading team setup…</p></div></div>`;
+  panel.innerHTML = `<header class="architect-setup-heading"><h2>${escapeI18n(tr('modules.common.architect_workers'))}</h2><button type="button" class="icon-button" aria-label="${escapeI18n(tr('modules.common.close_dialog'))}">${icon('close')}</button></header><div class="architect-setup-scroll"><div id="architect-setup-host"><p class="architect-loading" role="status">${escapeI18n(tr('modules.common.loading_team_setup'))}</p></div></div>`;
   const host = panel.querySelector<HTMLElement>('#architect-setup-host')!;
   let closed = false, frame = 0, setup: SetupController | undefined;
   const expanded = anchor.getAttribute('aria-expanded'), controls = anchor.getAttribute('aria-controls');
@@ -148,7 +151,7 @@ export function mountArchitectSetup(host: HTMLElement, options: SetupOptions): S
   const setupHelp = 'Applies to the next architect turn. Existing workers keep their models.';
   const parallelHelp = 'Maximum simultaneous assignments. The architect dispatches independent work; overlapping writes or dependencies may wait.';
   const guidanceHelp = 'Extra instructions for the lead, added to the built-in architect rules and sent with them. Leave it empty to use the guidance from Settings → Agent teams, or the built-in rules alone when none is set.';
-  host.innerHTML = `<form class="architect-setup"><section class="architect-config-section"><div class="architect-section-label"><h3>Architect</h3><span>Plans & reviews</span></div><button class="architect-model" type="button" aria-label="Choose architect model" aria-haspopup="dialog" aria-expanded="false">${modelMarkup(architect, providers)}</button><div class="architect-guidance"><label for="team-guidance">Lead guidance</label>${infoMark(guidanceHelp, 'Lead guidance')}<span class="sr-only" id="team-guidance-help">${escape(guidanceHelp)}</span><textarea id="team-guidance" name="leadGuidance" rows="3" maxlength="2000" aria-describedby="team-guidance-help" placeholder="Extra instructions for the lead, on top of the built-in team rules.">${escape(config.leadGuidance ?? '')}</textarea><button type="button" class="secondary-button architect-guidance-reset">Reset to default</button></div></section><section class="architect-config-section"><div class="architect-section-label"><h3>Workers</h3><button type="button" class="architect-add" aria-label="Add worker profile">${icon('plus')} Add</button></div><div class="architect-profiles"></div></section><section class="architect-parallel"><div class="architect-parallel-controls"><label for="team-parallel">At once</label>${infoMark(parallelHelp, 'How parallel workers run')}<span id="team-parallel-help" class="sr-only">${parallelHelp}</span></div><div class="architect-parallel-controls"><label><input id="team-unlimited" type="checkbox" aria-label="Unlimited workers" aria-describedby="team-parallel-help" ${config.maxParallel === 0 ? 'checked' : ''}>Unlimited</label><input id="team-parallel" name="maxParallel" aria-label="Workers at once" aria-describedby="team-parallel-help" type="number" min="1" step="1" value="${config.maxParallel || 3}" ${config.maxParallel === 0 ? 'hidden' : ''} ${config.maxParallel === 0 ? 'disabled' : ''} required></div></section><details class="architect-limits"><summary>Run limits & context</summary><div class="architect-limit-fields"><label>Architect rounds<input type="number" name="maxRounds" min="1" max="20" value="${config.maxRounds}" required></label><label>Worker assignments<input type="number" name="maxAssignments" min="1" max="50" value="${config.maxAssignments}" required></label><label>Result summary limit<input type="number" name="summaryLimit" aria-label="Result summary limit" min="512" max="6000" value="${config.summaryLimit}" required><small>Bytes per worker result</small></label></div><p>Short summaries keep the architect's context focused. Full worker transcripts remain available.</p><p>Shared checkout · overlapping write scopes wait. Read-only assignments can run alongside writers. Scopes coordinate work; task permissions apply to every worker.</p></details>${task.resumeId && !team ? '<p class="architect-workspace-note">A fresh architect context enables delegation. Your saved conversation stays here.</p>' : ''}${team ? `<p class="architect-workspace-note">Next architect turn ${infoMark(setupHelp, 'When team changes apply')}<span class="sr-only">${setupHelp}</span></p>` : ''}<p class="architect-setup-error" role="alert" hidden></p><div class="architect-setup-footer">${canDisable ? '<button class="secondary-button architect-disable" type="button">Use a single agent</button>' : '<span>Remembered for new tasks</span>'}<button class="primary-button" type="submit">${team && !canDisable ? 'Apply setup' : 'Save setup'}</button></div></form>`;
+  host.innerHTML = `<form class="architect-setup"><section class="architect-config-section"><div class="architect-section-label"><h3>${escapeI18n(tr('modules.common.architect'))}</h3><span>${escapeI18n(tr('modules.common.plans_reviews'))}</span></div><button class="architect-model" type="button" aria-label="${escapeI18n(tr('modules.common.choose_architect_model'))}" aria-haspopup="dialog" aria-expanded="false">${modelMarkup(architect, providers)}</button><div class="architect-guidance"><label for="team-guidance">${escapeI18n(tr('modules.common.lead_guidance'))}</label>${infoMark(guidanceHelp, tr('modules.common.lead_guidance'))}<span class="sr-only" id="team-guidance-help">${escape(guidanceHelp)}</span><textarea id="team-guidance" name="leadGuidance" rows="3" maxlength="2000" aria-describedby="team-guidance-help" placeholder="${escapeI18n(tr('modules.common.extra_instructions_for_the_lead_on_top_of_the_built_in_team'))}">${escape(config.leadGuidance ?? '')}</textarea><button type="button" class="secondary-button architect-guidance-reset">${escapeI18n(tr('modules.common.reset_to_default'))}</button></div></section><section class="architect-config-section"><div class="architect-section-label"><h3>${escapeI18n(tr('modules.common.workers'))}</h3><button type="button" class="architect-add" aria-label="${escapeI18n(tr('modules.common.add_worker_profile'))}">${icon('plus')} Add</button></div><div class="architect-profiles"></div></section><section class="architect-parallel"><div class="architect-parallel-controls"><label for="team-parallel">${escapeI18n(tr('modules.common.at_once'))}</label>${infoMark(parallelHelp, tr('modules.common.how_parallel_workers_run'))}<span id="team-parallel-help" class="sr-only">${parallelHelp}</span></div><div class="architect-parallel-controls"><label><input id="team-unlimited" type="checkbox" aria-label="${escapeI18n(tr('modules.common.unlimited_workers'))}" aria-describedby="team-parallel-help" ${config.maxParallel === 0 ? 'checked' : ''}>${escapeI18n(tr('modules.common.unlimited'))}</label><input id="team-parallel" name="maxParallel" aria-label="${escapeI18n(tr('modules.common.workers_at_once'))}" aria-describedby="team-parallel-help" type="number" min="1" step="1" value="${config.maxParallel || 3}" ${config.maxParallel === 0 ? 'hidden' : ''} ${config.maxParallel === 0 ? 'disabled' : ''} required></div></section><details class="architect-limits"><summary>${escapeI18n(tr('modules.common.run_limits_context'))}</summary><div class="architect-limit-fields"><label>${escapeI18n(tr('modules.common.architect_rounds'))}<input type="number" name="maxRounds" min="1" max="20" value="${config.maxRounds}" required></label><label>${escapeI18n(tr('modules.common.worker_assignments'))}<input type="number" name="maxAssignments" min="1" max="50" value="${config.maxAssignments}" required></label><label>${escapeI18n(tr('modules.common.result_summary_limit'))}<input type="number" name="summaryLimit" aria-label="${escapeI18n(tr('modules.common.result_summary_limit'))}" min="512" max="6000" value="${config.summaryLimit}" required><small>${escapeI18n(tr('modules.common.bytes_per_worker_result'))}</small></label></div><p>${escapeI18n(tr('modules.common.short_summaries_keep_the_architect_s_context_focused_full_worker_transcripts_remain'))}</p><p>${escapeI18n(tr('modules.common.shared_checkout_overlapping_write_scopes_wait_read_only_assignments_can_run_alongside'))}</p></details>${task.resumeId && !team ? `<p class="architect-workspace-note">${escapeI18n(tr('modules.common.a_fresh_architect_context_enables_delegation_your_saved_conversation_stays_here'))}</p>` : ''}${team ? `<p class="architect-workspace-note">Next architect turn ${infoMark(setupHelp, tr('modules.common.when_team_changes_apply'))}<span class="sr-only">${setupHelp}</span></p>` : ''}<p class="architect-setup-error" role="alert" hidden></p><div class="architect-setup-footer">${canDisable ? `<button class="secondary-button architect-disable" type="button">${escapeI18n(tr('modules.common.use_a_single_agent'))}</button>` : `<span>${escapeI18n(tr('modules.common.remembered_for_new_tasks'))}</span>`}<button class="primary-button" type="submit">${team && !canDisable ? 'Apply setup' : 'Save setup'}</button></div></form>`;
   const form = host.querySelector<HTMLFormElement>('form')!;
   const guidanceField = host.querySelector<HTMLTextAreaElement>('#team-guidance')!;
   const profiles = host.querySelector<HTMLElement>('.architect-profiles')!;
@@ -236,9 +239,9 @@ export function mountArchitectSetup(host: HTMLElement, options: SetupOptions): S
     error.hidden = true;
     for (const name of ['maxRounds', 'maxAssignments', 'summaryLimit'] as const) config[name] = Number((form.elements.namedItem(name) as HTMLInputElement).value);
     config.leadGuidance = guidanceField.value.trim() || null;
-    if (!disable && !unlimited.checked && (!Number.isSafeInteger(config.maxParallel) || config.maxParallel < 1)) { error.textContent = 'Choose a whole worker count or Unlimited.'; error.hidden = false; return; }
-    if (!disable && new TextEncoder().encode(config.leadGuidance ?? '').length > 2000) { error.textContent = 'Lead guidance must be under 2000 bytes.'; error.hidden = false; guidanceField.focus(); return; }
-    if (!disable && config.workers.some(p => !p.name.trim())) { error.textContent = 'Give each worker profile a name.'; error.hidden = false; return; }
+    if (!disable && !unlimited.checked && (!Number.isSafeInteger(config.maxParallel) || config.maxParallel < 1)) { error.textContent = tr('modules.common.choose_a_whole_worker_count_or_unlimited'); error.hidden = false; return; }
+    if (!disable && new TextEncoder().encode(config.leadGuidance ?? '').length > 2000) { error.textContent = tr('modules.common.lead_guidance_must_be_under_2000_bytes'); error.hidden = false; guidanceField.focus(); return; }
+    if (!disable && config.workers.some(p => !p.name.trim())) { error.textContent = tr('modules.common.give_each_worker_profile_a_name'); error.hidden = false; return; }
     const profileId = disable ? null : savedProfiles.selectedId();
     setBusy(true);
     try { await options.save(disable ? null : config, architect, profileId); }
@@ -278,7 +281,7 @@ export class ArchitectView {
   private teamMessages?: TeamMessages;
   constructor(private options: { setup: (anchor: HTMLElement) => void; loadModels: (provider: ProviderId) => Promise<ProviderModel[]>; updated: (team: TeamSnapshot) => void; report: (error: unknown) => void; onFork?: (sessionId: string, messageId: number) => Promise<void>; fileContext?: (sessionId: string) => FileLinkContext | undefined; assist?: (sessionId: string, kind: 'review' | 'route') => void; remote?: (sessionId: string) => boolean }) {
     this.host.className = 'architect-host'; this.host.hidden = true;
-    this.trigger.className = 'architect-trigger'; this.trigger.type = 'button'; this.trigger.setAttribute('aria-label', 'Open workers'); this.trigger.setAttribute('aria-expanded', 'false');
+    this.trigger.className = 'architect-trigger'; this.trigger.type = 'button'; this.trigger.setAttribute('aria-label', tr('modules.common.open_workers')); this.trigger.setAttribute('aria-expanded', 'false');
     this.trigger.addEventListener('click', () => this.panel ? this.close() : this.open()); this.host.append(this.trigger);
     this.host.addEventListener('keydown', event => { if (event.key === 'Escape' && this.panel) { event.preventDefault(); event.stopPropagation(); this.close(); this.trigger.focus(); } });
     bindMessageActions(this.host, {
@@ -291,7 +294,7 @@ export class ArchitectView {
   private paintAssist(): void {
     const button = this.panel?.querySelector<HTMLButtonElement>('.architect-assist'); if (!button) return;
     button.hidden = !this.assistEnabled || !this.options.assist;
-    button.textContent = this.selected ? 'Review with Jev' : 'Suggest worker';
+    button.textContent = this.selected ? tr('modules.common.review_with_jev') : tr('modules.common.suggest_worker');
   }
   setTask(taskId: string, team: TeamSnapshot | null, providers: Provider[]): void {
     if (taskId !== this.taskId) this.close();
@@ -350,8 +353,8 @@ export class ArchitectView {
   open(focus = true): void {
     if (!this.team || this.panel) return;
     this.childAgents?.setTask('', false);
-    const panel = document.createElement('section'); panel.className = 'architect-panel'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Workers');
-    panel.innerHTML = `<div class="architect-panel-heading"><button class="icon-button architect-back" aria-label="Back to workers" hidden>${icon('back')}</button><strong class="architect-panel-summary"></strong><small class="architect-panel-count"></small><span class="architect-panel-controls"><button class="icon-button" data-team-control="pause" aria-label="Pause team" title="Pause team">${icon('pause')}</button><button class="icon-button" data-team-control="resume" aria-label="Resume team" title="Resume team">${icon('play')}</button><button class="icon-button" data-team-control="stop" aria-label="Stop team" title="Stop team">${icon('stop')}</button><button class="icon-button architect-configure" aria-label="View team setup" title="Team setup">${icon('settings')}</button></span><button class="icon-button architect-close" aria-label="Close workers" title="Close">${icon('close')}</button></div><p class="architect-panel-error" role="status" hidden></p><div class="architect-panel-scroll"><div class="architect-worker-list"></div><div class="architect-worker-detail" hidden><div class="architect-worker-meta"></div><details class="architect-assignment"><summary>Assignment & file scope</summary><p></p><small></small></details><details class="architect-worker-checkpoint" hidden><summary>Latest checkpoint <time></time></summary><dl><div><dt>Progress</dt><dd data-checkpoint="summary"></dd></div><div><dt>Next</dt><dd data-checkpoint="nextSteps"></dd></div><div class="architect-checkpoint-blocker"><dt>Blocked</dt><dd data-checkpoint="blocker"></dd></div></dl></details><div class="architect-worker-history"></div><div class="architect-worker-live"></div><div class="architect-worker-tools"></div><div class="architect-worker-approvals"></div><div class="architect-worker-inputs"></div><p class="architect-worker-empty" role="status"></p><button class="secondary-button architect-history-retry" hidden>Retry loading worker</button></div></div>`;
+    const panel = document.createElement('section'); panel.className = 'architect-panel'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', tr('modules.common.workers'));
+    panel.innerHTML = `<div class="architect-panel-heading"><button class="icon-button architect-back" aria-label="${escapeI18n(tr('modules.common.back_to_workers'))}" hidden>${icon('back')}</button><strong class="architect-panel-summary"></strong><small class="architect-panel-count"></small><span class="architect-panel-controls"><button class="icon-button" data-team-control="pause" aria-label="${escapeI18n(tr('modules.common.pause_team'))}" title="${escapeI18n(tr('modules.common.pause_team'))}">${icon('pause')}</button><button class="icon-button" data-team-control="resume" aria-label="${escapeI18n(tr('modules.common.resume_team'))}" title="${escapeI18n(tr('modules.common.resume_team'))}">${icon('play')}</button><button class="icon-button" data-team-control="stop" aria-label="${escapeI18n(tr('modules.common.stop_team'))}" title="${escapeI18n(tr('modules.common.stop_team'))}">${icon('stop')}</button><button class="icon-button architect-configure" aria-label="${escapeI18n(tr('modules.common.view_team_setup'))}" title="${escapeI18n(tr('modules.common.team_setup'))}">${icon('settings')}</button></span><button class="icon-button architect-close" aria-label="${escapeI18n(tr('modules.common.close_workers'))}" title="${escapeI18n(tr('modules.common.close'))}">${icon('close')}</button></div><p class="architect-panel-error" role="status" hidden></p><div class="architect-panel-scroll"><div class="architect-worker-list"></div><div class="architect-worker-detail" hidden><div class="architect-worker-meta"></div><details class="architect-assignment"><summary>${escapeI18n(tr('modules.common.assignment_file_scope'))}</summary><p></p><small></small></details><details class="architect-worker-checkpoint" hidden><summary>${escapeI18n(tr('modules.common.latest_checkpoint'))} <time></time></summary><dl><div><dt>${escapeI18n(tr('modules.common.progress'))}</dt><dd data-checkpoint="summary"></dd></div><div><dt>${escapeI18n(tr('modules.common.next'))}</dt><dd data-checkpoint="nextSteps"></dd></div><div class="architect-checkpoint-blocker"><dt>${escapeI18n(tr('modules.common.blocked'))}</dt><dd data-checkpoint="blocker"></dd></div></dl></details><div class="architect-worker-history"></div><div class="architect-worker-live"></div><div class="architect-worker-tools"></div><div class="architect-worker-approvals"></div><div class="architect-worker-inputs"></div><p class="architect-worker-empty" role="status"></p><button class="secondary-button architect-history-retry" hidden>${escapeI18n(tr('modules.common.retry_loading_worker'))}</button></div></div>`;
     this.panel = panel; this.host.append(panel);
     const assist = document.createElement('button'); assist.type = 'button'; assist.className = 'architect-assist';
     assist.addEventListener('click', () => {
@@ -407,7 +410,7 @@ export class ArchitectView {
     const done = team.workers.filter(w => w.status === 'completed' || w.abandoned).length;
     const asking = team.workers.some(w => this.needsInput(w.sessionId));
     const progress = asking ? 'Needs input' : team.workers.length ? `${done}/${team.workers.length}` : 'Ready';
-    const trigger = `${icon('worktree')}<span>Architect & workers</span><small>${progress}</small>${icon('chevron')}`;
+    const trigger = `${icon('worktree')}<span>${escapeI18n(tr('modules.common.architect_workers'))}</span><small>${progress}</small>${icon('chevron')}`;
     if (this.trigger.dataset.painted !== trigger) { this.trigger.innerHTML = trigger; this.trigger.dataset.painted = trigger; }
     this.trigger.dataset.status = asking ? 'waiting' : team.status;
     if (!this.panel) return;
@@ -415,9 +418,9 @@ export class ArchitectView {
     this.paintAssist();
     // Auto teams have nothing to set up: the lead picks worker models.
     panel.querySelector<HTMLElement>('.architect-configure')!.hidden = Boolean(team.config.auto);
-    panel.querySelector<HTMLElement>('.architect-panel-summary')!.textContent = teamActive(team) ? 'Architect is working…' : statusNames[team.status];
+    panel.querySelector<HTMLElement>('.architect-panel-summary')!.textContent = teamActive(team) ? tr('modules.common.architect_is_working') : statusNames[team.status];
     const count = panel.querySelector<HTMLElement>('.architect-panel-count')!;
-    count.textContent = `${team.workers.length} ${team.workers.length === 1 ? 'task' : 'tasks'}`; count.title = `Round ${team.round}/${team.config.maxRounds}`;
+    count.textContent = `${team.workers.length} ${team.workers.length === 1 ? 'task' : 'tasks'}`; count.title = tr('modules.dynamic.round', { round: String(team.round), total: String(team.config.maxRounds) });
     panel.querySelector<HTMLButtonElement>('[data-team-control=pause]')!.hidden = !teamActive(team);
     panel.querySelector<HTMLButtonElement>('[data-team-control=stop]')!.hidden = !teamActive(team) && team.status !== 'paused';
     // Resume at the round limit grants more rounds natively, up to the maximum of 20.
@@ -437,7 +440,7 @@ export class ArchitectView {
       const queueReason = workerQueueReason(worker, team.workers, team.config.maxParallel);
       meta.innerHTML = `${providerLogo(worker.provider)}<div class="architect-worker-copy"><strong>${escape(worker.name)}</strong><small>${escape(modelName(worker, this.providers))} · ${escape(statusNames[worker.status])}${worker.readOnly ? ' · Read only' : ''}</small>${queueReason ? `<small class="architect-worker-queue" role="status" data-tip="${escape(queueReason)}">${escape(queueReason)}</small>` : ''}${worker.error ? `<small class="architect-worker-error" role="status">${escape(worker.error)}</small>` : ''}</div>`;
       panel.querySelector<HTMLElement>('.architect-assignment p')!.textContent = worker.assignment;
-      panel.querySelector<HTMLElement>('.architect-assignment small')!.textContent = worker.readOnly ? 'Read only · no writes' : worker.files.length ? `Write scope: ${worker.files.join(', ')}` : 'Write scope: shared checkout';
+      panel.querySelector<HTMLElement>('.architect-assignment small')!.textContent = worker.readOnly ? tr('modules.common.read_only_no_writes') : worker.files.length ? `Write scope: ${worker.files.join(', ')}` : tr('modules.common.write_scope_shared_checkout');
       const checkpoint = panel.querySelector<HTMLDetailsElement>('.architect-worker-checkpoint')!;
       checkpoint.hidden = !worker.checkpoint;
       if (checkpoint.dataset.workerId !== worker.id) { checkpoint.open = false; checkpoint.dataset.workerId = worker.id; }
@@ -450,13 +453,13 @@ export class ArchitectView {
         }
         const time = checkpoint.querySelector('time')!;
         const updated = new Date(worker.checkpoint.updatedAt);
-        time.dateTime = updated.toISOString(); time.textContent = updated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        time.dateTime = updated.toISOString(); time.textContent = updated.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' });
       }
       panel.querySelector('.architect-panel-scroll')!.classList.remove('is-overflowing');
       this.paintLive(); return;
     }
     const list = panel.querySelector<HTMLElement>('.architect-worker-list')!;
-    if (!team.workers.length) { list.textContent = team.status === 'ready' ? 'Send a task to let the architect delegate the work.' : 'The architect is planning its first assignments.'; return; }
+    if (!team.workers.length) { list.textContent = team.status === 'ready' ? tr('modules.common.send_a_task_to_let_the_architect_delegate_the_work') : tr('modules.common.the_architect_is_planning_its_first_assignments'); return; }
     if (!this.rows.size) list.replaceChildren();
     for (const worker of team.workers) {
       let row = this.rows.get(worker.id);
@@ -491,7 +494,7 @@ export class ArchitectView {
     const fileContext = this.options.fileContext?.(worker.sessionId);
     const liveAtRequest = this.live.get(worker.sessionId), textAtRequest = liveAtRequest?.text;
     const empty = panel.querySelector<HTMLElement>('.architect-worker-empty')!, retry = panel.querySelector<HTMLButtonElement>('.architect-history-retry')!;
-    if (initial) empty.textContent = 'Loading worker…';
+    if (initial) empty.textContent = tr('modules.common.loading_worker');
     retry.hidden = true; this.historyLoading = true;
     let loaded = false;
     try {
@@ -539,7 +542,7 @@ export class ArchitectView {
             const current = this.live.get(worker.sessionId);
             if (tool.status !== 'running' && current?.tools.get(tool.id)?.status === 'running') current.tools.set(tool.id, tool);
             article.dataset.savedToolId = tool.id; article.innerHTML = renderToolActivity(tool, 'tool:' + tool.id); } else article.textContent = message.content; }
-        else { const label = document.createElement('small'); label.textContent = message.role === 'assistant' ? worker.name : message.role === 'user' ? 'Assignment' : 'Activity'; const body = document.createElement('div'); article.append(label, body); bindFileLinkContext(body, fileContext); void markdown(body, message.content, scroll);
+        else { const label = document.createElement('small'); label.textContent = message.role === 'assistant' ? worker.name : message.role === 'user' ? tr('modules.common.assignment') : tr('modules.common.activity'); const body = document.createElement('div'); article.append(label, body); bindFileLinkContext(body, fileContext); void markdown(body, message.content, scroll);
           if (message.role === 'user' || message.role === 'assistant') {
             article.insertAdjacentHTML('beforeend', messageActionsHtml(worker.sessionId, message.id, Boolean(this.options.onFork) && message.id > 0 && !this.options.remote?.(taskId)));
           }
@@ -556,7 +559,7 @@ export class ArchitectView {
         if (live.ended) { live.text = ''; live.tools.clear(); }
         else if (page.messages.some(message => message.role === 'assistant' && message.content === live.text)) live.text = '';
       }
-      empty.textContent = !this.historyMessages.size && !live?.text ? worker.error || worker.summary || (worker.status === 'queued' ? '' : 'Waiting for the worker’s first response.') : '';
+      empty.textContent = !this.historyMessages.size && !live?.text ? worker.error || worker.summary || (worker.status === 'queued' ? '' : tr('modules.common.waiting_for_the_worker_s_first_response')) : '';
       this.paintLive();
       if (initial) scroll.scrollTop = scroll.scrollHeight; else restore();
       loaded = true;
@@ -608,7 +611,7 @@ export class ArchitectView {
     for (const [id, text] of live?.approvals ?? []) {
       if ([...approvals.children].some(el => (el as HTMLElement).dataset.requestId === id)) continue;
       const card = document.createElement('div'); card.className = 'approval-card'; card.dataset.requestId = id;
-      card.innerHTML = `<strong>Worker needs approval</strong><p>${escape(text)}</p><div><button class="secondary-button" type="button">Deny</button><button class="primary-button" type="button">Approve</button></div><small role="alert"></small>`;
+      card.innerHTML = `<strong>${escapeI18n(tr('modules.common.worker_needs_approval'))}</strong><p>${escape(text)}</p><div><button class="secondary-button" type="button">${escapeI18n(tr('modules.common.deny'))}</button><button class="primary-button" type="button">${escapeI18n(tr('modules.common.approve'))}</button></div><small role="alert"></small>`;
       card.querySelectorAll<HTMLButtonElement>('button').forEach((button, index) => button.addEventListener('click', async () => {
         card.querySelectorAll('button').forEach(b => { b.disabled = true; });
         try { await call('respond_approval', { sessionId: worker.sessionId, requestId: id, approved: index === 1 }); live?.approvals.delete(id); card.remove(); }

@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import type { AgentEvent, BrowserElement, BrowserStatus, TerminalEvent } from './types';
 
 export const preview = !('__TAURI_INTERNALS__' in window);
@@ -45,7 +46,7 @@ export async function chooseFolder(title = 'Open a project in PandaCode'): Promi
 /** Files to attach to a message. The preview returns a fixed sample selection. */
 export async function chooseAttachments(): Promise<string[]> {
   if (preview) return (await import('./preview')).samplePick('files');
-  const result = await (await import('@tauri-apps/plugin-dialog')).open({ multiple: true, title: 'Attach to your message', filters: [
+  const result = await (await import('@tauri-apps/plugin-dialog')).open({ multiple: true, title: tr('modules.common.attach_to_your_message'), filters: [
     { name: 'Images and documents', extensions: ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'txt', 'md', 'markdown', 'csv', 'json', 'yaml', 'yml', 'xml', 'html', 'rtf', 'doc', 'docx', 'odt', 'pages', 'key', 'numbers', 'pptx', 'xlsx', 'epub', 'log'] },
     { name: 'All files', extensions: ['*'] },
   ] });
@@ -54,11 +55,11 @@ export async function chooseAttachments(): Promise<string[]> {
 /** A VS Code extension package holding color themes. */
 export async function chooseVsix(): Promise<string | null> {
   if (preview) return '/Users/you/Downloads/tokyo-night.vsix';
-  const result = await (await import('@tauri-apps/plugin-dialog')).open({ multiple: false, title: 'Import a VS Code theme', filters: [{ name: 'VS Code extension', extensions: ['vsix'] }] });
+  const result = await (await import('@tauri-apps/plugin-dialog')).open({ multiple: false, title: tr('modules.common.import_a_vs_code_theme'), filters: [{ name: 'VS Code extension', extensions: ['vsix'] }] });
   return typeof result === 'string' ? result : null;
 }
 export async function chooseAttachmentFolder(): Promise<string | null> {
   if (preview) return (await import('./preview')).samplePick('folder')[0] ?? null;
-  const result = await (await import('@tauri-apps/plugin-dialog')).open({ directory: true, multiple: false, title: 'Attach a folder to your message' });
+  const result = await (await import('@tauri-apps/plugin-dialog')).open({ directory: true, multiple: false, title: tr('modules.common.attach_a_folder_to_your_message') });
   return typeof result === 'string' ? result : null;
 }

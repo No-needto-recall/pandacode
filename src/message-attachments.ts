@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import { escape, icon } from './dom';
 
 /** What a sent message carried, read back from the context blocks appended at send time
@@ -32,14 +33,14 @@ function documentHead(line: string): { name: string; path: string } | null {
 function parseBlock(block: string): MessageAttachment[] {
   const head = block.split('\n', 1)[0];
   let match: RegExpMatchArray | null;
-  if ((match = head.match(/^File context: (.+)$/))) return [{ kind: 'file', name: baseName(match[1]), detail: 'Project file', path: match[1] }];
+  if ((match = head.match(/^File context: (.+)$/))) return [{ kind: 'file', name: baseName(match[1]), detail: tr('modules.common.project_file'), path: match[1] }];
   const document = documentHead(head);
   if (document) {
     const ext = document.name.includes('.') ? document.name.split('.').pop()!.toUpperCase() : '';
     return [{ kind: 'document', ...document, detail: `${ext && ext.length <= 8 ? ext : 'Text'}${block.includes('\n[Context truncated at 32 KiB]') ? ' · first 32 KB' : ''}` }];
   }
   if ((match = head.match(/^Folder context: (.+) \((\d+) files, (\d+) folders(, partial listing)?\)$/))) {
-    return [{ kind: 'folder', name: baseName(match[1]) + '/', path: match[1], detail: `${match[2]} files · ${match[3]} folders${match[4] ? ' · partial' : ''}` }];
+    return [{ kind: 'folder', name: baseName(match[1]) + '/', path: match[1], detail: tr('modules.dynamic.folderCounts', { files: String(match[2]), folders: String(match[3]), partial: String(match[4] ? ' · partial' : '') }) }];
   }
   const imageId = block.match(IMAGE_ID)?.[1];
   if ((match = head.match(/^Attached (image|mockup): (.+) \((\d+) × (\d+)\)/))) {
@@ -47,7 +48,7 @@ function parseBlock(block: string): MessageAttachment[] {
   }
   if ((match = head.match(/^Attached browser screenshot: (.*)$/))) {
     const viewport = block.match(/^Viewport: (\d+ × \d+)$/m)?.[1];
-    return [{ kind: 'image', name: match[1].trim() || 'Browser screenshot', detail: `Screenshot${viewport ? ' · ' + viewport : ''}`, imageId, raw: block }];
+    return [{ kind: 'image', name: match[1].trim() || 'Browser screenshot', detail: tr('modules.dynamic.screenshot', { suffix: String(viewport ? ' · ' + viewport : '') }), imageId, raw: block }];
   }
   if (head.startsWith('GitHub context')) {
     const items = [...block.matchAll(GITHUB_ITEM)].flatMap(([, number, kind, state, title, url]) => {
@@ -66,7 +67,7 @@ function parseBlock(block: string): MessageAttachment[] {
     } catch { /* Keep the generic label; the raw text is still one click away. */ }
     return [{ kind: 'raw', name, detail, raw: block }];
   }
-  return [{ kind: 'raw', name: head.replace(/[:(].*$/, '').trim() || 'Context', detail: 'Attached context', raw: block }];
+  return [{ kind: 'raw', name: head.replace(/[:(].*$/, '').trim() || 'Context', detail: tr('modules.common.attached_context'), raw: block }];
 }
 
 /** Bot briefs and token-saver style notes are setup, not attachments, so they stay hidden. */

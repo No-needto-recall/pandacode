@@ -1,3 +1,4 @@
+import { t, formatDate, onLocaleChange } from './i18n';
 import './motion.css';
 import './tray-popover.css';
 import { accentTokens } from './palette-core';
@@ -28,34 +29,34 @@ refreshTheme();
 window.addEventListener('storage', event => { if (event.key === 'pandacode.theme' || event.key === 'pandacode.palette') location.reload(); });
 
 const host = document.querySelector<HTMLDivElement>('#app')!;
-host.innerHTML = `<main class="tray" aria-label="PandaCode"><header class="tray-header"><img class="tray-mark" src="/icon.svg" alt=""><strong>PandaCode</strong><span class="tray-summary"></span><button type="button" class="tray-icon-button tray-open-app" aria-label="Open PandaCode" title="Open PandaCode">${icon('external')}</button></header><div class="tray-body"></div><footer class="tray-footer"><button type="button" class="tray-open-app">Open PandaCode</button><button type="button" class="tray-quit">Quit</button></footer></main>`;
+host.innerHTML = `<main class="tray" aria-label="PandaCode"><header class="tray-header"><img class="tray-mark" src="/icon.svg" alt=""><strong>PandaCode</strong><span class="tray-summary"></span><button type="button" class="tray-icon-button tray-open-app" aria-label="${escape(t('shell.tray.open'))}" title="${escape(t('shell.tray.open'))}">${icon('external')}</button></header><div class="tray-body"></div><footer class="tray-footer"><button type="button" class="tray-open-app">${escape(t('shell.tray.open'))}</button><button type="button" class="tray-quit">${escape(t('shell.tray.quit'))}</button></footer></main>`;
 const body = host.querySelector<HTMLDivElement>('.tray-body')!;
 const summary = host.querySelector<HTMLSpanElement>('.tray-summary')!;
 let snapshot: TraySnapshot | null = null;
 
 function duration(ms: number): string {
   const minutes = Math.max(0, Math.floor(ms / 60000));
-  if (minutes < 1) return 'now';
-  if (minutes < 60) return `${minutes}m`;
-  if (minutes < 1440) return `${Math.floor(minutes / 60)}h${minutes % 60 ? ` ${minutes % 60}m` : ''}`;
-  return `${Math.floor(minutes / 1440)}d`;
+  if (minutes < 1) return t('shell.tray.now');
+  if (minutes < 60) return t('shell.tray.minutes', { count: minutes });
+  if (minutes < 1440) return t('shell.tray.hours', { count: Math.floor(minutes / 60) }) + (minutes % 60 ? ` ${t('shell.tray.minutes', { count: minutes % 60 })}` : '');
+  return t('shell.tray.days', { count: Math.floor(minutes / 1440) });
 }
 function resetLabel(value?: string | null): string {
   const reset = value ? new Date(value).getTime() : NaN;
   if (!Number.isFinite(reset)) return '';
   const left = reset - Date.now();
-  return left <= 0 ? 'reset due' : left < 86_400_000 ? `resets in ${duration(left)}` : `resets ${new Date(reset).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}`;
+  return left <= 0 ? t('shell.tray.resetDue') : left < 86_400_000 ? t('shell.tray.resetIn', { time: duration(left) }) : t('shell.tray.resetAt', { date: formatDate(reset, { weekday: 'short', month: 'short', day: 'numeric' }) });
 }
 const tone = (value: number) => value >= 95 ? 'exhausted' : value >= 80 ? 'high' : 'normal';
 const name = (id: string) => NAMES[id as ProviderId] ?? id;
 
 function row(task: TrayTask, kind: 'running' | 'waiting' | 'finished'): string {
   const elapsed = duration(Date.now() - task.at);
-  const sub = [task.project, kind === 'finished' ? (elapsed === 'now' ? 'just now' : `${elapsed} ago`) : elapsed].filter(Boolean).join(' · ');
-  const status = kind === 'running' ? '<span class="tray-spinner" aria-label="Running"></span>'
-    : kind === 'waiting' ? '<span class="tray-pill">Respond</span>'
-    : task.failed ? `<span class="tray-result failed" aria-label="Failed">${icon('close')}</span>` : `<span class="tray-result" aria-label="Done">${icon('check')}</span>`;
-  return `<button type="button" class="tray-row" data-id="${escape(task.id)}"><span class="tray-logo">${providerLogo(task.provider)}</span><span class="tray-text"><span class="tray-title">${escape(task.title || 'Untitled task')}</span><span class="tray-sub">${escape(sub)}</span></span>${status}</button>`;
+  const sub = [task.project, kind === 'finished' ? (Date.now() - task.at < 60000 ? t('shell.tray.justNow') : t('shell.tray.ago', { time: elapsed })) : elapsed].filter(Boolean).join(' · ');
+  const status = kind === 'running' ? `<span class="tray-spinner" aria-label="${escape(t('shell.tray.running'))}"></span>`
+    : kind === 'waiting' ? `<span class="tray-pill">${escape(t('shell.tray.respond'))}</span>`
+    : task.failed ? `<span class="tray-result failed" aria-label="${escape(t('shell.tray.failed'))}">${icon('close')}</span>` : `<span class="tray-result" aria-label="${escape(t('shell.tray.done'))}">${icon('check')}</span>`;
+  return `<button type="button" class="tray-row" data-id="${escape(task.id)}"><span class="tray-logo">${providerLogo(task.provider)}</span><span class="tray-text"><span class="tray-title">${escape(task.title || t('shell.tray.untitled'))}</span><span class="tray-sub">${escape(sub)}</span></span>${status}</button>`;
 }
 
 function usageBlock(usage: AgentUsage): string {
@@ -65,21 +66,26 @@ function usageBlock(usage: AgentUsage): string {
     return `<div class="tray-window" data-tone="${tone(value)}"><span class="tray-window-label">${escape(window.label)}</span><span class="tray-bar" role="progressbar" aria-label="${escape(`${name(usage.provider)} ${window.label}`)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(value)}"><span style="width:${value}%"></span></span><span class="tray-percent">${Math.round(value)}%</span>${reset ? `<span class="tray-reset">${escape(reset)}</span>` : ''}</div>`;
   }).join('');
   const plan = usage.plan ? `<span class="tray-chip">${escape(usage.plan)}</span>` : '';
-  const stale = usage.stale ? '<span class="tray-stale">stale</span>' : '';
+  const stale = usage.stale ? `<span class="tray-stale">${escape(t('shell.tray.stale'))}</span>` : '';
   return `<div class="tray-usage"><div class="tray-usage-head"><span class="tray-logo">${providerLogo(usage.provider)}</span><span>${escape(name(usage.provider))}</span>${plan}${stale}</div>${windows}</div>`;
 }
 
 function render(): void {
+  for (const button of host.querySelectorAll<HTMLButtonElement>('.tray-open-app')) {
+    if (button.classList.contains('tray-icon-button')) { button.title = t('shell.tray.open'); button.setAttribute('aria-label', t('shell.tray.open')); }
+    else button.textContent = t('shell.tray.open');
+  }
+  host.querySelector('.tray-quit')!.textContent = t('shell.tray.quit');
   if (!snapshot) return;
   const { running, waiting, finished, usage, checking } = snapshot;
-  const parts = [running.length && `${running.length} running`, (waiting.length + finished.length) && `${waiting.length + finished.length} to review`].filter(Boolean);
-  summary.textContent = parts.length ? parts.join(' · ') : 'All quiet';
-  const sections = ([['Running', running, 'running'], ['Needs you', waiting, 'waiting'], ['Finished', finished, 'finished']] as const)
+  const parts = [running.length && t('shell.tray.runningCount', { count: running.length }), (waiting.length + finished.length) && t('shell.tray.reviewCount', { count: waiting.length + finished.length })].filter(Boolean);
+  summary.textContent = parts.length ? parts.join(' · ') : t('shell.tray.quiet');
+  const sections = ([[t('shell.tray.running'), running, 'running'], [t('shell.tray.needsYou'), waiting, 'waiting'], [t('shell.tray.finished'), finished, 'finished']] as const)
     .filter(([, tasks]) => tasks.length)
     .map(([label, tasks, kind]) => `<section class="tray-section"><h2>${label}</h2>${tasks.map(task => row(task, kind)).join('')}</section>`).join('');
-  const usageBody = usage.length ? usage.map(usageBlock).join('') : `<p class="tray-quiet">${checking ? 'Checking plan limits…' : 'No plan limits reported.'}</p>`;
+  const usageBody = usage.length ? usage.map(usageBlock).join('') : `<p class="tray-quiet">${checking ? t('shell.tray.checking') : t('shell.tray.noLimits')}</p>`;
   const focused = (document.activeElement as HTMLElement | null)?.dataset.id;
-  body.innerHTML = `${sections || '<p class="tray-quiet tray-empty">No agents running.</p>'}<section class="tray-section tray-plan"><h2>Plan usage<button type="button" class="tray-icon-button tray-refresh${checking ? ' checking' : ''}" aria-label="Refresh usage" title="Refresh usage"${checking ? ' aria-busy="true"' : ''}>${icon('refresh')}</button></h2>${usageBody}</section>`;
+  body.innerHTML = `${sections || `<p class="tray-quiet tray-empty">${escape(t('shell.tray.noAgents'))}</p>`}<section class="tray-section tray-plan"><h2>${escape(t('shell.tray.planUsage'))}<button type="button" class="tray-icon-button tray-refresh${checking ? ' checking' : ''}" aria-label="${escape(t('shell.tray.refresh'))}" title="${escape(t('shell.tray.refresh'))}"${checking ? ' aria-busy="true"' : ''}>${icon('refresh')}</button></h2>${usageBody}</section>`;
   if (focused) body.querySelector<HTMLElement>(`.tray-row[data-id="${CSS.escape(focused)}"]`)?.focus();
   void call('tray_resize', { height: Math.ceil(host.querySelector('.tray')!.getBoundingClientRect().height) }).catch(() => undefined);
 }
@@ -111,3 +117,6 @@ document.addEventListener('keydown', event => {
 if (preview) void import('./preview').then(({ listen }) => listen('tray-changed', () => void load()));
 else void import('@tauri-apps/api/event').then(({ listen }) => listen('tray-changed', () => void load()));
 void load();
+
+const stopLocale = onLocaleChange(render);
+window.addEventListener('pagehide', stopLocale, { once: true });

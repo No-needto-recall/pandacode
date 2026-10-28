@@ -1,3 +1,6 @@
+import { getLocale } from './i18n.ts';
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { basename, mcpAction, parseFields, shellCommand, toolKind, type TraceKind } from './tool-trace.ts';
 import { escape, fileIcon, icon } from './dom.ts';
 
@@ -27,7 +30,15 @@ const field = (fields: Fields, ...keys: string[]) => {
 };
 const objects = (value: unknown): Fields[] => Array.isArray(value) ? value.filter((item): item is Fields => !!item && typeof item === 'object' && !Array.isArray(item)) : [];
 const splitLines = (value: string) => value ? value.replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n') : [];
-const plural = (count: number, one: string, many = one + 's') => `${count} ${count === 1 ? one : many}`;
+const cardCounts = {
+  earlierLine: (count: number) => count === 1 ? tr('modules.cards.count.earlierLine.one', { count }) : tr('modules.cards.count.earlierLine.many', { count }),
+  line: (count: number) => count === 1 ? tr('modules.cards.count.line.one', { count }) : tr('modules.cards.count.line.many', { count }),
+  match: (count: number) => count === 1 ? tr('modules.cards.count.match.one', { count }) : tr('modules.cards.count.match.many', { count }),
+  file: (count: number) => count === 1 ? tr('modules.cards.count.file.one', { count }) : tr('modules.cards.count.file.many', { count }),
+  item: (count: number) => count === 1 ? tr('modules.cards.count.item.one', { count }) : tr('modules.cards.count.item.many', { count }),
+  field: (count: number) => count === 1 ? tr('modules.cards.count.field.one', { count }) : tr('modules.cards.count.field.many', { count }),
+};
+const plural = (count: number, kind: keyof typeof cardCounts) => cardCounts[kind](count);
 const dirname = (path: string) => path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
 export function stripAnsi(value: string): string {
   // eslint-disable-next-line no-control-regex
@@ -71,8 +82,16 @@ const fileMark = (path: string, isDir = false) => `<span class="tc-mark tc-file-
 function head(mark: string, title: string, meta = '', right = ''): string {
   return `<div class="tc-head">${mark}<span class="tc-head-title">${title}</span>${meta ? `<span class="tc-head-meta">${escape(meta)}</span>` : ''}${right ? `<span class="tc-head-right">${right}</span>` : ''}</div>`;
 }
-function more(count: number, noun = 'more'): string {
-  return count > 0 ? `<div class="tc-more">+${count} ${escape(noun)}</div>` : '';
+const moreCounts = {
+  worker: (count: number) => tr('modules.cards.more.workers', { count }),
+  item: (count: number) => count === 1 ? tr('modules.cards.more.item.one', { count }) : tr('modules.cards.more.item.many', { count }),
+  line: (count: number) => count === 1 ? tr('modules.cards.more.line.one', { count }) : tr('modules.cards.more.line.many', { count }),
+  file: (count: number) => count === 1 ? tr('modules.cards.more.file.one', { count }) : tr('modules.cards.more.file.many', { count }),
+  step: (count: number) => count === 1 ? tr('modules.cards.more.step.one', { count }) : tr('modules.cards.more.step.many', { count }),
+  field: (count: number) => count === 1 ? tr('modules.cards.more.field.one', { count }) : tr('modules.cards.more.field.many', { count }),
+};
+function more(count: number, kind: keyof typeof moreCounts = 'item'): string {
+  return count > 0 ? `<div class="tc-more">${escape(moreCounts[kind](count))}</div>` : '';
 }
 function rowHtml(row: Row): string {
   const title = row.titleHtml ?? escape(clip(row.title, 120));
@@ -80,7 +99,7 @@ function rowHtml(row: Row): string {
   const body = row.bodyHtml ?? (row.body ? escape(clip(row.body, 220)) : '');
   return `<li class="tc-row"${status}>${row.mark}<div class="tc-row-main"><div class="tc-row-line"><span class="tc-row-title">${title}</span>${row.meta ? `<span class="tc-row-meta">${escape(clip(row.meta, 80))}</span>` : ''}${row.time ? `<span class="tc-row-time">${escape(row.time)}</span>` : ''}</div>${body ? `<div class="tc-row-body">${body}</div>` : ''}</div></li>`;
 }
-function rows(items: Row[], total = items.length, noun = 'more'): string {
+function rows(items: Row[], total = items.length, noun: keyof typeof moreCounts = 'item'): string {
   if (!items.length) return '';
   return `<ul class="tc-rows">${items.slice(0, ROWS).map(rowHtml).join('')}</ul>${more(total - Math.min(items.length, ROWS), noun)}`;
 }
@@ -92,7 +111,7 @@ function codeLines(values: string[], numbers: (number | null)[] | number, label:
     const n = typeof numbers === 'number' ? numbers + i : numbers[i];
     return `<span class="tc-line"><span class="tc-gutter">${n ?? ''}</span><span class="tc-code">${escape(line.slice(0, 400)) || ' '}</span></span>`;
   }).join('');
-  return `<pre class="tc-lines" tabindex="0" aria-label="${escape(label)}">${body}</pre>${more(total - shown.length, total - shown.length === 1 ? 'more line' : 'more lines')}`;
+  return `<pre class="tc-lines" tabindex="0" aria-label="${escape(label)}">${body}</pre>${more(total - shown.length, 'line')}`;
 }
 function pathTitle(path: string): string {
   const dir = dirname(path);
@@ -111,7 +130,7 @@ function clockTime(value: string): string {
   const date = new Date(/^\d{10}$/.test(value) ? Number(value) * 1000 : /^\d{13}$/.test(value) ? Number(value) : value);
   if (Number.isNaN(date.getTime())) return '';
   const today = new Date().toDateString() === date.toDateString();
-  return today ? date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  return today ? date.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' }) : date.toLocaleDateString(getLocale(), { month: 'short', day: 'numeric' });
 }
 
 // ── Shell ────────────────────────────────────────────────────────────────────
@@ -130,18 +149,18 @@ function shellCard(tool: CardTool, fields: Fields, output: string): string {
   if (!command) return '';
   const { code, body } = exitCode(output);
   const failed = code !== undefined ? code !== 0 : tool.status === 'failed';
-  const badge = code !== undefined || failed ? `<span class="tc-badge${failed ? ' is-failed' : ''}">${escape(code !== undefined ? `exit ${code}` : 'failed')}</span>` : '';
+  const badge = code !== undefined || failed ? `<span class="tc-badge${failed ? ' is-failed' : ''}">${escape(code !== undefined ? tr('modules.cards.exit', { code }) : tr('modules.common.failed'))}</span>` : '';
   const where = /vm_exec$/.test(tool.name) ? field(fields, 'name', 'vm') : '';
   const all = splitLines(stripAnsi(body).trimEnd());
   const tail = all.slice(-LINES);
   const earlier = all.length - tail.length;
   const out = tail.length
-    ? `${earlier > 0 ? `<div class="tc-more tc-earlier">${escape(plural(earlier, 'earlier line'))}</div>` : ''}<pre class="tc-term-out" tabindex="0" aria-label="Command output, last lines">${escape(tail.map(line => line.slice(0, 400)).join('\n'))}</pre>`
+    ? `${earlier > 0 ? `<div class="tc-more tc-earlier">${escape(plural(earlier, 'earlierLine'))}</div>` : ''}<pre class="tc-term-out" tabindex="0" aria-label="${escapeI18n(tr('modules.common.command_output_last_lines'))}">${escape(tail.map(line => line.slice(0, 400)).join('\n'))}</pre>`
     : '';
   return `<div class="tc-term${failed ? ' is-failed' : ''}">${termHead(command, where, badge)}${out}</div>`;
 }
 function termHead(command: string, where: string, badge = ''): string {
-  return `<div class="tc-term-head"><span class="tc-dollar" aria-hidden="true">$</span><code class="tc-command">${escape(clip(command, 400))}</code>${where ? `<span class="tc-head-meta">on ${escape(where)}</span>` : ''}${badge}</div>`;
+  return `<div class="tc-term-head"><span class="tc-dollar" aria-hidden="true">$</span><code class="tc-command">${escape(clip(command, 400))}</code>${where ? `<span class="tc-head-meta">${escape(tr('modules.cards.on', { machine: where }))}</span>` : ''}${badge}</div>`;
 }
 
 // ── Files: read, write, edit ─────────────────────────────────────────────────
@@ -161,14 +180,14 @@ function readCard(tool: CardTool, fields: Fields, output: string): string {
   const offset = Number(fields.offset) || 0;
   const start = entries[0]?.n ?? (offset || 1);
   const end = entries.length ? entries[entries.length - 1].n : 0;
-  const range = entries.length ? (start === 1 && !offset && !fields.limit ? plural(entries.length, 'line') : `Lines ${start}–${end}`) : '';
-  return fileHead(path, range) + codeLines(entries.map(e => e.text), entries.map(e => e.n), 'File preview', entries.length);
+  const range = entries.length ? (start === 1 && !offset && !fields.limit ? plural(entries.length, 'line') : tr('modules.cards.lineRange', { start, end })) : '';
+  return fileHead(path, range) + codeLines(entries.map(e => e.text), entries.map(e => e.n), tr('modules.cards.filePreview'), entries.length);
 }
 function writeCard(fields: Fields): string {
   const path = field(fields, 'file_path', 'path', 'filePath');
   if (!path) return '';
   const content = splitLines(field(fields, 'content', 'contents', 'text'));
-  return fileHead(path, 'New file') + codeLines(content, 1, 'New file preview');
+  return fileHead(path, tr('modules.cards.newFile')) + codeLines(content, 1, tr('modules.cards.newFilePreview'));
 }
 
 type DiffLine = { sign: ' ' | '+' | '-'; text: string; old?: number; new?: number };
@@ -230,16 +249,16 @@ function diffSection(file: FileDiff, budget: number): { html: string; used: numb
   const numbered = shown.some(l => l.old !== undefined || l.new !== undefined);
   const gutters = (l: DiffLine) => numbered ? `<span class="tc-gutter">${l.old ?? ''}</span><span class="tc-gutter">${l.new ?? ''}</span>` : '';
   const body = shown.map(l => `<span class="tc-diff-line" data-sign="${l.sign === '+' ? 'add' : l.sign === '-' ? 'del' : 'ctx'}">${gutters(l)}<span class="tc-sign">${l.sign === '-' ? '−' : l.sign}</span><span class="tc-code">${escape(l.text.slice(0, 300)) || ' '}</span></span>`).join('');
-  const meta = file.action === 'Add' ? 'New file' : file.action === 'Delete' ? 'Deleted' : '';
-  const title = file.path ? fileHead(file.path, meta) : head(iconMark('edit'), '<b>Edit</b>', meta);
+  const meta = file.action === 'Add' ? tr('modules.cards.newFile') : file.action === 'Delete' ? tr('modules.cards.deleted') : '';
+  const title = file.path ? fileHead(file.path, meta) : head(iconMark('edit'), `<b>${escapeI18n(tr('modules.common.edit'))}</b>`, meta);
   const rest = file.lines.length - shown.length;
-  return { html: `<div class="tc-diff-file">${title}${shown.length ? `<pre class="tc-diff${numbered ? '' : ' is-unnumbered'}" tabindex="0" aria-label="${escape(`Changes to ${basename(file.path) || 'file'}`)}">${body}</pre>` : ''}${more(rest, rest === 1 ? 'more line' : 'more lines')}</div>`, used: shown.length };
+  return { html: `<div class="tc-diff-file">${title}${shown.length ? `<pre class="tc-diff${numbered ? '' : ' is-unnumbered'}" tabindex="0" aria-label="${escape(tr('modules.cards.changesTo', { file: basename(file.path) || tr('modules.common.files') }))}">${body}</pre>` : ''}${more(rest, 'line')}</div>`, used: shown.length };
 }
 function editCard(tool: CardTool, fields: Fields): string {
   const files = editDiffs(tool, fields);
   let budget = DIFF_ROWS;
   const sections = files.slice(0, 3).map(file => { const section = diffSection(file, Math.max(budget, 4)); budget -= section.used; return section.html; });
-  return sections.join('') + more(files.length - sections.length, files.length - sections.length === 1 ? 'more file' : 'more files');
+  return sections.join('') + more(files.length - sections.length, 'file');
 }
 
 // ── Search: grep, glob, ls ───────────────────────────────────────────────────
@@ -275,17 +294,17 @@ function searchCard(tool: CardTool, fields: Fields, output: string): string {
   const total = files.reduce((sum, [, hits]) => sum + Math.max(1, hits.length), 0);
   // The row above already names the scope and the query; the card adds only the match count.
   const counted = [...groups.values()].some(hits => hits.length);
-  const top = counted ? `<div class="tc-head"><span class="tc-head-meta">${escape(`${plural(total, 'match', 'matches')} in ${plural(files.length, 'file')}`)}</span></div>` : '';
-  if (!files.length) return output.trim() ? excerpt(output, 2) : `<p class="tc-empty">No matches</p>`;
+  const top = counted ? `<div class="tc-head"><span class="tc-head-meta">${escape(tr('modules.cards.searchSummary', { matches: plural(total, 'match'), files: plural(files.length, 'file') }))}</span></div>` : '';
+  if (!files.length) return output.trim() ? excerpt(output, 2) : `<p class="tc-empty">${escapeI18n(tr('modules.common.no_matches'))}</p>`;
   const re = queryPattern(isGlob || isList ? '' : pattern);
   const items: Row[] = files.slice(0, ROWS).map(([path, hits]) => {
     const isDir = path.endsWith('/');
     const clean = path.replace(/\/$/, '');
     const shown = hits.slice(0, MATCHES_PER_FILE);
-    const bodyHtml = shown.length ? `<span class="tc-hits">${shown.map(hit => `<span class="tc-hit">${hit.n !== undefined ? `<span class="tc-gutter">${hit.n}</span>` : ''}<span class="tc-code">${highlight(clip(hit.text, 160), re)}</span></span>`).join('')}${hits.length > shown.length ? `<span class="tc-hit-more">+${hits.length - shown.length} more in file</span>` : ''}</span>` : '';
+    const bodyHtml = shown.length ? `<span class="tc-hits">${shown.map(hit => `<span class="tc-hit">${hit.n !== undefined ? `<span class="tc-gutter">${hit.n}</span>` : ''}<span class="tc-code">${highlight(clip(hit.text, 160), re)}</span></span>`).join('')}${hits.length > shown.length ? `<span class="tc-hit-more">${escape(tr('modules.cards.moreInFile', { count: hits.length - shown.length }))}</span>` : ''}</span>` : '';
     return { mark: fileMark(clean, isDir), title: basename(clean), meta: dirname(clean), time: hits.length > 1 ? String(hits.length) : '', bodyHtml };
   });
-  return top + rows(items, files.length, files.length - ROWS === 1 ? 'more file' : 'more files');
+  return top + rows(items, files.length, 'file');
 }
 
 // ── Web ──────────────────────────────────────────────────────────────────────
@@ -317,14 +336,14 @@ function fetchCard(fields: Fields, output: string): string {
 
 // ── Plans, agents, skills ────────────────────────────────────────────────────
 
-const STATUS_LABEL: Record<string, string> = { completed: 'Done', in_progress: 'In progress', pending: 'To do', cancelled: 'Cancelled' };
+const statusLabels = (): Record<string, string> => ({ completed: tr('modules.common.done'), in_progress: tr('modules.cards.inProgress'), pending: tr('modules.cards.toDo'), cancelled: tr('modules.cards.cancelled') });
 function statusMark(status: string): string {
-  const s = STATUS_LABEL[status] ? status : 'pending';
+  const s = Object.hasOwn(statusLabels(), status) ? status : 'pending';
   const glyph = s === 'completed' ? '<circle cx="8" cy="8" r="6.5" class="tc-fill"/><path d="m5.2 8.2 1.9 1.9 3.7-3.9" class="tc-tick"/>'
     : s === 'in_progress' ? '<circle cx="8" cy="8" r="6"/><path d="M8 3.5a4.5 4.5 0 0 1 0 9Z" class="tc-fill"/>'
       : s === 'cancelled' ? '<circle cx="8" cy="8" r="6"/><path d="m5.8 5.8 4.4 4.4m0-4.4-4.4 4.4"/>'
         : '<circle cx="8" cy="8" r="6"/>';
-  return `<span class="tc-mark tc-status" data-status="${s}" role="img" aria-label="${STATUS_LABEL[s]}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${glyph}</svg></span>`;
+  return `<span class="tc-mark tc-status" data-status="${s}" role="img" aria-label="${statusLabels()[s]}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${glyph}</svg></span>`;
 }
 function todoCard(fields: Fields): string {
   const todos = objects(fields.todos ?? fields.plan ?? fields.steps);
@@ -332,22 +351,23 @@ function todoCard(fields: Fields): string {
   const norm = (status: string) => status.replace(/-/g, '_').toLowerCase();
   const done = todos.filter(t => norm(field(t, 'status')) === 'completed').length;
   const explanation = field(fields, 'explanation');
-  const bar = `<span class="tc-progress" role="img" aria-label="${done} of ${todos.length} done"><span style="width:${Math.round(done / todos.length * 100)}%"></span></span>`;
+  const bar = `<span class="tc-progress" role="img" aria-label="${escape(tr('modules.cards.progress', { done, total: todos.length }))}"><span style="width:${Math.round(done / todos.length * 100)}%"></span></span>`;
   const items = todos.slice(0, 10).map(todo => {
     const status = norm(field(todo, 'status'));
     const active = status === 'in_progress' ? field(todo, 'activeForm') : '';
-    return rowHtml({ mark: statusMark(status), title: field(todo, 'content', 'step', 'title', 'text') || 'Untitled step', status, body: active });
+    return rowHtml({ mark: statusMark(status), title: field(todo, 'content', 'step', 'title', 'text') || tr('modules.common.untitled_step'), status, body: active });
   }).join('');
-  return head(iconMark('plan'), '<b>Plan</b>', `${done} of ${todos.length} done`, bar) + (explanation ? excerpt(explanation, 2) : '') + `<ul class="tc-rows tc-todos">${items}</ul>` + more(todos.length - 10, 'more steps');
+  return head(iconMark('plan'), `<b>${escapeI18n(tr('modules.common.plan'))}</b>`, tr('modules.cards.progress', { done, total: todos.length }), bar) + (explanation ? excerpt(explanation, 2) : '') + `<ul class="tc-rows tc-todos">${items}</ul>` + more(todos.length - 10, 'step');
 }
 function agentCard(tool: CardTool, fields: Fields, output: string): string {
   const description = field(fields, 'description', 'title');
   const prompt = field(fields, 'prompt', 'task');
   if (!description && !prompt && !output.trim()) return '';
-  const state = tool.status === 'running' ? 'Working' : tool.status === 'failed' ? 'Failed' : 'Done';
+  const state = tool.status === 'running' ? 'working' : tool.status === 'failed' ? 'failed' : 'done';
+  const stateLabel = state === 'working' ? tr('modules.common.working') : state === 'failed' ? tr('modules.common.failed') : tr('modules.common.done');
   // The row above names the agent and its description; the card adds the prompt, the state and the result.
-  const top = `<div class="tc-agent"><div class="tc-row-main">${prompt ? `<div class="tc-row-body">${escape(clip(prompt, 200))}</div>` : ''}</div><span class="tc-pill" data-state="${state.toLowerCase()}">${state}</span></div>`;
-  return top + (output.trim() ? `<div class="tc-result"><span class="tc-label">Result</span>${excerpt(output, 6)}</div>` : '');
+  const top = `<div class="tc-agent"><div class="tc-row-main">${prompt ? `<div class="tc-row-body">${escape(clip(prompt, 200))}</div>` : ''}</div><span class="tc-pill" data-state="${state}">${escape(stateLabel)}</span></div>`;
+  return top + (output.trim() ? `<div class="tc-result"><span class="tc-label">${escapeI18n(tr('modules.common.result'))}</span>${excerpt(output, 6)}</div>` : '');
 }
 /** The row above names the skill and its args; a card appears only for the skill's description. */
 function skillCard(output: string): string {
@@ -365,30 +385,30 @@ function pandacodeCard(tool: string, fields: Fields, output: string): string | u
       if (!workers.length) return '';
       // The row above already reads `Dispatched 2 workers`.
       return rows(workers.map(w => {
-        const name = field(w, 'name', 'title', 'id') || 'Worker';
+        const name = field(w, 'name', 'title', 'id') || tr('modules.cards.worker');
         return { mark: letterMark(name), title: name, meta: field(w, 'model', 'provider'), body: field(w, 'prompt', 'assignment', 'task', 'description') };
-      }), workers.length, 'more workers');
+      }), workers.length, 'worker');
     }
     case 'title': {
       const title = field(fields, 'title');
-      return title ? `<div class="tc-title-card"><span class="tc-label">Task title</span><b>${escape(clip(title, 120))}</b></div>` : '';
+      return title ? `<div class="tc-title-card"><span class="tc-label">${escapeI18n(tr('modules.common.task_title'))}</span><b>${escape(clip(title, 120))}</b></div>` : '';
     }
     case 'design_write': {
-      const name = field(fields, 'name', 'file', 'path', 'title') || 'Artboard';
+      const name = field(fields, 'name', 'file', 'path', 'title') || tr('modules.cards.artboardName');
       const html = field(fields, 'html', 'content');
       const size = [field(fields, 'width'), field(fields, 'height')].filter(Boolean).join(' × ');
-      return head(iconMark('sketch'), `<b>${escape(clip(name, 80))}</b>`, ['Design artboard', size].filter(Boolean).join(' · '), html ? `<span class="tc-count">${escape(plural(splitLines(html).length, 'line'))}</span>` : '');
+      return head(iconMark('sketch'), `<b>${escape(clip(name, 80))}</b>`, [tr('modules.cards.artboard'), size].filter(Boolean).join(' · '), html ? `<span class="tc-count">${escape(plural(splitLines(html).length, 'line'))}</span>` : '');
     }
     case 'vm_screenshot': {
       const vm = field(fields, 'name', 'vm', 'id') || 'VM';
       const dims = /(\d{3,5})\s*[x×]\s*(\d{3,5})/.exec(output);
-      return head(iconMark('monitor'), `<b>${escape(clip(vm, 60))}</b>`, ['Screenshot', dims ? `${dims[1]} × ${dims[2]}` : ''].filter(Boolean).join(' · '));
+      return head(iconMark('monitor'), `<b>${escape(clip(vm, 60))}</b>`, [tr('modules.cards.screenshot'), dims ? `${dims[1]} × ${dims[2]}` : ''].filter(Boolean).join(' · '));
     }
     case 'preview_file': {
       const path = field(fields, 'path', 'file');
-      return path ? fileHead(path, 'Opened in preview') : '';
+      return path ? fileHead(path, tr('modules.cards.openedPreview')) : '';
     }
-    case 'run_project': return head(iconMark('play'), '<b>pandacode-run.sh</b>', 'Started run script') + (output.trim() ? excerpt(output, 2) : '');
+    case 'run_project': return head(iconMark('play'), '<b>pandacode-run.sh</b>', tr('modules.cards.startedScript')) + (output.trim() ? excerpt(output, 2) : '');
     default: return undefined;
   }
 }
@@ -408,11 +428,11 @@ function keyValues(fields: Fields, cls: string): string {
   const entries = Object.entries(fields).filter(([, v]) => valueText(v) !== '');
   if (!entries.length) return '';
   const shown = entries.slice(0, KEYS).map(([k, v]) => `<dt>${escape(clip(k.replace(/_/g, ' '), 32))}</dt><dd>${escape(clip(valueText(v), 120))}</dd>`).join('');
-  return `<dl class="tc-kv ${cls}">${shown}</dl>${more(entries.length - KEYS, 'more fields')}`;
+  return `<dl class="tc-kv ${cls}">${shown}</dl>${more(entries.length - KEYS, 'field')}`;
 }
 /** A JSON record becomes a reference row: title, short meta, right-aligned time, second line. */
 function recordRow(item: Fields): Row {
-  const title = field(item, 'title', 'name', 'subject', 'summary', 'identifier', 'key', 'id') || clip(valueText(Object.values(item).find(v => typeof v === 'string') ?? ''), 80) || 'Item';
+  const title = field(item, 'title', 'name', 'subject', 'summary', 'identifier', 'key', 'id') || clip(valueText(Object.values(item).find(v => typeof v === 'string') ?? ''), 80) || tr('modules.cards.item');
   const link = field(item, 'url', 'link', 'href');
   const meta = field(item, 'from', 'author', 'user', 'repo', 'repository', 'channel', 'state', 'status', 'identifier', 'number') || (link ? domain(link) + urlPath(link) : '');
   const time = clockTime(field(item, 'updated_at', 'updatedAt', 'created_at', 'createdAt', 'date', 'time', 'timestamp', 'ts'));
@@ -440,16 +460,16 @@ function mcpCard(tool: CardTool, fields: Fields, output: string): string {
 
 // ── States ───────────────────────────────────────────────────────────────────
 
-const RUNNING_LABEL: Partial<Record<TraceKind, string>> = { shell: 'Running command…', read: 'Reading file…', edit: 'Applying edit…', write: 'Writing file…', search: 'Searching…', web: 'Searching the web…', fetch: 'Fetching page…', agent: 'Agent working…', skill: 'Loading skill…', mcp: 'Waiting for result…' };
+const runningLabels = (): Partial<Record<TraceKind, string>> => ({ shell: tr('modules.cards.running.shell'), read: tr('modules.cards.running.read'), edit: tr('modules.cards.running.edit'), write: tr('modules.cards.running.write'), search: tr('modules.cards.running.search'), web: tr('modules.cards.running.web'), fetch: tr('modules.cards.running.fetch'), agent: tr('modules.cards.running.agent'), skill: tr('modules.cards.running.skill'), mcp: tr('modules.cards.running.mcp') });
 /** One quiet line where the result will land; a shell keeps its final `$ command` header above it. */
 function runningCard(kind: TraceKind, tool: CardTool, fields: Fields): string {
-  const line = `<p class="tc-running" role="status">${escape(RUNNING_LABEL[kind] ?? 'Working…')}</p>`;
+  const line = `<p class="tc-running" role="status">${escape(runningLabels()[kind] ?? tr('modules.cards.working'))}</p>`;
   const command = kind === 'shell' ? shellCommand(tool.input, fields) : '';
   return command ? `<div class="tc-term">${termHead(command, /vm_exec$/.test(tool.name) ? field(fields, 'name', 'vm') : '')}${line}</div>` : line;
 }
 function failedCard(tool: CardTool, output: string): string {
   const error = splitLines(stripAnsi(output).trim()).filter(line => line.trim()).slice(0, 4);
-  return `<div class="tc-failed" role="alert">${iconMark('alert', 'tc-failed-mark')}<div class="tc-row-main"><div class="tc-row-line"><span class="tc-row-title">Failed</span><span class="tc-row-meta">${escape(clip(tool.name, 60))}</span></div>${error.length ? `<pre class="tc-failed-out">${escape(error.map(line => clip(line, 200)).join('\n'))}</pre>` : ''}</div></div>`;
+  return `<div class="tc-failed" role="alert">${iconMark('alert', 'tc-failed-mark')}<div class="tc-row-main"><div class="tc-row-line"><span class="tc-row-title">${escapeI18n(tr('modules.common.failed'))}</span><span class="tc-row-meta">${escape(clip(tool.name, 60))}</span></div>${error.length ? `<pre class="tc-failed-out">${escape(error.map(line => clip(line, 200)).join('\n'))}</pre>` : ''}</div></div>`;
 }
 
 function body(kind: TraceKind, tool: CardTool, fields: Fields, output: string): string {

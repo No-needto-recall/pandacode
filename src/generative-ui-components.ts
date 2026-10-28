@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /* The generative UI component library. `normalize` validates an agent's JSON spec at the
  * boundary (types, lengths, counts, depth) and is pure, so Node tests can run it; `renderBlock`
  * draws a fence's view. Interactivity is local (tabs, sort, toggles) or fills the composer;
@@ -160,7 +161,7 @@ export function normalize(value: unknown, depth = 0, budget = new Budget()): Vie
     }) };
     case 'actions': case 'buttons': return { type: 'actions', label: str(raw.label, 120), buttons: actions(raw.buttons ?? raw.actions) };
     case 'chips': return { type: 'chips', label: str(raw.label, 120), options: actions(raw.options) };
-    case 'followups': return { type: 'chips', label: str(raw.label, 120) ?? 'Suggested follow-ups', options: actions(raw.items ?? raw.options) };
+    case 'followups': return { type: 'chips', label: str(raw.label, 120) ?? tr('modules.common.suggested_follow_ups'), options: actions(raw.items ?? raw.options) };
     case 'form': {
       const fields = list(raw.fields, 12).flatMap(entry => {
         const field = obj(entry), name = str(field.name, 40)?.replace(/[^\w-]/g, '');
@@ -349,7 +350,7 @@ const codeView = (label: string | undefined, code: string) => h('figure', { clas
 
 function codeHead(label: string | undefined, text: string): HTMLElement {
   const copy = h('button', { type: 'button', class: 'gu-copy', 'aria-label': `Copy ${label ?? 'code'}` }, 'Copy');
-  copy.addEventListener('click', () => void navigator.clipboard?.writeText(text).then(() => { copy.textContent = 'Copied'; }, () => { copy.textContent = 'Copy failed'; }));
+  copy.addEventListener('click', () => void navigator.clipboard?.writeText(text).then(() => { copy.textContent = tr('modules.common.copied'); }, () => { copy.textContent = tr('modules.common.copy_failed'); }));
   return h('figcaption', { class: 'gu-code-head' }, h('span', {}, label ?? ''), copy);
 }
 

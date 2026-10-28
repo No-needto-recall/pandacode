@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 /* Workflow recipes: pick a saved recipe, see a dry run against this task's harness, then
  * queue its steps as ordinary messages. Recipes are plain JSON (`.pandacode/recipes/<name>.json`
  * in the project, or the global folder); the native side (`recipes.rs`) validates, saves and
@@ -38,22 +40,22 @@ export function mountRecipes(root: HTMLElement, host: RecipesHost): void {
 
   function detail(): string {
     if (editing !== null) {
-      return `<textarea class="recipe-json" aria-label="Recipe JSON" spellcheck="false">${escape(editing)}</textarea>
-        <div class="recipe-actions"><button type="button" class="secondary-button" data-action="recipe-cancel">Cancel</button><button type="button" class="primary-button" data-action="recipe-save">Save</button></div>`;
+      return `<textarea class="recipe-json" aria-label="${escapeI18n(tr('modules.common.recipe_json'))}" spellcheck="false">${escape(editing)}</textarea>
+        <div class="recipe-actions"><button type="button" class="secondary-button" data-action="recipe-cancel">${escapeI18n(tr('modules.common.cancel'))}</button><button type="button" class="primary-button" data-action="recipe-save">${escapeI18n(tr('modules.common.save'))}</button></div>`;
     }
-    if (!selected) return '<p class="recipe-empty">Choose a recipe, or create one.</p>';
+    if (!selected) return `<p class="recipe-empty">${escapeI18n(tr('modules.common.choose_a_recipe_or_create_one'))}</p>`;
     const rows = selected.steps.map((step, i) => {
       const report = plan?.steps[i];
       return `<tr><td>${i + 1}</td><td>${escape(step.kind)}</td><td class="recipe-text">${escape(summary(step))}</td><td>${report ? `<span class="recipe-status" data-status="${report.status}">${LABEL[report.status]}</span>` : ''}</td><td class="recipe-reason">${escape(report?.reason ?? '')}</td></tr>`;
     }).join('');
     const blocked = !plan || plan.steps.some(s => s.status === 'blocked');
     return `<h3>${escape(selected.name)}</h3><p class="recipe-description">${escape(selected.description)}</p>
-      <table class="recipe-steps" aria-label="Dry run for ${escape(selected.name)}"><thead><tr><th>#</th><th>Step</th><th>What</th><th>Status</th><th>Why</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="recipe-actions"><button type="button" class="secondary-button" data-action="recipe-delete">Delete</button><button type="button" class="secondary-button" data-action="recipe-edit">Edit</button><button type="button" class="primary-button" data-action="recipe-run" ${blocked || busy ? 'disabled' : ''}>Run</button></div>`;
+      <table class="recipe-steps" aria-label="Dry run for ${escape(selected.name)}"><thead><tr><th>#</th><th>${escapeI18n(tr('modules.common.step'))}</th><th>${escapeI18n(tr('modules.common.what'))}</th><th>${escapeI18n(tr('modules.common.status'))}</th><th>${escapeI18n(tr('modules.common.why'))}</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="recipe-actions"><button type="button" class="secondary-button" data-action="recipe-delete">${escapeI18n(tr('modules.common.delete'))}</button><button type="button" class="secondary-button" data-action="recipe-edit">${escapeI18n(tr('modules.common.edit'))}</button><button type="button" class="primary-button" data-action="recipe-run" ${blocked || busy ? 'disabled' : ''}>${escapeI18n(tr('modules.common.run'))}</button></div>`;
   }
 
   function draw(): void {
-    root.innerHTML = `<section class="recipes" aria-label="Workflow recipes"><div class="recipe-list"><ul>${recipes.map(rowFor).join('')}</ul><button type="button" class="secondary-button" data-action="recipe-new">New recipe</button></div>
+    root.innerHTML = `<section class="recipes" aria-label="${escapeI18n(tr('modules.common.workflow_recipes'))}"><div class="recipe-list"><ul>${recipes.map(rowFor).join('')}</ul><button type="button" class="secondary-button" data-action="recipe-new">${escapeI18n(tr('modules.common.new_recipe'))}</button></div>
       <div class="recipe-detail">${detail()}<p class="recipe-message" role="status">${escape(message)}</p></div></section>`;
   }
 

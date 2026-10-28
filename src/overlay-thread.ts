@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { escape, icon } from './dom';
 import { providerLogo } from './provider-logos';
 import { overlayCall, overlayEvents, type OverlayTask, type OverlayThread } from './overlay-client';
@@ -34,8 +36,8 @@ export class OverlayThreadView {
   private notice: HTMLElement;
   constructor(private host: HTMLElement, private back: () => void, private opened?: (task: OverlayTask) => void) {
     host.className = 'launcher-thread'; host.hidden = true;
-    host.setAttribute('aria-label', 'Agent conversation');
-    host.innerHTML = `<header class="launcher-thread-heading"><button class="launcher-thread-back" aria-label="Back to active agents">${icon('back')}</button><span class="launcher-thread-provider"></span><div><h2></h2><p></p></div></header><div class="launcher-thread-scroll" tabindex="0" aria-label="Conversation"><div class="launcher-thread-history"></div><p class="launcher-thread-empty" role="status">Loading conversation…</p><p class="launcher-thread-notice" role="status" hidden></p><button class="launcher-thread-retry" hidden>Retry loading conversation</button></div><footer class="launcher-thread-footer"><span class="launcher-thread-status" role="status"></span><button class="launcher-thread-app">Open in app ${icon('forward')}</button></footer>`;
+    host.setAttribute('aria-label', tr('modules.common.agent_conversation'));
+    host.innerHTML = `<header class="launcher-thread-heading"><button class="launcher-thread-back" aria-label="${escapeI18n(tr('modules.common.back_to_active_agents'))}">${icon('back')}</button><span class="launcher-thread-provider"></span><div><h2></h2><p></p></div></header><div class="launcher-thread-scroll" tabindex="0" aria-label="${escapeI18n(tr('modules.common.conversation'))}"><div class="launcher-thread-history"></div><p class="launcher-thread-empty" role="status">${escapeI18n(tr('modules.common.loading_conversation'))}</p><p class="launcher-thread-notice" role="status" hidden></p><button class="launcher-thread-retry" hidden>${escapeI18n(tr('modules.common.retry_loading_conversation'))}</button></div><footer class="launcher-thread-footer"><span class="launcher-thread-status" role="status"></span><button class="launcher-thread-app">Open in app ${icon('forward')}</button></footer>`;
     this.scroll = host.querySelector('.launcher-thread-scroll')!;
     this.history = host.querySelector('.launcher-thread-history')!;
     this.notice = host.querySelector('.launcher-thread-notice')!;
@@ -93,7 +95,7 @@ export class OverlayThreadView {
     this.latest = undefined;
     this.notice.hidden = true; this.host.querySelector<HTMLElement>('.launcher-thread-retry')!.hidden = true;
     this.host.querySelector<HTMLElement>('.launcher-thread-empty')!.hidden = false;
-    this.host.querySelector('.launcher-thread-empty')!.textContent = 'Loading conversation…';
+    this.host.querySelector('.launcher-thread-empty')!.textContent = tr('modules.common.loading_conversation');
     this.lastLoad = 0;
   }
   setVisible(value: boolean): void {
@@ -199,7 +201,7 @@ export class OverlayThreadView {
     });
     for (const [key,node] of this.turns) if (!keys.has(key)) { node.remove(); this.turns.delete(key); }
     this.host.querySelector<HTMLElement>('.launcher-thread-empty')!.hidden = messages.length > 0;
-    this.host.querySelector('.launcher-thread-empty')!.textContent = 'The agent is getting started…';
+    this.host.querySelector('.launcher-thread-empty')!.textContent = tr('modules.common.the_agent_is_getting_started');
     const status = this.host.querySelector<HTMLElement>('.launcher-thread-status')!;
     status.textContent = statusLabel(child?.status || thread.status); status.dataset.status = child?.status || thread.status;
     if (follow) this.scroll.scrollTop = this.scroll.scrollHeight; else restore?.();
@@ -210,11 +212,11 @@ export class OverlayThreadView {
     if (turn.handoff) {
       if (!node.childElementCount) {
         const handoff = decodeHandoff(turn.handoff);
-        if (handoff) node.innerHTML = `<details class="launcher-thread-handoff"><summary>${providerLogo(handoff.fromProvider)}${icon('forward')}${providerLogo(handoff.toProvider)}<span>Conversation carried forward</span>${icon('down')}</summary><p>${escape(handoff.summary)}</p></details>`;
+        if (handoff) node.innerHTML = `<details class="launcher-thread-handoff"><summary>${providerLogo(handoff.fromProvider)}${icon('forward')}${providerLogo(handoff.toProvider)}<span>${escapeI18n(tr('modules.common.conversation_carried_forward'))}</span>${icon('down')}</summary><p>${escape(handoff.summary)}</p></details>`;
       }
       return;
     }
-    if (!node.childElementCount) node.innerHTML = `<article class="launcher-thread-message launcher-thread-user"><header>You</header><div></div></article><div class="launcher-thread-coordination" hidden></div><details class="launcher-thread-activity"><summary></summary><div></div></details><article class="launcher-thread-message launcher-thread-response"><header></header><div></div></article><div class="launcher-thread-errors"></div>`;
+    if (!node.childElementCount) node.innerHTML = `<article class="launcher-thread-message launcher-thread-user"><header>${escapeI18n(tr('modules.common.you'))}</header><div></div></article><div class="launcher-thread-coordination" hidden></div><details class="launcher-thread-activity"><summary></summary><div></div></details><article class="launcher-thread-message launcher-thread-response"><header></header><div></div></article><div class="launcher-thread-errors"></div>`;
     const user = node.querySelector<HTMLElement>('.launcher-thread-user')!; user.hidden = !turn.user;
     if (turn.user) { user.dataset.messageId = String(turn.user.id); streamMarkdown(user.querySelector('div')!,turn.user.content,this.scroll); this.paintActions(user, turn.user); }
     const coordination = node.querySelector<HTMLElement>('.launcher-thread-coordination')!;

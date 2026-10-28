@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 // Editor tabs in the inspector: files opened from the Files tree, search, or file links each get
 // a tab in the inspector's Open files view, kept per task, so the conversation stays in sight.
 import './file-tabs.css';
@@ -42,6 +44,7 @@ export function createFileTabs(deps: Deps) {
   let key = '', workspace = '';
   let disposeOffice = () => {};
 
+  const disposeLocale = onLocaleChange(() => render());
   const thread = (): Thread | undefined => threads.get(key);
   const current = (): Tab | undefined => thread()?.tabs.find(tab => tab.path === thread()!.active);
   const name = (path: string) => path.split('/').pop() ?? path;
@@ -67,15 +70,15 @@ export function createFileTabs(deps: Deps) {
     if (!entry?.tabs.length) { strip.innerHTML = ''; view.innerHTML = ''; return; }
     const tabButton = (path: string, label: string, glyph: string) => {
       const selected = entry.active === path;
-      return `<div class="file-tab${selected ? ' selected' : ''}" role="presentation" data-tab="${escape(path)}"><button role="tab" aria-selected="${selected}" aria-controls="file-view" tabindex="${selected ? 0 : -1}" data-file-tab="select" title="${escape(path)}">${glyph}<span>${escape(label)}</span></button><button class="icon-button" tabindex="-1" data-file-tab="close" aria-label="Close ${escape(label)}" title="Close (Delete)">${icon('close')}</button></div>`;
+      return `<div class="file-tab${selected ? ' selected' : ''}" role="presentation" data-tab="${escape(path)}"><button role="tab" aria-selected="${selected}" aria-controls="file-view" tabindex="${selected ? 0 : -1}" data-file-tab="select" title="${escape(path)}">${glyph}<span>${escape(label)}</span></button><button class="icon-button" tabindex="-1" data-file-tab="close" aria-label="${escape(tr('modules.files.close', { name: label }))}" title="${escape(tr('modules.files.closeDelete'))}">${icon('close')}</button></div>`;
     };
     strip.innerHTML = entry.tabs.map(tab => tabButton(tab.path, name(tab.path), fileIcon(name(tab.path), false))).join('');
     if (!active) { view.innerHTML = ''; return; }
-    const attach = deps.canAttach(active.context) ? `<button data-file-tab="attach">${icon('attach')} Attach</button>` : '';
-    const preview = isPreviewableFile(active.path) ? `<button class="icon-button" data-file-tab="preview" aria-label="Preview in browser" title="Preview in browser">${icon('globe')}</button>` : '';
-    view.innerHTML = `<div class="file-view-header"><span class="file-view-path" title="${escape(active.path)}">${escape(active.path)}</span><div class="file-preview-actions">${preview}${typeof active.content === 'object' ? '' : `<button class="icon-button" data-file-tab="copy" aria-label="Copy file" title="Copy file">${icon('copy')}</button>`}${attach}</div></div><div class="file-view-body"></div>`;
+    const attach = deps.canAttach(active.context) ? `<button data-file-tab="attach">${icon('attach')} ${escape(tr('modules.files.attach'))}</button>` : '';
+    const preview = isPreviewableFile(active.path) ? `<button class="icon-button" data-file-tab="preview" aria-label="${escapeI18n(tr('modules.common.preview_in_browser'))}" title="${escapeI18n(tr('modules.common.preview_in_browser'))}">${icon('globe')}</button>` : '';
+    view.innerHTML = `<div class="file-view-header"><span class="file-view-path" title="${escape(active.path)}">${escape(active.path)}</span><div class="file-preview-actions">${preview}${typeof active.content === 'object' ? '' : `<button class="icon-button" data-file-tab="copy" aria-label="${escapeI18n(tr('modules.common.copy_file'))}" title="${escapeI18n(tr('modules.common.copy_file'))}">${icon('copy')}</button>`}${attach}</div></div><div class="file-view-body"></div>`;
     const body = view.querySelector<HTMLElement>('.file-view-body')!;
-    if (active.content === undefined) { body.innerHTML = '<div class="inspector-empty" role="status">Loading file…</div>'; return; }
+    if (active.content === undefined) { body.innerHTML = `<div class="inspector-empty" role="status">${escapeI18n(tr('modules.common.loading_file'))}</div>`; return; }
     if (typeof active.content === 'string') {
       renderDocument(body, active.path, active.content, path => deps.call<string>('workspace_image', { ...active.context, path }));
       body.scrollTop = scroll;
@@ -89,7 +92,7 @@ export function createFileTabs(deps: Deps) {
       if (disposed || !body.isConnected) { dispose(); return; }
       disposeOffice = dispose; body.scrollTop = scroll;
     }).catch(error => {
-      if (!disposed && body.isConnected) body.innerHTML = `<div class="inspector-empty" role="alert">This file could not be opened: ${escape(error instanceof Error ? error.message : String(error))}</div>`;
+      if (!disposed && body.isConnected) body.innerHTML = `<div class="inspector-empty" role="alert">${escape(tr('modules.files.openError', { error: error instanceof Error ? error.message : String(error) }))}</div>`;
     });
   }
 
@@ -154,7 +157,7 @@ export function createFileTabs(deps: Deps) {
     // Attaching is the first step of writing about the file, so focus goes to the prompt beside it.
     if (action === 'attach') { deps.attach(tab.path); deps.focusConversation(); }
     if (action === 'preview') void deps.preview(tab.path, tab.context).catch(deps.report);
-    if (action === 'copy' && typeof tab.content === 'string') void navigator.clipboard.writeText(tab.content).then(() => deps.notify('File copied'), deps.report);
+    if (action === 'copy' && typeof tab.content === 'string') void navigator.clipboard.writeText(tab.content).then(() => deps.notify(tr('modules.common.file_copied')), deps.report);
   });
 
   return {
@@ -182,6 +185,7 @@ export function createFileTabs(deps: Deps) {
     // Documents can be tens of megabytes, so they are re-read only when their tab is opened again.
     reload(): void { const tab = current(); if (tab && (tab.source || !officeKind(tab.path))) void load(tab); },
     forget(id: string): void { threads.delete(id); if (id === key) render(); },
+    dispose(): void { disposeLocale(); disposeOffice(); threads.clear(); },
     get active(): string { return thread()?.active ?? ''; },
     get count(): number { return thread()?.tabs.length ?? 0; },
   };

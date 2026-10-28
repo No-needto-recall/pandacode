@@ -1,10 +1,12 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import { escape, icon } from './dom';
 import './message-actions.css';
 
 /** Keys identify saved messages or a live text buffer; never embed message text. */
 export function messageActionsHtml(sessionId: string, key: string | number, canFork = true, canEdit = false): string {
   const data = `data-message-session="${escape(sessionId)}" data-message-key="${escape(key)}"`;
-  return `<div class="message-actions" role="group" aria-label="Message actions"><button type="button" data-message-action="copy" ${data} aria-label="Copy message" title="Copy message">${icon('copy')}</button>${canFork ? `<button type="button" data-message-action="fork" ${data} aria-label="Fork from here" title="Fork through this message into a new task in the same checkout">${icon('branch')}</button>` : ''}${canEdit ? `<button type="button" data-message-action="edit" ${data} aria-label="Edit and resend" title="Rewind to before this message in a new task and edit it there">${icon('edit')}</button>` : ''}<span class="message-action-status" role="status" aria-live="polite"></span></div>`;
+  return `<div class="message-actions" role="group" aria-label="${escapeI18n(tr('modules.common.message_actions'))}"><button type="button" data-message-action="copy" ${data} aria-label="${escapeI18n(tr('modules.common.copy_message'))}" title="${escapeI18n(tr('modules.common.copy_message'))}">${icon('copy')}</button>${canFork ? `<button type="button" data-message-action="fork" ${data} aria-label="${escapeI18n(tr('modules.common.fork_from_here'))}" title="${escapeI18n(tr('modules.common.fork_through_this_message_into_a_new_task_in_the_same_checkout'))}">${icon('branch')}</button>` : ''}${canEdit ? `<button type="button" data-message-action="edit" ${data} aria-label="${escapeI18n(tr('modules.common.edit_and_resend'))}" title="${escapeI18n(tr('modules.common.rewind_to_before_this_message_in_a_new_task_and_edit_it'))}">${icon('edit')}</button>` : ''}<span class="message-action-status" role="status" aria-live="polite"></span></div>`;
 }
 
 /** Clipboard APIs can be unavailable in older desktop webviews. */
@@ -74,12 +76,12 @@ export function bindMessageActions(root: HTMLElement, options: {
       if (action !== 'copy' || !button.isConnected) return;
       clearTimeout(feedback.get(button));
       button.innerHTML = icon('check'); button.dataset.copied = 'true';
-      button.title = 'Copied'; button.setAttribute('aria-label', 'Copied');
+      button.title = tr('modules.common.copied'); button.setAttribute('aria-label', tr('modules.common.copied'));
       const status = button.parentElement?.querySelector<HTMLElement>('.message-action-status');
-      if (status) status.textContent = 'Message copied';
+      if (status) status.textContent = tr('modules.common.message_copied');
       feedback.set(button, setTimeout(() => {
         feedback.delete(button); delete button.dataset.copied;
-        button.innerHTML = icon('copy'); button.title = 'Copy message'; button.setAttribute('aria-label', 'Copy message');
+        button.innerHTML = icon('copy'); button.title = tr('modules.common.copy_message'); button.setAttribute('aria-label', tr('modules.common.copy_message'));
         if (status) status.textContent = '';
       }, 1600));
     }).catch(options.report).finally(() => {

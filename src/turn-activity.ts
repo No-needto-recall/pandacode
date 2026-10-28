@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 import type { Message, TurnChanges } from './types.ts';
 import { decodeToolActivity } from './tool-activity.ts';
 
@@ -90,12 +91,12 @@ export function formatDuration(ms: number): string {
   const seconds = validTime(ms) ? Math.floor(ms / 1000) : 0;
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor(seconds / 60) % 60;
-  return [hours ? `${hours}h` : '', minutes || hours ? `${minutes}m` : '', `${seconds % 60}s`]
+  return [hours ? tr('finish.trace.hours', { count: hours }) : '', minutes || hours ? tr('finish.trace.minutes', { count: minutes }) : '', tr('finish.trace.seconds', { count: seconds % 60 })]
     .filter(Boolean).join(' ');
 }
 
 export function turnLabel(durationMs: number | null, estimated = false): string {
   return validTime(durationMs)
-    ? `Worked for ${estimated ? 'about ' : ''}${formatDuration(durationMs)}`
-    : 'Tool activity';
+    ? tr(estimated ? 'finish.trace.workedEstimate' : 'finish.trace.worked', { duration: formatDuration(durationMs) })
+    : tr('finish.trace.activity');
 }

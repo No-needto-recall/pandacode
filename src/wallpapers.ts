@@ -1,11 +1,12 @@
+import { t as tr } from './i18n.ts';
 export const wallpaperSets = [
-  { id: 'mon', label: 'Monday' }, { id: 'tue', label: 'Tuesday' },
-  { id: 'wed', label: 'Wednesday' }, { id: 'thu', label: 'Thursday' },
-  { id: 'fri', label: 'Friday' }, { id: 'sat', label: 'Saturday' },
-  { id: 'sun', label: 'Sunday' },
+  { id: 'mon', get label() { return tr('modules.common.monday'); } }, { id: 'tue', get label() { return tr('modules.common.tuesday'); } },
+  { id: 'wed', get label() { return tr('modules.common.wednesday'); } }, { id: 'thu', get label() { return tr('modules.common.thursday'); } },
+  { id: 'fri', get label() { return tr('modules.common.friday'); } }, { id: 'sat', get label() { return tr('modules.common.saturday'); } },
+  { id: 'sun', get label() { return tr('modules.common.sunday'); } },
 ] as const;
 export const wallpaperPeriods = [
-  { id: 'morning', label: 'Morning' }, { id: 'afternoon', label: 'Afternoon' }, { id: 'night', label: 'Night' },
+  { id: 'morning', get label() { return tr('modules.common.morning'); } }, { id: 'afternoon', get label() { return tr('modules.common.afternoon'); } }, { id: 'night', get label() { return tr('modules.common.night'); } },
 ] as const;
 type WallpaperDay = typeof wallpaperSets[number]['id'];
 export interface WallpaperPreferences {

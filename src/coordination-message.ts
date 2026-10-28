@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './coordination-message.css';
 import type { Message } from './types';
 import { icon } from './dom';
@@ -8,5 +10,5 @@ export function renderCoordination(message: Message): string {
     : message.coordinationKind === 'worker_update' ? 'Checking worker updates'
     : message.coordinationKind === 'continue' ? 'Continuing the plan'
     : message.coordinationKind === 'worker_failed' ? 'Handling a failed worker' : 'Coordinating team';
-  return `<div class="coordination-status" role="note" aria-label="Team status">${icon('worktree')}<strong>Team</strong><span>${label}</span></div>`;
+  return `<div class="coordination-status" role="note" aria-label="${escapeI18n(tr('modules.common.team_status'))}">${icon('worktree')}<strong>${escapeI18n(tr('modules.common.team'))}</strong><span>${label}</span></div>`;
 }

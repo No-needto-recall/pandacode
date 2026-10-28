@@ -1,3 +1,4 @@
+import { getLocale, t as tr } from './i18n.ts';
 /** Estimated API cost from local agent logs, grouped into the viewer's local calendar days. */
 import type { ProviderId } from './types';
 
@@ -16,7 +17,7 @@ export type PromptActivity = [number, ProviderId, number][];
 
 export type Range = 'week' | 'month' | 'year';
 export const RANGE_DAYS: Record<Range, number> = { week: 7, month: 30, year: 365 };
-export const RANGE_LABEL: Record<Range, string> = { week: 'Past 7 days', month: 'Past 30 days', year: 'Past year' };
+export const RANGE_LABEL: Record<Range, string> = { get week() { return tr('modules.usage.pastWeek'); }, get month() { return tr('modules.usage.pastMonth'); }, get year() { return tr('modules.usage.pastYear'); } };
 
 export interface Totals { input: number; cacheRead: number; cacheWrite: number; output: number; cost: number; savings: number; tokens: number; unpricedTokens: number; }
 export interface AgentCost extends Totals { provider: ProviderId; sessions: number; }
@@ -107,10 +108,10 @@ export function averageLimit(peaks: readonly number[]): number | null {
   return valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : null;
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const usdCompact = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 });
-const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
-const share = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 });
+const usd = { format: (value: number) => new Intl.NumberFormat(getLocale(), { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) };
+const usdCompact = { format: (value: number) => new Intl.NumberFormat(getLocale(), { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 }).format(value) };
+const compact = { format: (value: number) => new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(value) };
+const share = { format: (value: number) => new Intl.NumberFormat(getLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(value) };
 export function formatUsd(value: number): string { return value > 0 && value < 0.01 ? '<$0.01' : usd.format(value); }
 export function formatUsdAxis(value: number): string { return value >= 1000 ? usdCompact.format(value) : usd.format(value).replace(/\.00$/, ''); }
 export function formatTokens(value: number): string { return compact.format(value); }

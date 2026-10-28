@@ -1,3 +1,4 @@
+import { t as tr } from './i18n.ts';
 /* What the GitHub view asks an agent to do. Each prompt names the pull request or issue as
  * `#123`, so sending it attaches that item's title, state and description as GitHub context
  * (github.ts `contextFor`); the prompt itself only says what to do with it. Agents run in
@@ -9,10 +10,10 @@ interface PullRef { number: number; title: string; base: string; head: string }
 interface IssueRef { number: number; title: string }
 
 export const PULL_ACTIONS: { id: Exclude<PullAction, 'review'>; label: string; icon: string }[] = [
-  { id: 'thread', label: 'Open in thread', icon: 'chat' },
-  { id: 'checks', label: 'Fix failing checks', icon: 'check' },
-  { id: 'feedback', label: 'Address review comments', icon: 'edit' },
-  { id: 'merge', label: 'Merge when ready', icon: 'branch' },
+  { id: 'thread', label: tr('modules.common.open_in_thread'), icon: 'chat' },
+  { id: 'checks', label: tr('modules.common.fix_failing_checks'), icon: 'check' },
+  { id: 'feedback', label: tr('modules.common.address_review_comments'), icon: 'edit' },
+  { id: 'merge', label: tr('modules.common.merge_when_ready'), icon: 'branch' },
 ];
 
 export function pullPrompt(action: PullAction, pull: PullRef): string {

@@ -1,5 +1,7 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr, onLocaleChange } from './i18n.ts';
 import { preview } from './bridge';
-import { icon } from './dom';
+import { icon, morph } from './dom';
 import { appUpdates, describeUpdate, type UpdateMode } from './app-updates';
 
 /** Public project links. Opening one is user-initiated; only the update check runs on its own. */
@@ -16,11 +18,12 @@ const link = (label: string, url: string) =>
 /** The About group: app version, license, updates from GitHub Releases, and links. */
 export function aboutSettingsHtml(): string {
   return `<div class="settings-group settings-about" aria-labelledby="settings-about-heading">
-    <div class="setting-row"><div><strong id="settings-about-heading">About PandaCode</strong><small class="settings-about-version">Version …</small></div></div>
-    <div class="setting-row"><div><strong>License</strong><small>Open source (MIT-based). No account, no telemetry.</small></div>${link('PandaCode License', PROJECT_LINKS.license)}</div>
-    <div class="setting-row settings-updates"><div><strong>Updates</strong><small class="settings-update-status" aria-live="polite">Checks GitHub Releases automatically.</small></div><div class="settings-row-actions"><button type="button" class="secondary-button settings-update-action" hidden></button>${link('Releases', PROJECT_LINKS.releases)}</div></div>
-    <div class="setting-row settings-updates-auto"><div><strong>Update mode</strong><small>Automatic restarts when no agent is working; Notify me asks first.</small></div><select class="settings-select" data-update-mode aria-label="Update mode"><option value="automatic">Automatic</option><option value="notify">Notify me</option><option value="off">Off</option></select></div>
-    <div class="setting-row"><div><strong>Source code</strong><small>Report bugs and follow development.</small></div><div class="settings-row-actions">${link('GitHub repository', PROJECT_LINKS.repository)}${link('Issues', PROJECT_LINKS.issues)}</div></div>
+    <div class="setting-row"><div><strong id="settings-about-heading">${escapeI18n(tr('modules.common.about_pandacode'))}</strong><small class="settings-about-version">${escapeI18n(tr('modules.common.version'))}</small></div></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.license'))}</strong><small>${escapeI18n(tr('modules.common.open_source_mit_based_no_account_no_telemetry'))}</small></div>${link(tr('modules.about.license'), PROJECT_LINKS.license)}</div>
+    <div class="setting-row settings-updates"><div><strong>${escapeI18n(tr('modules.common.updates'))}</strong><small class="settings-update-status" aria-live="polite">${escapeI18n(tr('modules.common.checks_github_releases_automatically'))}</small></div><div class="settings-row-actions"><button type="button" class="secondary-button settings-update-action" hidden></button>${link(tr('modules.about.releases'), PROJECT_LINKS.releases)}</div></div>
+    <div class="setting-row settings-updates-auto"><div><strong>${escapeI18n(tr('modules.common.update_mode'))}</strong><small>${escapeI18n(tr('modules.common.automatic_restarts_when_no_agent_is_working_notify_me_asks_first'))}</small></div><select class="settings-select" data-update-mode aria-label="${escapeI18n(tr('modules.common.update_mode'))}"><option value="automatic">${escapeI18n(tr('modules.common.automatic'))}</option><option value="notify">${escapeI18n(tr('modules.common.notify_me'))}</option><option value="off">${escapeI18n(tr('modules.common.off'))}</option></select></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('modules.common.source_code'))}</strong><small>${escapeI18n(tr('modules.common.report_bugs_and_follow_development'))}</small></div><div class="settings-row-actions">${link(tr('modules.about.repository'), PROJECT_LINKS.repository)}${link(tr('modules.about.issues'), PROJECT_LINKS.issues)}</div></div>
+    <div class="setting-row"><div><strong>${escapeI18n(tr('common.forkLabel'))}</strong><small>This is a fork of PandaCode</small></div><div class="settings-row-actions">${link('PandaCode', PROJECT_LINKS.repository)}${link(tr('common.forkSource'), 'https://github.com/No-needto-recall/pandacode/tree/feat/zh-cn-localization')}</div></div>
   </div>`;
 }
 
@@ -32,14 +35,24 @@ async function appVersion(): Promise<string> {
 
 export function mountAboutSettings(host: HTMLElement): () => void {
   const version = host.querySelector<HTMLElement>('.settings-about-version');
-  let disposed = false;
+  let disposed = false, versionValue: string | null = null, versionError = false;
   const cleanupUpdates = mountUpdates(host);
+  const paintVersion = () => { if (version) version.textContent = versionError ? tr('modules.common.version_unavailable') : versionValue !== null ? tr('modules.about.version', { version: preview ? tr('modules.common.preview') : versionValue }) : tr('modules.common.version'); };
+  const disposeLocale = onLocaleChange(() => {
+    const next = document.createElement('div'); next.innerHTML = aboutSettingsHtml();
+    if (!host.querySelector('.settings-updates-auto')) next.querySelector('.settings-updates-auto')?.remove();
+    const selector = 'strong, small:not([class]), button[data-url], option';
+    const fresh = [...next.querySelectorAll(selector)];
+    host.querySelectorAll(selector).forEach((element, index) => { if (fresh[index]) morph(element, fresh[index].innerHTML, 20); });
+    host.querySelector('[data-update-mode]')?.setAttribute('aria-label', tr('modules.common.update_mode'));
+    paintVersion();
+  });
   if (version) {
     appVersion()
-      .then(value => { if (!disposed) version.textContent = `Version ${value}`; })
-      .catch(() => { if (!disposed) version.textContent = 'Version unavailable'; });
+      .then(value => { versionValue = value; if (!disposed) paintVersion(); })
+      .catch(() => { versionError = true; if (!disposed) paintVersion(); });
   }
-  return () => { disposed = true; cleanupUpdates(); };
+  return () => { disposed = true; disposeLocale(); cleanupUpdates(); };
 }
 
 /** The Updates rows follow the updater: status, Check now / Install / Restart now, and the mode. */
@@ -51,7 +64,7 @@ function mountUpdates(host: HTMLElement): () => void {
   if (!updates?.supported) {
     status.textContent = describeUpdate({ kind: 'off' }, 'off');
     host.querySelector<HTMLElement>('.settings-updates-auto')?.remove();
-    return () => {};
+    return onLocaleChange(() => { status.textContent = describeUpdate({ kind: 'off' }, 'off'); });
   }
   const paint = () => {
     const state = updates.state;
@@ -60,13 +73,14 @@ function mountUpdates(host: HTMLElement): () => void {
     const restartable = updates.installable && (state.kind === 'ready' || state.kind === 'available');
     action.hidden = state.kind === 'downloading' || state.kind === 'installing';
     action.disabled = state.kind === 'checking';
-    action.textContent = restartable ? (state.kind === 'ready' ? 'Restart now' : 'Install') : 'Check now';
+    action.textContent = restartable ? (state.kind === 'ready' ? tr('modules.common.restart_now') : tr('modules.common.install')) : tr('modules.common.check_now');
   };
   const click = () => { void (updates.installable && (updates.state.kind === 'ready' || updates.state.kind === 'available') ? updates.restart() : updates.check()); };
   const change = () => updates.setMode(modeSelect.value as UpdateMode);
   action.addEventListener('click', click);
   modeSelect.addEventListener('change', change);
   const unsubscribe = updates.subscribe(paint);
+  const disposeLocale = onLocaleChange(paint);
   paint();
-  return () => { unsubscribe(); action.removeEventListener('click', click); modeSelect.removeEventListener('change', change); };
+  return () => { disposeLocale(); unsubscribe(); action.removeEventListener('click', click); modeSelect.removeEventListener('change', change); };
 }

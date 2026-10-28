@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './jev.css';
 import { call, preview, subscribe } from './bridge';
 import { escape, icon } from './dom';
@@ -51,8 +53,8 @@ export function showJevTestPopover(anchor: HTMLElement, context: TestContext): (
   panel.className = 'jev-popover floating-menu';
   panel.id = 'jev-test-popover';
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-label', 'Test with Jev');
-  panel.innerHTML = `<div class="jev-view"><div class="dialog-heading"><div class="jev-heading"><h2>Test with Jev</h2>${testInfoButton('jev-test-help', 'About Jev browser tests')}</div><button type="button" class="icon-button" data-jev-close aria-label="Close Test with Jev">${icon('close')}</button></div></div>`;
+  panel.setAttribute('aria-label', tr('modules.common.test_with_jev'));
+  panel.innerHTML = `<div class="jev-view"><div class="dialog-heading"><div class="jev-heading"><h2>${escapeI18n(tr('modules.common.test_with_jev'))}</h2>${testInfoButton('jev-test-help', 'About Jev browser tests')}</div><button type="button" class="icon-button" data-jev-close aria-label="${escapeI18n(tr('modules.common.close_test_with_jev'))}">${icon('close')}</button></div></div>`;
   const host = panel.firstElementChild as HTMLElement;
   const cleanups: (() => void)[] = [];
   const expanded = anchor.getAttribute('aria-expanded'), controls = anchor.getAttribute('aria-controls');
@@ -123,7 +125,7 @@ function createView(dialog: HTMLDialogElement, title: string, variant: string) {
   views.get(dialog)?.();
   const host = document.createElement('div');
   host.className = 'jev-view';
-  host.innerHTML = `<div class="dialog-heading"><div class="jev-heading"><span class="jev-mark">${icon('globe')}</span><h2>${title}</h2><span class="jev-preview-badge">Preview</span></div><button type="button" class="icon-button" data-jev-close aria-label="Close ${title}">${icon('close')}</button></div>`;
+  host.innerHTML = `<div class="dialog-heading"><div class="jev-heading"><span class="jev-mark">${icon('globe')}</span><h2>${title}</h2><span class="jev-preview-badge">${escapeI18n(tr('modules.common.preview'))}</span></div><button type="button" class="icon-button" data-jev-close aria-label="Close ${title}">${icon('close')}</button></div>`;
   dialog.className = `settings-dialog jev-dialog ${variant}`;
   dialog.replaceChildren(host);
   let disposed = false;
@@ -150,32 +152,32 @@ export async function showJevSettings(dialog: HTMLDialogElement): Promise<void> 
   const { host } = view;
   host.insertAdjacentHTML('beforeend', `<form class="jev-settings-form">
     <fieldset class="jev-fields" disabled>
-      <label class="jev-enable-row" for="jev-enabled"><span><strong>Let your agents test their apps</strong><small>Available to your architect and workers when enabled.</small></span><input class="jev-switch" type="checkbox" id="jev-enabled" role="switch"></label>
-      <label class="jev-enable-row" for="jev-decisions-enabled"><span><strong>Decision assistance</strong><small>Optional reviews, project rules, context search, and worker suggestions.</small></span><input class="jev-switch" type="checkbox" id="jev-decisions-enabled" role="switch"></label>
-      <p class="jev-privacy">Browser tests send your goal and visible page text to TypeSafe and your text model provider, using a separate Chrome profile. Decision assistance sends selected task text and diffs to TypeSafe, or to OpenRouter if you choose it below. Reports stay on this device.</p>
-      <section class="jev-section"><div class="jev-section-heading"><h3>Connections</h3><span>Usage is billed by your providers</span></div>
+      <label class="jev-enable-row" for="jev-enabled"><span><strong>${escapeI18n(tr('modules.common.let_your_agents_test_their_apps'))}</strong><small>${escapeI18n(tr('modules.common.available_to_your_architect_and_workers_when_enabled'))}</small></span><input class="jev-switch" type="checkbox" id="jev-enabled" role="switch"></label>
+      <label class="jev-enable-row" for="jev-decisions-enabled"><span><strong>${escapeI18n(tr('modules.common.decision_assistance'))}</strong><small>${escapeI18n(tr('modules.common.optional_reviews_project_rules_context_search_and_worker_suggestions'))}</small></span><input class="jev-switch" type="checkbox" id="jev-decisions-enabled" role="switch"></label>
+      <p class="jev-privacy">${escapeI18n(tr('modules.common.browser_tests_send_your_goal_and_visible_page_text_to_typesafe_and'))}</p>
+      <section class="jev-section"><div class="jev-section-heading"><h3>${escapeI18n(tr('modules.common.connections'))}</h3><span>${escapeI18n(tr('modules.common.usage_is_billed_by_your_providers'))}</span></div>
         <div class="jev-field-grid">
-          <label>Decision provider<select id="jev-decision-provider"><option value="typesafe">TypeSafe (default)</option><option value="openrouter">OpenRouter</option></select></label>
-          <div class="jev-model-field"><label for="jev-decision-model">Decision model</label><div><select id="jev-decision-model"></select><button type="button" class="jev-text-button" data-jev-models-refresh hidden>Refresh</button></div></div>
+          <label>${escapeI18n(tr('modules.common.decision_provider'))}<select id="jev-decision-provider"><option value="typesafe">${escapeI18n(tr('modules.common.typesafe_default'))}</option><option value="openrouter">OpenRouter</option></select></label>
+          <div class="jev-model-field"><label for="jev-decision-model">${escapeI18n(tr('modules.common.decision_model'))}</label><div><select id="jev-decision-model"></select><button type="button" class="jev-text-button" data-jev-models-refresh hidden>${escapeI18n(tr('modules.common.refresh'))}</button></div></div>
         </div>
         ${keyField('typesafe', 'TypeSafe API key')}${keyField('openrouter', 'OpenRouter API key')}${keyField('text', 'Text model API key')}
-        <p class="jev-hint">PandaCode works without Jev or a TypeSafe key. Optional decision assistance only needs the key for the provider you pick. OpenRouter models are listed only when you open the model menu. Keys are saved privately on this device, outside the keychain. Leave a field empty to keep its saved key.</p>
+        <p class="jev-hint">${escapeI18n(tr('modules.common.pandacode_works_without_jev_or_a_typesafe_key_optional_decision_assistance_only'))}</p>
       </section>
-      <details class="jev-section jev-advanced" data-jev-browser-runtime><summary>Browser runtime <span class="jev-runtime-badge" role="status">Checking setup…</span>${icon('down')}</summary>
-        <p class="jev-hint">Only browser tests need Python 3.12+, Chrome, and a text model key. Decision assistance works without the browser runtime. Jev is installed separately and only runs when testing.</p>
+      <details class="jev-section jev-advanced" data-jev-browser-runtime><summary>${escapeI18n(tr('modules.common.browser_runtime'))} <span class="jev-runtime-badge" role="status">${escapeI18n(tr('modules.common.checking_setup'))}</span>${icon('down')}</summary>
+        <p class="jev-hint">${escapeI18n(tr('modules.common.only_browser_tests_need_python_3_12_chrome_and_a_text_model'))}</p>
         <div class="jev-runtime-actions"><button type="button" class="secondary-button" data-jev-install>${icon('plus')}Install Jev runtime</button><button type="button" class="secondary-button" data-jev-doctor>${icon('refresh')}Check setup</button></div>
-        <progress class="jev-install-progress" aria-label="Installing Jev runtime" hidden></progress><div class="jev-doctor-details"></div>
+        <progress class="jev-install-progress" aria-label="${escapeI18n(tr('modules.common.installing_jev_runtime'))}" hidden></progress><div class="jev-doctor-details"></div>
       </details>
       <details class="jev-advanced"><summary>Advanced ${icon('down')}</summary><div class="jev-field-grid">
-        <label>Text model<input id="jev-text-model" autocomplete="off" spellcheck="false" maxlength="256" placeholder="inception/mercury-2.5"></label>
-        <label>OpenAI-compatible base URL<input id="jev-text-base" type="url" autocomplete="off" spellcheck="false" maxlength="2048" placeholder="https://openrouter.ai/api/v1"></label>
-        <label>Python executable<input id="jev-python-path" autocomplete="off" spellcheck="false" maxlength="4096" placeholder="Find automatically"></label>
-        <label>Chrome executable<input id="jev-chrome-path" autocomplete="off" spellcheck="false" maxlength="4096" placeholder="Find automatically"></label>
-      </div><p class="jev-hint">Save changed paths before installing or checking the runtime. Custom providers must support the text model API.</p></details>
+        <label>${escapeI18n(tr('modules.common.text_model'))}<input id="jev-text-model" autocomplete="off" spellcheck="false" maxlength="256" placeholder="inception/mercury-2.5"></label>
+        <label>${escapeI18n(tr('modules.common.openai_compatible_base_url'))}<input id="jev-text-base" type="url" autocomplete="off" spellcheck="false" maxlength="2048" placeholder="https://openrouter.ai/api/v1"></label>
+        <label>${escapeI18n(tr('modules.common.python_executable'))}<input id="jev-python-path" autocomplete="off" spellcheck="false" maxlength="4096" placeholder="${escapeI18n(tr('modules.common.find_automatically'))}"></label>
+        <label>${escapeI18n(tr('modules.common.chrome_executable'))}<input id="jev-chrome-path" autocomplete="off" spellcheck="false" maxlength="4096" placeholder="${escapeI18n(tr('modules.common.find_automatically'))}"></label>
+      </div><p class="jev-hint">${escapeI18n(tr('modules.common.save_changed_paths_before_installing_or_checking_the_runtime_custom_providers_must'))}</p></details>
     </fieldset>
-    ${preview ? '<p class="jev-hint">Jev runs in the desktop app. This browser preview does not save keys or contact model providers.</p>' : ''}
-    <p class="jev-feedback" role="status">Loading settings…</p>
-    <div class="dialog-footer"><button class="secondary-button" type="button" data-jev-settings-close>Close</button><button class="primary-button" type="submit" data-jev-save disabled>Save settings</button></div>
+    ${preview ? `<p class="jev-hint">${escapeI18n(tr('modules.common.jev_runs_in_the_desktop_app_this_browser_preview_does_not_save'))}</p>` : ''}
+    <p class="jev-feedback" role="status">${escapeI18n(tr('modules.common.loading_settings'))}</p>
+    <div class="dialog-footer"><button class="secondary-button" type="button" data-jev-settings-close>${escapeI18n(tr('modules.common.close'))}</button><button class="primary-button" type="submit" data-jev-save disabled>${escapeI18n(tr('modules.common.save_settings'))}</button></div>
   </form>`);
   const query = <T extends HTMLElement = HTMLElement>(selector: string) => host.querySelector<T>(selector)!;
   const input = (name: string) => query<HTMLInputElement>(`#jev-${name}`);
@@ -196,7 +198,7 @@ export async function showJevSettings(dialog: HTMLDialogElement): Promise<void> 
     const select = modelSelect();
     const known = models.some(model => model.id === selected);
     const options = [...(selected && !known ? [{ id: selected, name: selected }] : []), ...models];
-    select.innerHTML = (provider().value === 'openrouter' ? '<option value="">Choose a model…</option>' : '') + options.map(model => `<option value="${escape(model.id)}">${escape(model.name === model.id ? model.id : `${model.name} (${model.id})`)}</option>`).join('');
+    select.innerHTML = (provider().value === 'openrouter' ? `<option value="">${escapeI18n(tr('modules.common.choose_a_model'))}</option>` : '') + options.map(model => `<option value="${escape(model.id)}">${escape(model.name === model.id ? model.id : `${model.name} (${model.id})`)}</option>`).join('');
     select.value = selected;
     if (provider().value === 'typesafe') select.value = options[0]?.id ?? '';
   }
@@ -222,15 +224,15 @@ export async function showJevSettings(dialog: HTMLDialogElement): Promise<void> 
   function renderKeys() {
     for (const name of ['typesafe', 'openrouter', 'text']) {
       const saved = name === 'typesafe' ? config?.typesafeKeySaved : name === 'openrouter' ? config?.openrouterKeySaved : config?.textKeySaved;
-      query(`[data-jev-key-status="${name}"]`).textContent = removed.has(name) ? 'Will be removed on save' : saved ? 'Key saved' : 'No saved key';
+      query(`[data-jev-key-status="${name}"]`).textContent = removed.has(name) ? tr('modules.common.will_be_removed_on_save') : saved ? tr('modules.common.key_saved') : tr('modules.common.no_saved_key');
       query<HTMLButtonElement>(`[data-jev-remove-key="${name}"]`).hidden = !saved || removed.has(name);
-      input(`${name}-key`).placeholder = saved && !removed.has(name) ? 'Replace saved key' : 'Enter API key';
+      input(`${name}-key`).placeholder = saved && !removed.has(name) ? tr('modules.common.replace_saved_key') : tr('modules.common.enter_api_key');
     }
   }
   function renderDoctor(doctor: JevDoctor) {
     if (!view.alive()) return;
     const badge = query('.jev-runtime-badge');
-    badge.textContent = doctor.ready ? 'Ready' : 'Setup needed'; badge.dataset.ready = String(doctor.ready);
+    badge.textContent = doctor.ready ? tr('modules.common.ready') : tr('modules.common.setup_needed'); badge.dataset.ready = String(doctor.ready);
     query('.jev-doctor-details').innerHTML = `${doctor.issues.length ? `<ul>${doctor.issues.map(issue => `<li>${escape(issue)}</li>`).join('')}</ul>` : ''}<p class="jev-hint">${[doctor.pythonVersion, doctor.jevVersion && `Jev ${doctor.jevVersion}`].filter(Boolean).map(escape).join(' · ')}</p>`;
   }
   async function checkDoctor(command: 'jev_doctor' | 'jev_install_runtime') {
@@ -291,19 +293,19 @@ export async function showJevSettings(dialog: HTMLDialogElement): Promise<void> 
     }).catch(error => tell(errorText(error), true)),
     checkDoctor('jev_doctor').catch(error => {
       if (!view.alive()) return;
-      query('.jev-runtime-badge').textContent = 'Could not check setup'; tell(errorText(error), true);
+      query('.jev-runtime-badge').textContent = tr('modules.common.could_not_check_setup'); tell(errorText(error), true);
     }),
   ]);
 }
 
 function keyField(id: string, label: string): string {
-  return `<div class="jev-key-field"><label for="jev-${id}-key">${label}<span data-jev-key-status="${id}"></span></label><div><input id="jev-${id}-key" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4096" placeholder="Enter API key"><button class="jev-text-button" type="button" data-jev-remove-key="${id}" hidden aria-label="Remove saved ${label}">Remove</button></div></div>`;
+  return `<div class="jev-key-field"><label for="jev-${id}-key">${label}<span data-jev-key-status="${id}"></span></label><div><input id="jev-${id}-key" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="4096" placeholder="${escapeI18n(tr('modules.common.enter_api_key'))}"><button class="jev-text-button" type="button" data-jev-remove-key="${id}" hidden aria-label="Remove saved ${label}">${escapeI18n(tr('modules.common.remove'))}</button></div></div>`;
 }
 
 const presets = {
-  smoke: { label: 'Smoke test', goal: 'Check that this app loads and its main controls work. Try the primary interaction and report any broken or confusing behavior. Do not make purchases or submit real personal data.', viewport: 'desktop' },
-  journey: { label: 'User journey', goal: 'Explore the primary user journey from start to finish using test data. Try navigation, inputs, validation, and recovery from mistakes. Report what you actually observed. Do not make purchases or change real account data.', viewport: 'desktop' },
-  mobile: { label: 'Mobile check', goal: 'Test the main user journey in a narrow mobile viewport. Check that navigation, inputs, and primary controls are visible and usable. Report any clipping or inaccessible controls. Do not make purchases or submit real personal data.', viewport: 'mobile' },
+  get smoke() { return { label: tr('modules.common.smoke_test'), goal: 'Check that this app loads and its main controls work. Try the primary interaction and report any broken or confusing behavior. Do not make purchases or submit real personal data.', viewport: 'desktop' }; },
+  get journey() { return { label: tr('modules.common.user_journey'), goal: 'Explore the primary user journey from start to finish using test data. Try navigation, inputs, validation, and recovery from mistakes. Report what you actually observed. Do not make purchases or change real account data.', viewport: 'desktop' }; },
+  get mobile() { return { label: tr('modules.common.mobile_check'), goal: 'Test the main user journey in a narrow mobile viewport. Check that navigation, inputs, and primary controls are visible and usable. Report any clipping or inaccessible controls. Do not make purchases or submit real personal data.', viewport: 'mobile' }; },
 } as const;
 
 export async function showJevTests(dialog: HTMLDialogElement, context: TestContext): Promise<void> {
@@ -318,21 +320,21 @@ function testInfoButton(id: string, label: string): string {
 async function mountTests(view: JevView, context: TestContext, compact = false): Promise<void> {
   const { host } = view;
   host.insertAdjacentHTML('beforeend', `<div class="jev-testing-body"><section class="jev-test-setup">
-    ${compact ? `<p id="jev-test-help" class="jev-help-text" hidden>Give Jev a goal and watch its actions in the sidebar. Tests use a separate Chrome profile and save reports locally. ${preview ? 'This web preview does not run model API calls.' : 'Your configured providers handle model requests.'}</p>` : '<p class="jev-intro">Give the browser a goal. Watch it explore your app.</p>'}
+    ${compact ? `<p id="jev-test-help" class="jev-help-text" hidden>Give Jev a goal and watch its actions in the sidebar. Tests use a separate Chrome profile and save reports locally. ${preview ? 'This web preview does not run model API calls.' : 'Your configured providers handle model requests.'}</p>` : `<p class="jev-intro">${escapeI18n(tr('modules.common.give_the_browser_a_goal_watch_it_explore_your_app'))}</p>`}
     <div class="jev-setup-notice" role="status" hidden><span></span><button type="button" class="jev-text-button" data-jev-open-settings>Set up Jev ${icon('forward')}</button></div>
-    <form class="jev-test-form"><label for="jev-test-url">App URL</label><input id="jev-test-url" type="text" inputmode="url" placeholder="http://localhost:3000" autocomplete="off" spellcheck="false" maxlength="2048" required>
-      ${compact ? `<details class="jev-local-options" hidden><summary>Local servers ${icon('down')}</summary>` : ''}<div class="jev-local-servers" aria-label="Available local servers"></div>${compact ? '</details>' : ''}
-      <div class="jev-presets" aria-label="Test presets">${Object.entries(presets).map(([id, preset]) => `<button type="button" data-jev-preset="${id}" aria-pressed="${id === 'smoke'}">${escape(preset.label)}</button>`).join('')}</div>
+    <form class="jev-test-form"><label for="jev-test-url">${escapeI18n(tr('modules.common.app_url'))}</label><input id="jev-test-url" type="text" inputmode="url" placeholder="http://localhost:3000" autocomplete="off" spellcheck="false" maxlength="2048" required>
+      ${compact ? `<details class="jev-local-options" hidden><summary>Local servers ${icon('down')}</summary>` : ''}<div class="jev-local-servers" aria-label="${escapeI18n(tr('modules.common.available_local_servers'))}"></div>${compact ? '</details>' : ''}
+      <div class="jev-presets" aria-label="${escapeI18n(tr('modules.common.test_presets'))}">${Object.entries(presets).map(([id, preset]) => `<button type="button" data-jev-preset="${id}" aria-pressed="${id === 'smoke'}">${escape(preset.label)}</button>`).join('')}</div>
       <label for="jev-test-goal">${compact ? 'Test goal' : 'What should it test?'}</label><textarea id="jev-test-goal" rows="3" maxlength="8192" required>${presets.smoke.goal}</textarea>
-      <details class="jev-advanced jev-test-checks"><summary>Verify the result ${compact ? testInfoButton('jev-check-help', 'About result checks') : '<span>Optional checks</span>'}${icon('down')}</summary><p ${compact ? 'id="jev-check-help" class="jev-help-text" hidden' : 'class="jev-hint"'}>Checked independently on the final page. An agent saying it finished is not a verified pass.</p><div class="jev-field-grid">
-        <label>Page contains text<input id="jev-expected-text" placeholder="e.g. Game over" maxlength="2000"></label><label>Title contains<input id="jev-expected-title" placeholder="e.g. Minesweeper" maxlength="500"></label><label>Final URL equals<input id="jev-expected-url" type="url" placeholder="http://localhost:3000/success" maxlength="4096" spellcheck="false"></label>
+      <details class="jev-advanced jev-test-checks"><summary>Verify the result ${compact ? testInfoButton('jev-check-help', 'About result checks') : `<span>${escapeI18n(tr('modules.common.optional_checks'))}</span>`}${icon('down')}</summary><p ${compact ? 'id="jev-check-help" class="jev-help-text" hidden' : 'class="jev-hint"'}>${escapeI18n(tr('modules.common.checked_independently_on_the_final_page_an_agent_saying_it_finished_is'))}</p><div class="jev-field-grid">
+        <label>${escapeI18n(tr('modules.common.page_contains_text'))}<input id="jev-expected-text" placeholder="${escapeI18n(tr('modules.common.e_g_game_over'))}" maxlength="2000"></label><label>${escapeI18n(tr('modules.common.title_contains'))}<input id="jev-expected-title" placeholder="${escapeI18n(tr('modules.common.e_g_minesweeper'))}" maxlength="500"></label><label>${escapeI18n(tr('modules.common.final_url_equals'))}<input id="jev-expected-url" type="url" placeholder="http://localhost:3000/success" maxlength="4096" spellcheck="false"></label>
       </div></details>
-      <details class="jev-advanced"><summary>Run options ${icon('down')}</summary><div class="jev-field-grid jev-run-options"><label>Viewport<select id="jev-viewport"><option value="desktop">Desktop</option><option value="mobile">Mobile</option></select></label><label>Maximum steps<input id="jev-max-steps" type="number" min="1" max="60" value="20" required></label><label>Time limit (seconds)<input id="jev-time-limit" type="number" min="30" max="600" value="180" required></label></div></details>
-      <div class="jev-run-row">${compact ? '' : '<span class="jev-hint">Separate Chrome profile · local report</span>'}<button type="submit" class="primary-button" data-jev-run disabled>${icon('play')}Run test</button></div>
+      <details class="jev-advanced"><summary>Run options ${icon('down')}</summary><div class="jev-field-grid jev-run-options"><label>${escapeI18n(tr('modules.common.viewport'))}<select id="jev-viewport"><option value="desktop">${escapeI18n(tr('modules.common.desktop'))}</option><option value="mobile">${escapeI18n(tr('modules.common.mobile'))}</option></select></label><label>${escapeI18n(tr('modules.common.maximum_steps'))}<input id="jev-max-steps" type="number" min="1" max="60" value="20" required></label><label>${escapeI18n(tr('modules.common.time_limit_seconds'))}<input id="jev-time-limit" type="number" min="30" max="600" value="180" required></label></div></details>
+      <div class="jev-run-row">${compact ? '' : `<span class="jev-hint">${escapeI18n(tr('modules.common.separate_chrome_profile_local_report'))}</span>`}<button type="submit" class="primary-button" data-jev-run disabled>${icon('play')}Run test</button></div>
     </form>
     <p class="jev-feedback" role="status" hidden></p>
-    ${preview && !compact ? '<p class="jev-hint">Browser testing runs in the desktop app. No model API calls are made by this preview.</p>' : ''}
-  </section><${compact ? 'details' : 'section'} class="jev-results-section">${compact ? `<summary>Recent tests ${icon('down')}</summary>` : ''}<div class="jev-section-heading"><h3>Test runs</h3><button type="button" class="jev-text-button" data-jev-refresh>${icon('refresh')}Refresh</button></div><div class="jev-run-list" aria-label="Test runs for this task"></div><div class="jev-report" hidden></div><p class="jev-empty">No tests yet. Run a quick check before handing work back to your agent.</p></${compact ? 'details' : 'section'}></div>`);
+    ${preview && !compact ? `<p class="jev-hint">${escapeI18n(tr('modules.common.browser_testing_runs_in_the_desktop_app_no_model_api_calls_are'))}</p>` : ''}
+  </section><${compact ? 'details' : 'section'} class="jev-results-section">${compact ? `<summary>Recent tests ${icon('down')}</summary>` : ''}<div class="jev-section-heading"><h3>${escapeI18n(tr('modules.common.test_runs'))}</h3><button type="button" class="jev-text-button" data-jev-refresh>${icon('refresh')}Refresh</button></div><div class="jev-run-list" aria-label="${escapeI18n(tr('modules.common.test_runs_for_this_task'))}"></div><div class="jev-report" hidden></div><p class="jev-empty">${escapeI18n(tr('modules.common.no_tests_yet_run_a_quick_check_before_handing_work_back_to'))}</p></${compact ? 'details' : 'section'}></div>`);
   const query = <T extends HTMLElement = HTMLElement>(selector: string) => host.querySelector<T>(selector)!;
   const reports = new Map<string, JevReport>();
   const reportButtons = new Map<string, HTMLButtonElement>();
@@ -374,7 +376,7 @@ async function mountTests(view: JevView, context: TestContext, compact = false):
   function setConfig(configuration: JevConfiguration) {
     enabled = configuration.enabled; runButton.disabled = !enabled || starting;
     const notice = query('.jev-setup-notice'); notice.hidden = enabled;
-    notice.querySelector('span')!.textContent = 'Enable Jev and connect your providers to run browser tests.';
+    notice.querySelector('span')!.textContent = tr('modules.common.enable_jev_and_connect_your_providers_to_run_browser_tests');
   }
   function updateReport(report: JevReport, fromEvent = false) {
     if (!view.alive() || report.sessionId !== context.sessionId) return;
@@ -410,7 +412,7 @@ async function mountTests(view: JevView, context: TestContext, compact = false):
     resultHost.hidden = false;
     if (detailId !== selected) {
       detailId = selected; renderedEvents = 0;
-      resultHost.innerHTML = `<div class="jev-report-heading"><strong class="jev-report-status" role="status"></strong><span class="jev-report-meta"></span><button type="button" class="secondary-button" data-jev-cancel>${icon('stop')}Stop</button></div><p class="jev-report-url"></p><p class="jev-report-summary"></p><div class="jev-verification"><span class="jev-check-badge"></span><ul></ul></div><details class="jev-events"><summary>Browser actions <span></span>${icon('down')}</summary><ol></ol></details><figure class="jev-screenshot" hidden><img alt="Final browser screenshot from this Jev test" loading="lazy"><figcaption>Final browser view</figcaption></figure>${context.watch ? `<button type="button" class="secondary-button" data-jev-watch>${icon('globe')}Watch in browser</button>` : ''}${context.attach ? '<button type="button" class="secondary-button jev-attach-report">' + icon('attach') + 'Use report in prompt</button>' : ''}`;
+      resultHost.innerHTML = `<div class="jev-report-heading"><strong class="jev-report-status" role="status"></strong><span class="jev-report-meta"></span><button type="button" class="secondary-button" data-jev-cancel>${icon('stop')}Stop</button></div><p class="jev-report-url"></p><p class="jev-report-summary"></p><div class="jev-verification"><span class="jev-check-badge"></span><ul></ul></div><details class="jev-events"><summary>${escapeI18n(tr('modules.common.browser_actions'))} <span></span>${icon('down')}</summary><ol></ol></details><figure class="jev-screenshot" hidden><img alt="Final browser screenshot from this Jev test" loading="lazy"><figcaption>${escapeI18n(tr('modules.common.final_browser_view'))}</figcaption></figure>${context.watch ? `<button type="button" class="secondary-button" data-jev-watch>${icon('globe')}Watch in browser</button>` : ''}${context.attach ? '<button type="button" class="secondary-button jev-attach-report">' + icon('attach') + 'Use report in prompt</button>' : ''}`;
       resultHost.querySelector('[data-jev-cancel]')!.addEventListener('click', () => { void cancelSelected(); });
       resultHost.querySelector('[data-jev-watch]')?.addEventListener('click', () => { if (selected) { const id = selected; view.close(); context.watch?.(id); } });
       resultHost.querySelector('.jev-attach-report')?.addEventListener('click', () => {
@@ -423,9 +425,9 @@ async function mountTests(view: JevView, context: TestContext, compact = false):
     target('.jev-report-status').dataset.status = report.status;
     target('.jev-report-meta').textContent = `${report.steps} ${report.steps === 1 ? 'step' : 'steps'} · ${duration(report.durationMs)} · ${report.viewport}`;
     target('.jev-report-url').textContent = report.url;
-    target('.jev-report-summary').textContent = report.summary || (running(report) ? 'The browser is working through your goal.' : 'No summary was returned.');
+    target('.jev-report-summary').textContent = report.summary || (running(report) ? tr('modules.common.the_browser_is_working_through_your_goal') : tr('modules.common.no_summary_was_returned'));
     const cancel = target<HTMLButtonElement>('[data-jev-cancel]'); cancel.hidden = !running(report); cancel.disabled = cancelPending;
-    const badge = target('.jev-check-badge'); badge.textContent = running(report) ? 'Checks pending' : verificationLabels[report.verification]; badge.dataset.verification = running(report) ? 'not_checked' : report.verification;
+    const badge = target('.jev-check-badge'); badge.textContent = running(report) ? tr('modules.common.checks_pending') : verificationLabels[report.verification]; badge.dataset.verification = running(report) ? 'not_checked' : report.verification;
     target('.jev-verification ul').innerHTML = report.checks.map(check => `<li>${icon(check.passed ? 'check' : 'close')}<span>${escape(check.name)}<small>${escape(check.expected)}</small></span><span>${check.passed ? 'Passed' : 'Failed'}</span></li>`).join('');
     target('.jev-events summary span').textContent = String(report.events.length);
     const events = target<HTMLOListElement>('.jev-events ol');

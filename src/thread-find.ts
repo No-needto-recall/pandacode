@@ -1,3 +1,5 @@
+import { escape as escapeI18n } from './dom.ts';
+import { t as tr } from './i18n.ts';
 import './thread-find.css';
 import { icon } from './dom';
 
@@ -77,7 +79,7 @@ export function createThreadFind(host: Host) {
 
   function label(): void {
     if (!count || !input) return;
-    count.textContent = !input.value ? '' : ranges.length ? `${current + 1} of ${ranges.length}` : 'No results';
+    count.textContent = !input.value ? '' : ranges.length ? `${current + 1} of ${ranges.length}` : tr('modules.common.no_results');
     bar?.querySelectorAll<HTMLButtonElement>('[data-find-step]').forEach(button => { button.disabled = ranges.length < 2; });
   }
 
@@ -130,7 +132,7 @@ export function createThreadFind(host: Host) {
       bar = document.createElement('div');
       bar.className = 'thread-find';
       bar.setAttribute('role', 'search');
-      bar.innerHTML = `${icon('search')}<input type="search" aria-label="Find in thread" placeholder="Find in thread" autocomplete="off" spellcheck="false" maxlength="200"><span class="thread-find-count" aria-live="polite"></span><button type="button" class="icon-button thread-find-previous" data-find-step="-1" aria-label="Previous match" title="Previous match (⇧↩)">${icon('down')}</button><button type="button" class="icon-button" data-find-step="1" aria-label="Next match" title="Next match (↩)">${icon('down')}</button><button type="button" class="icon-button" data-find-close aria-label="Close find" title="Close (Esc)">${icon('close')}</button>`;
+      bar.innerHTML = `${icon('search')}<input type="search" aria-label="${escapeI18n(tr('modules.common.find_in_thread'))}" placeholder="${escapeI18n(tr('modules.common.find_in_thread'))}" autocomplete="off" spellcheck="false" maxlength="200"><span class="thread-find-count" aria-live="polite"></span><button type="button" class="icon-button thread-find-previous" data-find-step="-1" aria-label="${escapeI18n(tr('modules.common.previous_match'))}" title="${escapeI18n(tr('modules.common.previous_match_1fd7e9'))}">${icon('down')}</button><button type="button" class="icon-button" data-find-step="1" aria-label="${escapeI18n(tr('modules.common.next_match'))}" title="${escapeI18n(tr('modules.common.next_match_49c934'))}">${icon('down')}</button><button type="button" class="icon-button" data-find-close aria-label="${escapeI18n(tr('modules.common.close_find'))}" title="${escapeI18n(tr('modules.common.close_esc'))}">${icon('close')}</button>`;
       input = bar.querySelector('input')!; count = bar.querySelector<HTMLElement>('.thread-find-count')!;
       input.addEventListener('input', () => search(true));
       input.addEventListener('keydown', event => {
