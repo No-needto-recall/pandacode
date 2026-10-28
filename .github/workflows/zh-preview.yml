@@ -87,6 +87,9 @@ jobs:
     name: Android ARM64 standalone preview APK
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
     env:
       CI: '1'
       PANDACODE_ANDROID_PREVIEW: '1'
@@ -105,6 +108,9 @@ jobs:
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
         with: { distribution: temurin, java-version: '17' }
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d
       - name: Install SDK 58 Android toolchain
         run: sdkmanager 'platforms;android-37' 'build-tools;37.0.0' 'ndk;27.1.12297006' 'cmake;3.22.1'
@@ -130,7 +136,7 @@ jobs:
           cp mobile/android/app/build/outputs/apk/release/app-release.apk "$apk"
           "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs "$apk" | tee artifacts/SIGNING.txt
           "$ANDROID_HOME/build-tools/37.0.0/zipalign" -c -P 16 -v 4 "$apk"
-          analyzer="$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer"
+          analyzer="$(command -v apkanalyzer)"
           test "$("$analyzer" manifest application-id "$apk")" = 'io.github.norecall.pandacode.zhpreview'
           test "$("$analyzer" manifest debuggable "$apk")" = 'false'
           node mobile/scripts/verify-apk.mjs "$apk"
