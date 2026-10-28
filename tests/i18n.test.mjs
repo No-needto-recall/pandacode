@@ -87,6 +87,11 @@ test('generation is deterministic, scoped per client and checks stale output', a
     ]) await writeFile(join(directory, `shared/i18n/catalogs/${name}.json`), JSON.stringify(catalog));
     assert.equal((await generate({ directory })).changed.length, 4);
     assert.equal((await generate({ directory, check: true })).changed.length, 0);
+    for (const path of ['shared/i18n/core.ts', 'src/i18n-generated/core.ts', 'src/i18n-generated/messages.ts', 'mobile/src/i18n-generated/core.ts', 'mobile/src/i18n-generated/messages.ts']) {
+      const full = join(directory, path);
+      await writeFile(full, (await readFile(full, 'utf8')).replace(/\n/g, '\r\n'));
+    }
+    assert.equal((await generate({ directory, check: true })).changed.length, 0);
     const desktop = await readFile(join(directory, 'src/i18n-generated/messages.ts'), 'utf8');
     const mobile = await readFile(join(directory, 'mobile/src/i18n-generated/messages.ts'), 'utf8');
     assert.match(desktop, /shell.test/);

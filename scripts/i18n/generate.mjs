@@ -34,7 +34,7 @@ export async function generate({ check = false, directory = root } = {}) {
       keys.add(key);
     }
   }
-  const core = await readFile(join(source, 'core.ts'), 'utf8');
+  const core = (await readFile(join(source, 'core.ts'), 'utf8')).replace(/\r\n/g, '\n');
   const changed = [];
   for (const platform of ['desktop', 'mobile']) {
     const messages = Object.fromEntries(catalogs
@@ -51,7 +51,7 @@ export async function generate({ check = false, directory = root } = {}) {
         if (error.code === 'ENOENT') return null;
         throw error;
       });
-      if (previous === content) continue;
+      if (previous?.replace(/\r\n/g, '\n') === content) continue;
       changed.push(path);
       if (!check) {
         await mkdir(destination, { recursive: true });
