@@ -71,6 +71,7 @@ jobs:
           $hash = (Get-FileHash (Join-Path artifacts $name) -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  $name" | Set-Content (Join-Path artifacts "$name.sha256") -Encoding ascii
           Copy-Item docs/localization-downloads.md artifacts/README.md
+          Copy-Item LICENSE artifacts/LICENSE
           @{ sourceCommit = $env:GITHUB_SHA; target = 'windows-x86_64'; signing = 'unsigned preview'; connectConfigured = '${{ steps.connect.outputs.configured }}' -eq 'true'; autoUpdater = 'disabled' } | ConvertTo-Json | Set-Content artifacts/build-info.json -Encoding utf8
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         id: artifact
@@ -113,7 +114,7 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d
       - name: Install SDK 58 Android toolchain
-        run: sdkmanager 'platforms;android-37' 'build-tools;37.0.0' 'ndk;27.1.12297006' 'cmake;3.22.1'
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;27.1.12297006' 'cmake;3.22.1'
       - run: npm ci --prefix mobile
       - name: Validate optional Connect configuration
         run: node scripts/release/preview-config.mjs
@@ -141,6 +142,7 @@ jobs:
           test "$("$analyzer" manifest debuggable "$apk")" = 'false'
           node mobile/scripts/verify-apk.mjs "$apk"
           cp docs/localization-downloads.md artifacts/README.md
+          cp LICENSE artifacts/LICENSE
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         id: artifact
         with:
