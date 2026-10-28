@@ -1,5 +1,9 @@
 # PandaCode
 
+**This is a fork of PandaCode** — upstream: [aicodeking/pandacode](https://github.com/aicodeking/pandacode).
+
+本分支提供 Windows 与 Android 简体中文预览版。构建、下载和签名限制见 [中文预览包说明](docs/localization-downloads.md)。
+
 A small, native desktop workspace for coding agents. PandaCode runs the coding
 CLIs you already use — **Claude Code, Codex, Kimi Code, OpenCode, GLM Coding
 Plan and Xiaomi MiMo** (through Claude Code), **GitHub Copilot CLI, Antigravity,
