@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // GitHub device-flow sign-in and the relay's HTTP API; mirrors src-tauri/src/remote/auth.rs.
 import * as ExpoDevice from 'expo-device';
 import { Platform } from 'react-native';
@@ -6,8 +7,8 @@ import { publicKey } from './crypto.ts';
 import * as secrets from './secrets.ts';
 import type { Account, Device } from './types.ts';
 
-export const SIGNED_OUT = 'This phone was signed out of PandaCode Connect.';
-const KEY_CHANGED = 'The relay has another key for this device.';
+export const SIGNED_OUT = "This phone was signed out of PandaCode Connect.";
+const KEY_CHANGED = "The relay has another key for this device.";
 const GITHUB = 'https://github.com';
 const WEEK_S = 7 * 24 * 3600;
 
@@ -27,14 +28,14 @@ async function fetchJson(url: string, init: RequestInit, label: string): Promise
   try {
     const response = await fetch(url, { ...init, signal: init.signal ?? controller.signal });
     const text = await response.text();
-    if (text.length > 1024 * 1024) throw new Error(`${label} sent a response that is too large.`);
+    if (text.length > 1024 * 1024) throw new Error(msg('mobile.error.response_too_large', { name: label }));
     let body: any = null;
     try { body = JSON.parse(text); } catch { /* not JSON */ }
     return { status: response.status, body };
   } catch (error) {
-    if ((error as Error).name === 'AbortError') throw new Error(init.signal?.aborted ? 'Sign-in was cancelled.' : `${label} did not answer in time.`);
+    if ((error as Error).name === 'AbortError') throw new Error(init.signal?.aborted ? msg("mobile.text.sign_in_was_cancelled") : msg('mobile.error.no_answer', { name: label }));
     if (error instanceof Error && error.message.startsWith(label)) throw error;
-    throw new Error(`Could not reach ${label}. Check your connection.`);
+    throw new Error(msg('mobile.error.reach', { name: label }));
   } finally {
     clearTimeout(timer);
   }
@@ -45,11 +46,11 @@ export async function relay(method: string, path: string, token: string | null, 
   const headers: Record<string, string> = {};
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const reply = await fetchJson(`${config().relay}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) }, 'the relay');
+  const reply = await fetchJson(`${config().relay}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) }, msg("mobile.text.the_relay"));
   if (reply.status >= 200 && reply.status < 300) return reply.body;
   if (reply.status === 401 && token) throw new SignedOut(token);
   if (reply.status === 409 && !token) throw new Error(KEY_CHANGED);
-  const error = typeof reply.body?.error === 'string' ? `Relay: ${reply.body.error.slice(0, 300)}` : `The relay returned HTTP ${reply.status}.`;
+  const error = typeof reply.body?.error === 'string' ? `Relay: ${reply.body.error.slice(0, 300)}` : msg('mobile.error.relay_http', { status: reply.status });
   throw new Error(error);
 }
 
@@ -64,9 +65,9 @@ export async function startSignIn(): Promise<SignInCode> {
   const reply = await github('/login/device/code', `client_id=${encodeURIComponent(config().clientId)}&scope=`);
   const { device_code, user_code, verification_uri } = reply;
   if (typeof user_code !== 'string' || typeof verification_uri !== 'string') {
-    throw new Error(`GitHub did not start sign-in: ${reply.error_description ?? 'unexpected reply'}`);
+    throw new Error(msg('mobile.error.github_start', { error: reply.error_description ?? msg("mobile.text.unexpected_reply") }));
   }
-  if (!safe(device_code) || !verification_uri.startsWith('https://github.com/')) throw new Error('GitHub returned an unexpected sign-in code.');
+  if (!safe(device_code) || !verification_uri.startsWith('https://github.com/')) throw new Error(msg("mobile.text.github_returned_an_unexpected_sign_in_code"));
   const expiresIn = Math.min(Number(reply.expires_in) || 900, 3600);
   const interval = Math.min(Math.max(Number(reply.interval) || 5, 1), 60);
   return { userCode: user_code, verificationUri: verification_uri, expiresIn, deviceCode: device_code, interval, expiresAt: Date.now() + expiresIn * 1000 };
@@ -74,7 +75,7 @@ export async function startSignIn(): Promise<SignInCode> {
 
 const sleep = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
   const timer = setTimeout(resolve, ms);
-  signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('Sign-in was cancelled.')); }, { once: true });
+  signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new Error(msg("mobile.text.sign_in_was_cancelled"))); }, { once: true });
 });
 
 /** Waits for the user to approve on GitHub; the GitHub token lives only in memory. */
@@ -82,23 +83,23 @@ async function githubToken(code: SignInCode, signal?: AbortSignal): Promise<stri
   let interval = code.interval;
   const form = `client_id=${encodeURIComponent(config().clientId)}&device_code=${code.deviceCode}&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code`;
   for (;;) {
-    if (Date.now() >= code.expiresAt) throw new Error('The sign-in code expired. Start again.');
+    if (Date.now() >= code.expiresAt) throw new Error(msg("mobile.text.the_sign_in_code_expired_start_again"));
     await sleep(interval * 1000, signal);
     const reply = await github('/login/oauth/access_token', form, signal);
     if (typeof reply.access_token === 'string') return reply.access_token;
     switch (reply.error) {
       case 'authorization_pending': break;
       case 'slow_down': interval = Math.min(interval + 5, 60); break;
-      case 'expired_token': throw new Error('The sign-in code expired. Start again.');
-      case 'access_denied': throw new Error('Sign-in was cancelled on GitHub.');
-      default: throw new Error(`GitHub sign-in failed: ${reply.error_description ?? reply.error ?? 'unexpected reply'}`);
+      case 'expired_token': throw new Error(msg("mobile.text.the_sign_in_code_expired_start_again"));
+      case 'access_denied': throw new Error(msg("mobile.text.sign_in_was_cancelled_on_github"));
+      default: throw new Error(msg('mobile.error.github_signin', { error: reply.error_description ?? reply.error ?? msg("mobile.text.unexpected_reply") }));
     }
   }
 }
 
 function deviceName(): string {
-  const name = (ExpoDevice.deviceName ?? ExpoDevice.modelName ?? 'Phone').replace(/[\u0000-\u001f\u007f]/g, '').trim();
-  return [...(name || 'Phone')].slice(0, 64).join('');
+  const name = (ExpoDevice.deviceName ?? ExpoDevice.modelName ?? msg("mobile.text.phone")).replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  return [...(name || msg("mobile.text.phone"))].slice(0, 64).join('');
 }
 
 /** Polls GitHub, then registers this phone with the relay. A 409 gets a new device id, once. */
@@ -117,8 +118,8 @@ export async function finishSignIn(code: SignInCode, signal?: AbortSignal): Prom
     reply = await register(deviceId);
   }
   const token = reply?.token, account = reply?.account;
-  if (typeof token !== 'string' || token.length > 4096) throw new Error('The relay did not return a token.');
-  if (!account || typeof account.login !== 'string') throw new Error('The relay returned an unreadable account.');
+  if (typeof token !== 'string' || token.length > 4096) throw new Error(msg("mobile.text.the_relay_did_not_return_a_token"));
+  if (!account || typeof account.login !== 'string') throw new Error(msg("mobile.text.the_relay_returned_an_unreadable_account"));
   const clean: Account = { id: String(account.id), login: account.login, avatarUrl: String(account.avatarUrl ?? '') };
   await secrets.setToken(token);
   await secrets.setAccount(clean);

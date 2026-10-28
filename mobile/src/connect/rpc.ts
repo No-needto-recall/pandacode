@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // App-protocol framing and pending calls (docs/remote-access.md, "App protocol");
 // mirrors src-tauri/src/remote/client.rs.
 import { randomBytes, uuid } from './crypto.ts';
@@ -11,11 +12,11 @@ export const TIMEOUT_MS = 20_000;
 /** The host's worst case for task.start is about 9.5 minutes; wait 3 minutes longer. */
 export const START_TIMEOUT_MS = 12.5 * 60_000;
 const MAX_PARAMS = 110 * 1024;
-export const OFFLINE = 'That computer is offline.';
-export const RATE = 'Too many requests to that computer. Try again in a moment.';
-export const LOST = 'The connection to the relay was lost.';
-export const NOT_CONNECTED = 'Not connected to the relay.';
-export const TIMED_OUT = 'That computer did not answer in time.';
+export const OFFLINE = "That computer is offline.";
+export const RATE = "Too many requests to that computer. Try again in a moment.";
+export const LOST = "The connection to the relay was lost.";
+export const NOT_CONNECTED = "Not connected to the relay.";
+export const TIMED_OUT = "That computer did not answer in time.";
 /** A call that timed out or lost the socket while waiting may still have run on the host
  * (unlike OFFLINE or NOT_CONNECTED, which were never delivered), as in client.rs. */
 export const maybeRan = (error: unknown) => {
@@ -24,14 +25,14 @@ export const maybeRan = (error: unknown) => {
 };
 /** An older desktop's answer to a method it doesn't have. */
 export const UNKNOWN_METHOD = 'Unknown method.';
-export const outdated = (computer: string) => `Update PandaCode on ${computer} to use this.`;
+export const outdated = (computer: string) => msg('mobile.computer.update', { name: computer });
 
 /** `z: 1`: this phone opens packed (deflated) replies and events. */
 export interface Request { type: 'req'; id: string; method: Method; params: unknown; ts: number; nonce: string; z: 1 }
 
 export function request(method: Method, params: unknown, now = Date.now()): Request {
   if (!METHODS.includes(method)) throw new Error('Unknown remote method.');
-  if (JSON.stringify(params).length > MAX_PARAMS) throw new Error('That request is too large.');
+  if (JSON.stringify(params).length > MAX_PARAMS) throw new Error(msg("mobile.text.that_request_is_too_large"));
   // `ts` and a fresh `nonce` let the host refuse replays.
   const nonce = Array.from(randomBytes(16), b => b.toString(16).padStart(2, '0')).join('');
   return { type: 'req', id: uuid(), method, params, ts: now, nonce, z: 1 };
@@ -84,7 +85,7 @@ export class Pending {
   /** A response settles its call only when it comes from the device it was sent to. */
   resolve(from: string, message: { id?: unknown; ok?: unknown; result?: unknown; error?: unknown }) {
     if (typeof message.id !== 'string' || this.calls.get(message.id)?.device !== from) return;
-    const error = typeof message.error === 'string' ? message.error.slice(0, 1000) : 'The other computer refused the request.';
+    const error = typeof message.error === 'string' ? message.error.slice(0, 1000) : msg("mobile.text.the_other_computer_refused_the_request");
     this.settle(message.id, message.ok === true ? null : error, message.result);
   }
 

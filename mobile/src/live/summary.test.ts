@@ -1,9 +1,11 @@
 /// <reference types="node" />
+import { setRuntimeLocale } from '../i18n.ts'; // Existing fixtures assert the English product copy explicitly.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { TaskSummary } from '../connect/types.ts';
 import { inboxSections } from '../store/inbox.ts';
 import { headline, MAX_ROWS, summarize } from './summary.ts';
+setRuntimeLocale('en');
 
 const NOW = 1_800_000_000_000;
 const task = (sessionId: string, extra: Partial<TaskSummary> = {}): TaskSummary => ({

@@ -1,4 +1,8 @@
+'use no memo';
 import '../connect/polyfill.ts';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { loadLocale, useLocale, useLocaleReady } from '../ui/locale.ts';
+import { t as msg } from '../i18n.ts';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet, useColorScheme, View } from 'react-native';
@@ -31,6 +35,8 @@ const sheet = { presentation: 'formSheet', sheetGrabberVisible: true, headerShow
 const pushed = { headerShown: true, headerTransparent: hasGlass, headerBackButtonDisplayMode: 'minimal' } as const;
 
 export default function RootLayout() {
+  useLocale();
+  const localeReady = useLocaleReady();
   const colorScheme = useColorScheme();
   const { ready, signedIn } = useStatus();
   const colors = useColors();
@@ -46,11 +52,11 @@ export default function RootLayout() {
   const sidebar = split && !collapsed;
   useEffect(() => {
     void loadAppearance();
-    void connect.init(); // or demo mode (src/demo.ts)
+    void loadLocale().then(() => connect.init()); // or demo mode (src/demo.ts)
   }, []);
   useOutboxFlusher();
   usePushNotifications(signedIn);
-  if (!ready) return null;
+  if (!ready || !localeReady) return null;
   return (
     <GestureHandlerRootView style={[styles.root, { backgroundColor: colors.background }]}>
       <WallpaperLayer />
@@ -63,14 +69,14 @@ export default function RootLayout() {
               <Stack.Protected guard={signedIn} redirectTo={SIGN_IN}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="task/[device]/[session]" />
-                <Stack.Screen name="new-task" options={{ ...sheet, sheetAllowedDetents: [0.75, 1], title: 'New task' }} />
-                <Stack.Screen name="task-settings" options={{ ...sheet, sheetAllowedDetents: [0.5, 0.9], title: 'Model & permissions' }} />
-                <Stack.Screen name="task-info" options={{ ...sheet, sheetAllowedDetents: [0.45, 0.8], title: 'Task info' }} />
-                <Stack.Screen name="pull" options={{ ...pushed, title: 'Pull request' }} />
-                <Stack.Screen name="changes" options={{ ...pushed, title: 'Changes' }} />
-                <Stack.Screen name="diff" options={{ ...pushed, title: 'Diff' }} />
-                <Stack.Screen name="agents" options={{ ...pushed, title: 'Agents' }} />
-                <Stack.Screen name="agent" options={{ ...pushed, title: 'Agent' }} />
+                <Stack.Screen name="new-task" options={{ ...sheet, sheetAllowedDetents: [0.75, 1], title: msg("mobile.text.new_task") }} />
+                <Stack.Screen name="task-settings" options={{ ...sheet, sheetAllowedDetents: [0.5, 0.9], title: msg("mobile.text.model_permissions") }} />
+                <Stack.Screen name="task-info" options={{ ...sheet, sheetAllowedDetents: [0.45, 0.8], title: msg("mobile.text.task_info") }} />
+                <Stack.Screen name="pull" options={{ ...pushed, title: msg("mobile.text.pull_request") }} />
+                <Stack.Screen name="changes" options={{ ...pushed, title: msg("mobile.text.changes") }} />
+                <Stack.Screen name="diff" options={{ ...pushed, title: msg("mobile.text.diff") }} />
+                <Stack.Screen name="agents" options={{ ...pushed, title: msg("mobile.text.agents") }} />
+                <Stack.Screen name="agent" options={{ ...pushed, title: msg("mobile.text.agent") }} />
               </Stack.Protected>
               <Stack.Protected guard={!signedIn} redirectTo={HOME}>
                 <Stack.Screen name="sign-in" />

@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { errorText, t as msg } from '../i18n.ts';
+import { useLocale } from './locale.ts';
 // Bots in the inbox and the Duo sidebar: avatar, name, paused/working state, computer and the
 // last message time. Tapping opens the bot's desktop conversation (bot.thread) as a task.
 import { Image } from 'expo-image';
@@ -14,6 +18,7 @@ import { projectColor, useColors } from './theme.ts';
 
 /** The bot's stored image (a data: URL), else its coloured initial. Decorative. */
 export function BotAvatar({ bot, size = 32 }: { bot: Pick<Bot, 'avatar' | 'name'>; size?: number }) {
+  useLocale();
   const box = { width: size, height: size, borderRadius: size / 2 };
   if (bot.avatar?.startsWith('data:image/')) return <Image source={{ uri: bot.avatar }} style={[styles.avatar, box]} contentFit="cover" accessible={false} />;
   return (
@@ -32,6 +37,7 @@ export async function openBot(deviceId: string, bot: Bot, replace?: boolean) {
 }
 
 export const BotRow = memo(function BotRow({ row, last, sidebar, selected, replace }: { row: Row; last: boolean; minute: number; sidebar?: boolean; selected?: boolean; replace?: boolean }) {
+  useLocale();
   const colors = useColors();
   const backdrop = useBackdrop();
   const { bot } = row;
@@ -41,14 +47,14 @@ export const BotRow = memo(function BotRow({ row, last, sidebar, selected, repla
     try {
       await openBot(row.deviceId, bot, replace);
     } catch (error) {
-      Alert.alert('Could not open the bot', (error as Error).message);
+      Alert.alert(msg("mobile.text.could_not_open_the_bot"), errorText(error), [{ text: msg('mobile.text.ok') }]);
     } finally {
       setOpening(false);
     }
   };
-  const state = bot.paused ? 'Paused' : bot.state === 'working' ? 'Working' : '';
+  const state = bot.paused ? msg("mobile.text.paused") : bot.state === 'working' ? msg("mobile.text.working") : '';
   return (
-    <Pressable onPress={open} disabled={opening} accessibilityRole="button" accessibilityHint="Opens the bot's conversation" accessibilityState={{ selected: !!selected, busy: opening }}
+    <Pressable onPress={open} disabled={opening} accessibilityRole="button" accessibilityHint={msg("mobile.text.opens_the_bot_s_conversation")} accessibilityState={{ selected: !!selected, busy: opening }}
       style={({ pressed }) => [styles.row, sidebar ? [styles.sidebarRow, { backgroundColor: selected ? colors.fill : backdrop.grouped }] : { backgroundColor: backdrop.background }, pressed && { opacity: 0.7 }]}>
       <BotAvatar bot={bot} size={sidebar ? 30 : 34} />
       <View style={styles.text}>

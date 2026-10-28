@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../locale.ts';
+import { t as msg } from '../../i18n.ts';
 // Shared pieces of generative UI: the composer fill for the open thread, titles, and the glass
 // buttons and chips that only put a prompt in the composer (never send it).
 import * as Haptics from 'expo-haptics';
@@ -17,15 +21,17 @@ export function useFill(): ((prompt: string) => void) | undefined {
 }
 
 export function Title({ text }: { text?: string }) {
+  useLocale();
   const colors = useColors();
   return text ? <Text style={[styles.title, { color: colors.text }]}>{text}</Text> : null;
 }
 
 export function Button({ label, tone, onPress, disabled, hint }: { label: string; tone: Action['tone']; onPress: () => void; disabled?: boolean; hint?: string }) {
+  useLocale();
   const colors = useColors();
   const primary = tone === 'primary';
   return (
-    <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" accessibilityLabel={label} accessibilityHint={hint ?? 'Puts a prompt in the message field'} accessibilityState={{ disabled }}
+    <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" accessibilityLabel={label} accessibilityHint={hint ?? msg("mobile.text.puts_a_prompt_in_the_message_field")} accessibilityState={{ disabled }}
       style={({ pressed }) => ({ opacity: disabled ? 0.4 : pressed ? 0.7 : 1 })}>
       {primary
         ? <View style={[styles.button, { backgroundColor: colors.tint }]}><Text style={[styles.buttonText, { color: colors.onTint }]}>{label}</Text></View>
@@ -35,6 +41,7 @@ export function Button({ label, tone, onPress, disabled, hint }: { label: string
 }
 
 export function Actions({ items }: { items: Action[] }) {
+  useLocale();
   const fill = useFill();
   if (!items.length) return null;
   return <View style={styles.row}>{items.map((item, i) => <Button key={i} label={item.label} tone={item.tone} disabled={!fill} hint={item.prompt === item.label ? undefined : item.prompt} onPress={() => fill?.(item.prompt)} />)}</View>;
@@ -42,6 +49,7 @@ export function Actions({ items }: { items: Action[] }) {
 
 /** Followup suggestions: glass chips under the reply. */
 export function Chips({ options, label }: { options: Action[]; label?: string }) {
+  useLocale();
   const colors = useColors();
   const fill = useFill();
   if (!options.length || !fill) return null;
@@ -50,7 +58,7 @@ export function Chips({ options, label }: { options: Action[]; label?: string })
       {!!label && <Text style={[styles.hint, { color: colors.secondary }]}>{label}</Text>}
       <View style={styles.row}>
         {options.map((option, i) => (
-          <Pressable key={i} onPress={() => fill(option.prompt)} accessibilityRole="button" accessibilityLabel={option.label} accessibilityHint="Puts it in the message field" style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
+          <Pressable key={i} onPress={() => fill(option.prompt)} accessibilityRole="button" accessibilityLabel={option.label} accessibilityHint={msg("mobile.text.puts_it_in_the_message_field")} style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}>
             <Glass interactive style={styles.chip}><Text style={[styles.chipText, { color: colors.text }]} numberOfLines={1}>{option.label}</Text></Glass>
           </Pressable>
         ))}

@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // The phone's Connect client: a viewer of tasks on the user's computers (it never hosts).
 // Owns the relay socket, the pending calls and the store; screens call `connect.*` and read
 // state with the hooks in src/store. See README.md beside this file.
@@ -248,7 +249,7 @@ const demoHost: DemoHost = { get: () => state(), set: patch, later: (run, ms) =>
 async function signOut(): Promise<void> {
   if (state().demo) return leaveDemo();
   socket.stop();
-  pending.failAll('Signed out.');
+  pending.failAll(msg("mobile.text.signed_out"));
   token = null;
   keys.clear();
   watched.clear();
@@ -346,14 +347,14 @@ async function deleteAccount(): Promise<void> {
 // ---- Calls ----
 
 /** Thrown by calls made while the token is still loading or after sign-out; screens don't show it. */
-export const NOT_SIGNED_IN = 'Sign in to PandaCode Connect first.';
+export const NOT_SIGNED_IN = "Sign in to PandaCode Connect first.";
 
 function callable(deviceId: string): Device {
   if (!token) throw new Error(NOT_SIGNED_IN);
   const s = state();
-  if (deviceId === s.deviceId) throw new Error('That is this phone.');
+  if (deviceId === s.deviceId) throw new Error(msg("mobile.text.that_is_this_phone"));
   const device = s.devices.find(d => d.id === deviceId);
-  if (!device) throw new Error('That computer is no longer on your account.');
+  if (!device) throw new Error(msg("mobile.text.that_computer_is_no_longer_on_your_account"));
   if (!device.online) throw new Error(OFFLINE);
   return device;
 }
@@ -402,7 +403,7 @@ function send<T>(deviceId: string, method: Method, params: unknown, timeoutMs: n
   const message = request(method, params);
   const body = seal(pairFor(device), state().deviceId, device.id, JSON.stringify(message));
   const frame = JSON.stringify({ to: device.id, body, ref: message.id });
-  if (frame.length > MAX_FRAME) throw new Error('That request is too large.');
+  if (frame.length > MAX_FRAME) throw new Error(msg("mobile.text.that_request_is_too_large"));
   const reply = pending.wait(device.id, message.id, timeoutMs);
   if (!socket.send(frame)) pending.fail(device.id, message.id, NOT_CONNECTED);
   return reply as Promise<T>;
@@ -430,7 +431,7 @@ function frame(text: string) {
       if (typeof value.to === 'string') pending.fail(value.to, typeof value.ref === 'string' ? value.ref : undefined, value.reason === 'rate' ? RATE : OFFLINE);
       return;
     case 'error':
-      patch({ error: typeof value.error === 'string' ? `Relay: ${value.error.slice(0, 300)}` : 'The relay reported an error.' });
+      patch({ error: typeof value.error === 'string' ? `Relay: ${value.error.slice(0, 300)}` : msg("mobile.text.the_relay_reported_an_error") });
       return;
   }
   const { from, to, body } = value ?? {};
@@ -744,7 +745,7 @@ function loadMessages(deviceId: string, sessionId: string, pages = MAX_PAGES, ba
     settle(null);
     markCurrent(key, how);
   }, (error: Error) => {
-    settle(error?.message || 'Could not load this task.');
+    settle(error?.message || msg("mobile.text.could_not_load_this_task"));
     throw error;
   });
 }
@@ -910,11 +911,11 @@ async function listModels(deviceId: string, provider: string, force = false): Pr
 /** Starts a task on the host (repo OR projectId) and watches it; `note` says when a busy
  * checkout made the host use a worktree instead. */
 async function startTask(deviceId: string, params: StartParams): Promise<{ sessionId: string; note?: string }> {
-  if (!params.repo === !params.projectId) throw new Error('Choose a repository or a project.');
+  if (!params.repo === !params.projectId) throw new Error(msg("mobile.text.choose_a_repository_or_a_project"));
   const reply = await call<{ sessionId: string }>(deviceId, 'task.start', params, START_TIMEOUT_MS);
   const { sessionId } = reply;
   watch(deviceId, [sessionId]);
-  patch(s => ({ live: { ...s.live, [taskKey(deviceId, sessionId)]: { ...idleLive(), status: 'running', activity: 'Starting' } } }));
+  patch(s => ({ live: { ...s.live, [taskKey(deviceId, sessionId)]: { ...idleLive(), status: 'running', activity: msg("mobile.text.starting") } } }));
   return { sessionId, note: startNote(reply) };
 }
 
@@ -1015,7 +1016,7 @@ async function newer<T>(deviceId: string, method: Method, params: unknown, timeo
   } catch (error) {
     if ((error as Error).message !== UNKNOWN_METHOD) throw error;
     patch(s => ({ outdated: { ...s.outdated, [deviceId]: true } }));
-    throw new Error(outdated(state().devices.find(d => d.id === deviceId)?.name ?? 'that computer'));
+    throw new Error(outdated(state().devices.find(d => d.id === deviceId)?.name ?? msg("mobile.text.that_computer")));
   }
 }
 

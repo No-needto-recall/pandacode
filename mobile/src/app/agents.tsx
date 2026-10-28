@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../ui/locale.ts';
+import { statusText, t as msg } from '../i18n.ts';
 // Everything working for one task: its team's workers (architect mode, task.team) and its
 // subagents (the live subagent state), each with harness, status, elapsed time, what it is doing
 // now and a one-line summary. A row opens that agent (agent.tsx).
@@ -22,10 +26,11 @@ const firstLine = (text: string) => text.split('\n').find(l => l.trim())?.replac
 
 /** A worker's status as the trace marks draw it (queued: a clock). */
 export function WorkerMark({ worker, team }: { worker: TeamWorker; team: Team }) {
+  useLocale();
   const colors = useColors();
   const label = workerLabel(worker, team);
-  if (label === 'Queued' || label === 'Paused') return <Icon ios="clock" android="schedule" size={13} color={colors.secondary} />;
-  if (label === 'Skipped') return <Icon ios="forward" android="skip_next" size={13} color={colors.secondary} />;
+  if (label === msg('mobile.text.queued') || label === msg('mobile.text.paused')) return <Icon ios="clock" android="schedule" size={13} color={colors.secondary} />;
+  if (label === msg('mobile.text.skipped')) return <Icon ios="forward" android="skip_next" size={13} color={colors.secondary} />;
   return <StatusMark status={worker.status === 'queued' ? 'running' : worker.status} color={colors.green} />;
 }
 
@@ -33,6 +38,7 @@ export function WorkerMark({ worker, team }: { worker: TeamWorker; team: Team })
 export const workerLine = (w: TeamWorker) => firstLine(w.error ?? '') || firstLine(w.summary) || firstLine(w.checkpoint?.summary ?? '') || firstLine(w.assignment);
 
 const WorkerRow = memo(function WorkerRow({ deviceId, sessionId, worker, team, now }: { deviceId: string; sessionId: string; worker: TeamWorker; team: Team; now: number }) {
+  useLocale();
   const colors = useColors();
   const live = useConnect(s => (worker.sessionId ? s.live[taskKey(deviceId, worker.sessionId)] : undefined));
   const active = workerActive(worker);
@@ -51,11 +57,11 @@ const WorkerRow = memo(function WorkerRow({ deviceId, sessionId, worker, team, n
         </View>
         <View style={styles.head}>
           <ModelBadge provider="" model={worker.model} />
-          <Text style={[styles.meta, { color: worker.status === 'failed' ? colors.red : colors.secondary }]} numberOfLines={1}>{[label, elapsed, worker.attempt > 1 && `attempt ${worker.attempt}`].filter(Boolean).join(' · ')}</Text>
+          <Text style={[styles.meta, { color: worker.status === 'failed' ? colors.red : colors.secondary }]} numberOfLines={1}>{[label, elapsed, worker.attempt > 1 && msg('mobile.agents.attempt', { count: worker.attempt })].filter(Boolean).join(' · ')}</Text>
         </View>
         {!!activity && <Text style={[styles.activity, { color: colors.tint }]} numberOfLines={1}>{activity}</Text>}
         {!!line && <Text style={[styles.line, { color: colors.secondary }]} numberOfLines={1}>{line}</Text>}
-        {!!worker.checkpoint?.blocker && <Text style={[styles.line, { color: colors.orange }]} numberOfLines={1}>Blocked: {worker.checkpoint.blocker}</Text>}
+        {!!worker.checkpoint?.blocker && <Text style={[styles.line, { color: colors.orange }]} numberOfLines={1}>{msg("mobile.text.blocked")}{worker.checkpoint.blocker}</Text>}
       </View>
       <Icon ios="chevron.right" android="chevron_right" size={12} color={colors.tertiary} />
     </Pressable>
@@ -63,6 +69,7 @@ const WorkerRow = memo(function WorkerRow({ deviceId, sessionId, worker, team, n
 });
 
 const SubagentRow = memo(function SubagentRow({ deviceId, sessionId, agent, now }: { deviceId: string; sessionId: string; agent: Subagent; now: number }) {
+  useLocale();
   const colors = useColors();
   const live = subagentActive(agent);
   const current = agent.tools.findLast(t => t.status === 'running');
@@ -70,7 +77,7 @@ const SubagentRow = memo(function SubagentRow({ deviceId, sessionId, agent, now 
   const line = !live && agent.response.trim() ? firstLine(agent.response) : firstLine(agent.prompt);
   return (
     <Pressable onPress={() => router.push({ pathname: '/agent', params: { device: deviceId, session: sessionId, kind: 'subagent', id: agent.id } })}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel={`${subagentName(agent)}, ${agent.status}`}>
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel={`${subagentName(agent)}, ${statusText(agent.status)}`}>
       <View style={styles.logo}><Icon ios="person.2" android="group" size={18} color={colors.secondary} /></View>
       <View style={styles.flex}>
         <View style={styles.head}>
@@ -78,7 +85,7 @@ const SubagentRow = memo(function SubagentRow({ deviceId, sessionId, agent, now 
           <StatusMark status={agent.status} color={colors.green} />
         </View>
         <Text style={[styles.meta, { color: agent.status === 'failed' ? colors.red : colors.secondary }]} numberOfLines={1}>
-          {[elapsed, agent.tools.length ? summarizeTools(agent.tools) : ''].filter(Boolean).join(' · ') || agent.status}
+          {[elapsed, agent.tools.length ? summarizeTools(agent.tools) : ''].filter(Boolean).join(' · ') || statusText(agent.status)}
         </Text>
         {current && <Text style={[styles.activity, { color: colors.tint }]} numberOfLines={1}>{traceText(describeTool(current))}</Text>}
         {!!line && <Text style={[styles.line, { color: colors.secondary }]} numberOfLines={1}>{line}</Text>}
@@ -89,6 +96,7 @@ const SubagentRow = memo(function SubagentRow({ deviceId, sessionId, agent, now 
 });
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  useLocale();
   const colors = useColors();
   const backdrop = useBackdrop();
   return (
@@ -100,32 +108,33 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function AgentsScreen() {
+  useLocale();
   const { device = '', session = '' } = useLocalSearchParams<{ device: string; session: string }>();
   const colors = useColors();
   const backdrop = useBackdrop();
   const team = useTeam(device, session);
   useWatchWorkers(device, team);
   const subagents = useConnect(s => s.live[taskKey(device, session)]?.subagents ?? NONE);
-  const computer = useConnect(s => s.devices.find(d => d.id === device)?.name ?? 'that computer');
+  const computer = useConnect(s => s.devices.find(d => d.id === device)?.name ?? msg("mobile.text.that_computer"));
   const workers = team && team !== 'outdated' ? team.workers : [];
   const now = useNow(workers.some(workerActive) || subagents.some(subagentActive));
   const empty = !workers.length && !subagents.length;
   return (
     <ScrollView style={{ backgroundColor: backdrop.background }} contentContainerStyle={styles.page} contentInsetAdjustmentBehavior="automatic">
-      <Stack.Screen options={{ title: 'Agents' }} />
+      <Stack.Screen options={{ title: msg("mobile.text.agents") }} />
       {team && team !== 'outdated' && workers.length > 0 && (
-        <Section title={`Team workers${team.rounds.max ? ` · round ${team.rounds.used} of ${team.rounds.max}` : ''}`}>
+        <Section title={msg('mobile.agents.team_round', { used: team.rounds.used, max: team.rounds.max })}>
           {workers.map(w => <WorkerRow key={w.id} deviceId={device} sessionId={session} worker={w} team={team} now={now} />)}
         </Section>
       )}
       {subagents.length > 0 && (
-        <Section title="Subagents">
+        <Section title={msg("mobile.text.subagents")}>
           {subagents.map(a => <SubagentRow key={a.id} deviceId={device} sessionId={session} agent={a} now={now} />)}
         </Section>
       )}
-      {team === 'outdated' && <Text style={[styles.note, { color: colors.secondary }]}>{`Team workers: ${outdated(computer)}`}</Text>}
+      {team === 'outdated' && <Text style={[styles.note, { color: colors.secondary }]}>{msg('mobile.agents.team_outdated', { message: outdated(computer) })}</Text>}
       {empty && team === undefined && <ActivityIndicator style={styles.spinner} />}
-      {empty && team !== undefined && team !== 'outdated' && <Text style={[styles.note, { color: colors.secondary }]}>No agents are working for this task.</Text>}
+      {empty && team !== undefined && team !== 'outdated' && <Text style={[styles.note, { color: colors.secondary }]}>{msg("mobile.text.no_agents_are_working_for_this_task")}</Text>}
     </ScrollView>
   );
 }

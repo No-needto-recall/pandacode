@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { t as msg } from '../i18n.ts';
 // Menus. iOS: a SwiftUI menu (`Menu`) or the system action sheet (`showActions`). Android: a
 // solid Material-style sheet (`MenuHost`, mounted once in the root layout).
 import { Button as SwiftButton, HStack, Host, RNHostView, Image as SwiftImage, Menu as SwiftMenu, Section, Text as SwiftText } from '@expo/ui/swift-ui';
@@ -18,7 +22,7 @@ const useSheet = create<{ title?: string; items: MenuItem[] }>(() => ({ items: [
 /** A one-off list of actions (long press, a row's "more"). */
 export function showActions(title: string | undefined, items: MenuItem[]) {
   if (Platform.OS !== 'ios') return useSheet.setState({ title, items });
-  const labels = [...items.map(i => (i.checked ? `✓ ${i.label}` : i.label)), 'Cancel'];
+  const labels = [...items.map(i => (i.checked ? `✓ ${i.label}` : i.label)), msg("mobile.text.cancel")];
   const destructive = items.map((i, n) => (i.destructive ? n : -1)).filter(n => n >= 0);
   ActionSheetIOS.showActionSheetWithOptions(
     { title, options: labels, cancelButtonIndex: items.length, destructiveButtonIndex: destructive },
@@ -28,13 +32,14 @@ export function showActions(title: string | undefined, items: MenuItem[]) {
 
 /** Android's action sheet; renders nothing on iOS. */
 export function MenuHost() {
+  useLocale();
   const colors = useColors();
   const { title, items } = useSheet();
   if (Platform.OS === 'ios') return null;
   const close = () => useSheet.setState({ title: undefined, items: [] });
   return (
     <Modal visible={items.length > 0} transparent animationType="fade" onRequestClose={close}>
-      <Pressable style={styles.scrim} onPress={close} accessibilityLabel="Close menu">
+      <Pressable style={styles.scrim} onPress={close} accessibilityLabel={msg("mobile.text.close_menu")}>
         <View style={[styles.sheet, { backgroundColor: colors.card }]}>
           {!!title && <Text style={[styles.title, { color: colors.secondary }]} numberOfLines={2}>{title}</Text>}
           {items.map(item => (
@@ -56,6 +61,7 @@ export function MenuHost() {
  * `children` (the button's frame); on Android the frame is pressable and opens the sheet.
  */
 export function Menu({ ios, android, color, size = 17, items, label, modifiers, children }: { ios: SFSymbol; android: Android; color: ColorValue; size?: number; items: MenuItem[]; label: string; modifiers?: ModifierConfig[]; children?: (icon: ReactNode) => ReactNode }) {
+  useLocale();
   const frame = children ?? ((icon: ReactNode) => icon);
   if (Platform.OS === 'ios') {
     return frame(
@@ -89,6 +95,7 @@ function swiftItems(items: MenuItem[]): ReactNode[] {
 /** A menu whose trigger is an icon, a text value and a chevron (the New thread pickers). */
 /** Without `ios`/`android` the caller draws its own leading view. */
 export function TextMenu({ ios, android, text, items, label, color, size = 15 }: { ios?: SFSymbol; android?: Android; text: string; items: MenuItem[]; label: string; color: ColorValue; size?: number }) {
+  useLocale();
   const colors = useColors();
   if (Platform.OS === 'ios') {
     return (
@@ -116,6 +123,7 @@ export function TextMenu({ ios, android, text, items, label, color, size = 15 }:
 
 /** A menu whose trigger is React Native content (a harness logo); `label` names it for VoiceOver. */
 export function ViewMenu({ items, label, children }: { items: MenuItem[]; label: string; children: ReactElement }) {
+  useLocale();
   if (Platform.OS === 'ios') {
     return (
       <Host matchContents>

@@ -1,3 +1,4 @@
+import { countNoun, t as msg, type CountKind } from '../i18n.ts';
 // Tool traces as the desktop draws them (src/tool-trace.ts, src/tool-activity.ts, src/subagents.ts):
 // a kind per tool, a one-line sentence, edit diffs, todo lists and subagent snapshots. Pure (tested in node).
 import type { ToolActivity } from '../connect/types.ts';
@@ -21,9 +22,9 @@ export const DIFF_LINES = 14;
 
 // [running verb, finished verb]
 const VERBS: Record<TraceKind, [string, string]> = {
-  shell: ['Running', 'Ran'], read: ['Reading', 'Read'], edit: ['Editing', 'Edited'], write: ['Writing', 'Wrote'],
-  search: ['Searching', 'Searched'], web: ['Searching', 'Searched'], fetch: ['Fetching', 'Fetched'], todo: ['Updating', 'Updated'],
-  agent: ['Starting', 'Started'], skill: ['Loading skill', 'Loaded skill'], mcp: ['Using', 'Used'], tool: ['Using', 'Used'],
+  get shell(): [string, string] { return [msg("mobile.text.running"), msg("mobile.text.ran")]; }, get read(): [string, string] { return [msg("mobile.text.reading"), msg("mobile.text.read")]; }, get edit(): [string, string] { return [msg("mobile.text.editing"), msg("mobile.text.edited")]; }, get write(): [string, string] { return [msg("mobile.text.writing"), msg("mobile.text.wrote")]; },
+  get search(): [string, string] { return [msg("mobile.text.searching"), msg("mobile.text.searched")]; }, get web(): [string, string] { return [msg("mobile.text.searching"), msg("mobile.text.searched")]; }, get fetch(): [string, string] { return [msg("mobile.text.fetching"), msg("mobile.text.fetched")]; }, get todo(): [string, string] { return [msg("mobile.text.updating_ec6952"), msg("mobile.text.updated")]; },
+  get agent(): [string, string] { return [msg("mobile.text.starting"), msg("mobile.text.started")]; }, get skill(): [string, string] { return [msg("mobile.text.loading_skill"), msg("mobile.text.loaded_skill")]; }, get mcp(): [string, string] { return [msg("mobile.text.using"), msg("mobile.text.used")]; }, get tool(): [string, string] { return [msg("mobile.text.using"), msg("mobile.text.used")]; },
 };
 
 const clip = (value: string, limit: number) => {
@@ -122,7 +123,7 @@ export function describeTool(tool: Pick<ToolActivity, 'name' | 'status' | 'input
     }
     case 'read': case 'write': {
       const content = field(fields, 'content', 'contents');
-      return { ...base, chip: basename(filePath(tool.input, fields)), object: kind === 'write' && content ? `${lines(content).length} lines` : '' };
+      return { ...base, chip: basename(filePath(tool.input, fields)), object: kind === 'write' && content ? msg('mobile.trace.lines', { count: lines(content).length }) : '' };
     }
     case 'edit': {
       const diff = diffLines(fields);
@@ -131,19 +132,19 @@ export function describeTool(tool: Pick<ToolActivity, 'name' | 'status' | 'input
     case 'search': {
       const where = field(fields, 'path', 'directory', 'target_directory');
       const pattern = field(fields, 'pattern', 'query', 'glob', 'regex') || (tool.input.trim().startsWith('{') ? '' : tool.input.trim());
-      return { ...base, chip: where ? basename(where) : 'workspace', object: pattern ? `for ${clip(pattern, 80)}` : '' };
+      return { ...base, chip: where ? basename(where) : msg('mobile.trace.workspace'), object: pattern ? msg('mobile.trace.for', { query: clip(pattern, 80) }) : '' };
     }
-    case 'web': return { ...base, chip: 'Web', object: field(fields, 'query', 'q') ? `for ${clip(field(fields, 'query', 'q'), MAX_OBJECT)}` : inputHint(tool.input) };
+    case 'web': return { ...base, chip: msg("mobile.text.web"), object: field(fields, 'query', 'q') ? msg('mobile.trace.for', { query: clip(field(fields, 'query', 'q'), MAX_OBJECT) }) : inputHint(tool.input) };
     case 'fetch': { const url = field(fields, 'url'); return { ...base, chip: url ? domain(url) : '', object: clip(field(fields, 'prompt'), 90) }; }
-    case 'todo': { const n = todosOf(fields).length; return { ...base, chip: '', object: n ? `the plan · ${n} ${n === 1 ? 'step' : 'steps'}` : 'the plan' }; }
-    case 'agent': return { ...base, chip: field(fields, 'subagent_type', 'agent') || 'agent', object: clip(field(fields, 'description', 'prompt'), 90) };
+    case 'todo': { const n = todosOf(fields).length; return { ...base, chip: '', object: n ? msg('mobile.trace.plan_steps', { steps: countNoun(n, 'step') }) : msg("mobile.text.the_plan") }; }
+    case 'agent': return { ...base, chip: field(fields, 'subagent_type', 'agent') || msg('mobile.text.agent'), object: clip(field(fields, 'description', 'prompt'), 90) };
     case 'skill': return { ...base, chip: field(fields, 'skill', 'name', 'command'), object: '' };
     case 'mcp': {
       const { server, tool: t } = mcpParts(tool.name);
       const name = (own ?? t).replace(/_/g, ' ');
       return { ...base, chip: own ? `PandaCode › ${name}` : `${server} › ${name}`, object: inputHint(tool.input), ...(own ? { own } : {}) };
     }
-    default: return { ...base, chip: tool.name || 'Tool', object: inputHint(tool.input) };
+    default: return { ...base, chip: tool.name || msg("mobile.text.tool"), object: inputHint(tool.input) };
   }
 }
 
@@ -164,11 +165,11 @@ export function parseToolMessage(content: string): ToolActivity {
   try {
     const t = JSON.parse(content);
     if (t && typeof t === 'object') {
-      return { id: String(t.id ?? ''), name: String(t.name ?? t.title ?? 'Tool').slice(0, 256), status: t.status === 'failed' ? 'failed' : t.status === 'running' ? 'running' : 'completed', input: String(t.input ?? ''), output: String(t.output ?? '') };
+      return { id: String(t.id ?? ''), name: String(t.name ?? t.title ?? msg("mobile.text.tool")).slice(0, 256), status: t.status === 'failed' ? 'failed' : t.status === 'running' ? 'running' : 'completed', input: String(t.input ?? ''), output: String(t.output ?? '') };
     }
   } catch { /* plain text below */ }
   const [name, ...rest] = content.split('\n');
-  return { id: '', name: name.slice(0, 256) || 'Tool', status: 'completed', input: '', output: rest.join('\n') };
+  return { id: '', name: name.slice(0, 256) || msg("mobile.text.tool"), status: 'completed', input: '', output: rest.join('\n') };
 }
 
 const SUB_STATUS = ['running', 'waiting', 'completed', 'failed', 'stopped'];
@@ -193,15 +194,12 @@ export const subagentActive = (a: Subagent) => a.status === 'running' || a.statu
 /** The subagent's title: its name unless that is a path or a generic word, else its prompt's first line. */
 export function subagentName(a: Subagent): string {
   const name = a.name.trim();
-  return name && !/[\\/]/.test(name) && !/^(?:subagent|agent)$/i.test(name) ? name : clip(a.prompt.split('\n', 1)[0] ?? '', 60) || 'Subagent';
+  return name && !/[\\/]/.test(name) && !/^(?:subagent|agent)$/i.test(name) ? name : clip(a.prompt.split('\n', 1)[0] ?? '', 60) || msg("mobile.text.subagent");
 }
 
 // Summary nouns per kind: [singular, plural]
-const NOUNS: Record<TraceKind, [string, string]> = {
-  shell: ['command', 'commands'], read: ['file', 'files'], edit: ['file', 'files'], write: ['file', 'files'], search: ['search', 'searches'],
-  web: ['search', 'searches'], fetch: ['page', 'pages'], todo: ['plan', 'plans'], agent: ['agent', 'agents'], skill: ['skill', 'skills'], mcp: ['tool', 'tools'], tool: ['tool', 'tools'],
-};
-const joinPhrases = (parts: string[]) => (parts.length < 2 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`);
+const NOUNS: Record<TraceKind, CountKind> = { shell: 'command', read: 'file', edit: 'file', write: 'file', search: 'search', web: 'search', fetch: 'page', todo: 'plan', agent: 'agent', skill: 'skill', mcp: 'tool', tool: 'tool' };
+const joinPhrases = (parts: string[]) => (parts.length < 2 ? parts.join('') : msg('mobile.trace.join', { first: parts.slice(0, -1).join(', '), last: parts[parts.length - 1] }));
 
 /** `Ran 3 commands, read 2 files and edited 1 file` (present tense while any runs; failures appended), as the desktop's tool groups. */
 export function summarizeTools(tools: readonly Pick<ToolActivity, 'name' | 'status'>[]): string {
@@ -210,13 +208,13 @@ export function summarizeTools(tools: readonly Pick<ToolActivity, 'name' | 'stat
   const counts = new Map<string, Map<TraceKind, number>>();
   for (const tool of tools) {
     const kind = toolKind(tool.name);
-    const verb = (kind === 'search' || kind === 'web' ? ['Running', 'Ran'] : VERBS[kind])[running ? 0 : 1];
+    const verb = (kind === 'search' || kind === 'web' ? [msg("mobile.text.running"), msg("mobile.text.ran")] : VERBS[kind])[running ? 0 : 1];
     const key = kind === 'web' ? 'search' : kind;
     const nouns = counts.get(verb) ?? new Map<TraceKind, number>();
     counts.set(verb, nouns.set(key, (nouns.get(key) ?? 0) + 1));
   }
-  const sentence = joinPhrases([...counts].map(([verb, nouns]) => `${verb.toLowerCase()} ${joinPhrases([...nouns].map(([kind, n]) => (kind === 'todo' ? 'the plan' : `${n} ${NOUNS[kind][n === 1 ? 0 : 1]}`)))}`));
-  return sentence.charAt(0).toUpperCase() + sentence.slice(1) + (running ? '…' : '') + (failed ? ` · ${failed} failed` : '');
+  const sentence = joinPhrases([...counts].map(([verb, nouns]) => `${verb.toLowerCase()} ${joinPhrases([...nouns].map(([kind, n]) => (kind === 'todo' ? msg("mobile.text.the_plan") : countNoun(n, NOUNS[kind]))))}`));
+  return sentence.charAt(0).toUpperCase() + sentence.slice(1) + (running ? '…' : '') + (failed ? msg('mobile.trace.failed', { count: failed }) : '');
 }
 
 export type Run<T> = { kind: 'tools'; items: T[] } | { kind: 'item'; item: T };

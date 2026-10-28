@@ -1,3 +1,6 @@
+/// <reference types="node" />
+import { setRuntimeLocale } from '../src/i18n.ts';
+setRuntimeLocale('en'); // Existing fixtures assert the English product copy explicitly.
 // Push registration payloads and the relay's answer classification (src/connect/push.ts).
 import assert from 'node:assert/strict';
 import test from 'node:test';

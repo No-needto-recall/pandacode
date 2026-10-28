@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // Settings → Appearance: System, Light or Dark for this app only. `Appearance.setColorScheme`
 // overrides the window's interface style, so native parts (headers, tabs, sheets, glass, blur,
 // keyboard, status bar) and PlatformColors follow, as does `useColorScheme()`.
@@ -6,7 +7,7 @@ import { create } from 'zustand';
 import { get, set } from '../connect/secrets.ts';
 
 export type AppearanceChoice = 'system' | 'light' | 'dark';
-export const APPEARANCES: { id: AppearanceChoice; label: string }[] = [{ id: 'system', label: 'System' }, { id: 'light', label: 'Light' }, { id: 'dark', label: 'Dark' }];
+export const APPEARANCES: { id: AppearanceChoice; label: string }[] = [{ id: 'system', get label() { return msg("mobile.text.system"); } }, { id: 'light', get label() { return msg("mobile.text.light"); } }, { id: 'dark', get label() { return msg("mobile.text.dark"); } }];
 
 const KEY = 'appearance';
 export const useAppearance = create<{ choice: AppearanceChoice }>(() => ({ choice: 'system' }));

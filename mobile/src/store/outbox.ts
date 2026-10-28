@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // The outbox: messages that could not reach their computer (offline, or the phone off the
 // relay) wait here, persisted, and are sent in order once the computer answers again.
 // Pure (tested in node); src/store/local.ts holds and persists the list.
@@ -39,7 +40,7 @@ export async function flush(entries: readonly OutboxEntry[], deps: FlushDeps): P
     } catch (error) {
       if (isUnsent(error)) stoppedHosts.add(entry.deviceId);
       else {
-        result.failed[entry.id] = error instanceof Error ? error.message : 'Could not send.';
+        result.failed[entry.id] = error instanceof Error ? error.message : msg("mobile.text.could_not_send");
         heldTasks.add(task);
       }
     }

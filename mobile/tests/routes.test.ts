@@ -1,4 +1,6 @@
 /// <reference types="node" />
+import { setRuntimeLocale } from '../src/i18n.ts';
+setRuntimeLocale('en'); // Existing fixtures assert the English product copy explicitly.
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';

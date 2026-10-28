@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../ui/locale.ts';
+import { t as msg } from '../i18n.ts';
 // One file's diff, from the pull request (task.pullDiff) or the task's checkout (task.diff).
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -9,6 +13,7 @@ import { DiffView } from '../ui/DiffView.tsx';
 import { useColors } from '../ui/theme.ts';
 
 export default function DiffScreen() {
+  useLocale();
   const { device = '', session = '', path = '', source = 'changes', staged } = useLocalSearchParams<{ device: string; session: string; path: string; source?: 'pull' | 'changes'; staged?: string }>();
   const colors = useColors();
   const backdrop = useBackdrop();
@@ -18,14 +23,14 @@ export default function DiffScreen() {
     const load = source === 'pull' ? connect.pullDiff(device, session, path) : connect.taskDiff(device, session, path, staged === '1');
     load.then(setDiff, (e: Error) => setError(e.message));
   }, [device, session, path, source, staged]);
-  const note = error || (diff && !diff.text ? 'No changes to show for this file.' : '');
+  const note = error || (diff && !diff.text ? msg("mobile.text.no_changes_to_show_for_this_file") : '');
   return (
     <View style={[styles.screen, { backgroundColor: backdrop.background }]}>
-      <Stack.Screen options={{ title: path.split('/').pop() || 'Diff' }} />
+      <Stack.Screen options={{ title: path.split('/').pop() || msg("mobile.text.diff") }} />
       {!diff && !error ? <ActivityIndicator style={styles.center} />
         : note ? <Text style={[styles.note, { color: colors.secondary }]}>{note}</Text>
         : <DiffView diff={diff!.text} />}
-      {diff?.truncated && <Text style={[styles.truncated, { color: colors.secondary, backgroundColor: colors.card }]}>This diff was cut short. See the rest on the computer.</Text>}
+      {diff?.truncated && <Text style={[styles.truncated, { color: colors.secondary, backgroundColor: colors.card }]}>{msg("mobile.text.this_diff_was_cut_short_see_the_rest_on_the_computer")}</Text>}
     </View>
   );
 }

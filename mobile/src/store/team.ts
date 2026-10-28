@@ -1,3 +1,4 @@
+import { countNoun, t as msg } from '../i18n.ts';
 // An architect task's team, as `task.team` sends it ({ team: null | { mode, rounds: { used, max },
 // workers } }, the desktop's TeamSnapshot trimmed), and the `team` live event's changed worker
 // row ({ removed: true } drops it). Tolerant of the full TeamSnapshot too. Pure (tested in node).
@@ -32,7 +33,7 @@ function worker(v: unknown): TeamWorker | undefined {
   const w = v as Record<string, unknown>;
   if (typeof w.id !== 'string' || !w.id || !STATUSES.includes(w.status as string)) return;
   return {
-    id: w.id.slice(0, 128), name: str(w.name, 120) || 'Worker', provider: str(w.provider, 40), model: str(w.model, 200), sessionId: str(w.sessionId, 128),
+    id: w.id.slice(0, 128), name: str(w.name, 120) || msg("mobile.text.worker"), provider: str(w.provider, 40), model: str(w.model, 200), sessionId: str(w.sessionId, 128),
     status: w.status as WorkerStatus, assignment: str(w.assignment, 16_384), summary: str(w.summary, 16_384), error: str(w.error, 4096) || null,
     files: strings(w.files), dependsOn: strings(w.dependsOn), readOnly: w.readOnly === true, abandoned: w.abandoned === true,
     attempt: Number(w.attempt) || 1, checkpoint: checkpoint(w.checkpoint), createdAt: time(w.startedAt) || time(w.createdAt), updatedAt: time(w.updatedAt),
@@ -107,20 +108,20 @@ export function teamRun(team: Team | null | 'outdated' | undefined): TeamRun | u
 }
 
 /** The status line while only workers run: "Waiting on 2 workers". */
-export const waitingOn = (n: number) => (n > 0 ? `Waiting on ${n} worker${n === 1 ? '' : 's'}` : 'Waiting on the team');
+export const waitingOn = (n: number) => (n > 0 ? msg('mobile.team.waiting', { workers: countNoun(n, 'worker') }) : msg("mobile.text.waiting_on_the_team"));
 
 /** A teammate id as a name: Architect, the worker's name, else Worker. */
-export const memberName = (team: Team | null | undefined, id: string) => (id === 'architect' ? 'Architect' : team?.workers.find(w => w.id === id)?.name ?? 'Worker');
+export const memberName = (team: Team | null | undefined, id: string) => (id === 'architect' ? msg("mobile.text.architect") : team?.workers.find(w => w.id === id)?.name ?? msg("mobile.text.worker"));
 
 /** Worker id → name, for tool sentences (`Asked GPT-6 for a follow-up`). */
 export const workerNames = (team: Team | null | undefined): WorkerNames =>
   Object.fromEntries((team?.workers ?? []).map(w => [w.id, w.name]));
 
-const LABELS: Record<WorkerStatus, string> = { running: 'Working', waiting: 'Needs attention', queued: 'Queued', completed: 'Completed', failed: 'Failed', stopped: 'Stopped' };
+const LABELS: Record<WorkerStatus, string> = { get running() { return msg("mobile.text.working"); }, get waiting() { return msg("mobile.text.needs_attention"); }, get queued() { return msg("mobile.text.queued"); }, get completed() { return msg("mobile.text.completed"); }, get failed() { return msg("mobile.text.failed"); }, get stopped() { return msg("mobile.text.stopped"); } };
 
 /** The worker's status word as the desktop's team progress line: Skipped, Paused (team idle) or its own. */
 export function workerLabel(w: TeamWorker, team: Team | null | undefined): string {
-  if (w.abandoned) return 'Skipped';
-  if (!teamActive(team) && workerActive(w)) return 'Paused';
+  if (w.abandoned) return msg("mobile.text.skipped");
+  if (!teamActive(team) && workerActive(w)) return msg("mobile.text.paused");
   return LABELS[w.status];
 }

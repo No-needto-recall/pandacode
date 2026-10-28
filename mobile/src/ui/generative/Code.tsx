@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../locale.ts';
+import { t as msg } from '../../i18n.ts';
 // Monospace boxes for generative UI: code and terminal output with a Copy button, and a
 // read-only diff (line kinds from src/store/diff.ts). Long lines scroll sideways.
 import * as Clipboard from 'expo-clipboard';
@@ -10,15 +14,16 @@ const MAX_LINES = 400;
 const FILL: Record<DiffKind, string | undefined> = { add: 'rgba(52, 199, 89, 0.18)', del: 'rgba(255, 59, 48, 0.16)', hunk: 'rgba(10, 132, 255, 0.14)', meta: undefined, context: undefined };
 
 function Frame({ label, copy, children }: { label?: string; copy: string; children: ReactNode }) {
+  useLocale();
   const colors = useColors();
   const [copied, setCopied] = useState('');
-  const onCopy = () => Clipboard.setStringAsync(copy).then(() => setCopied('Copied'), () => setCopied('Copy failed'));
+  const onCopy = () => Clipboard.setStringAsync(copy).then(() => setCopied(msg("mobile.text.copied")), () => setCopied(msg("mobile.text.copy_failed")));
   return (
     <View style={[styles.frame, { backgroundColor: colors.fill }]}>
       <View style={[styles.head, { borderColor: colors.separator }]}>
         <Text style={[styles.label, { color: colors.secondary }]} numberOfLines={1}>{label ?? ''}</Text>
-        <Pressable onPress={onCopy} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Copy ${label ?? 'code'}`}>
-          <Text style={[styles.copy, { color: colors.tint }]}>{copied || 'Copy'}</Text>
+        <Pressable onPress={onCopy} hitSlop={8} accessibilityRole="button" accessibilityLabel={msg('mobile.code.copy', { name: label ?? msg('mobile.code.code') })}>
+          <Text style={[styles.copy, { color: colors.tint }]}>{copied || msg("mobile.text.copy")}</Text>
         </Pressable>
       </View>
       <ScrollView horizontal directionalLockEnabled contentContainerStyle={styles.scroll}>{children}</ScrollView>
@@ -27,6 +32,7 @@ function Frame({ label, copy, children }: { label?: string; copy: string; childr
 }
 
 export function CodeBox({ label, code, command }: { label?: string; code: string; command?: string }) {
+  useLocale();
   const colors = useColors();
   const shown = useMemo(() => code.split('\n').slice(0, MAX_LINES).join('\n'), [code]);
   return (
@@ -40,11 +46,12 @@ export function CodeBox({ label, code, command }: { label?: string; code: string
 }
 
 export function DiffBox({ file, diff }: { file?: string; diff: string }) {
+  useLocale();
   const colors = useColors();
   const lines = useMemo(() => diffLines(diff).slice(0, MAX_LINES), [diff]);
   const tone = (kind: DiffKind): ColorValue => (kind === 'meta' || kind === 'hunk' ? colors.secondary : colors.text);
   return (
-    <Frame label={file ?? 'Diff'} copy={diff}>
+    <Frame label={file ?? msg("mobile.text.diff")} copy={diff}>
       <View>{lines.map((line, i) => <Text key={i} style={[styles.text, styles.line, { color: tone(line.kind), backgroundColor: FILL[line.kind] }]}>{line.text || ' '}</Text>)}</View>
     </Frame>
   );

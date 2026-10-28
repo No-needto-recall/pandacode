@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // MCP elicitation forms: the same flat JSON Schema subset and checks as the desktop
 // (renderSchema/validate in src/agent-input.ts). Pure, so tests run in node.
 
@@ -14,7 +15,7 @@ export interface Prop {
   items?: { type?: string; enum?: unknown[]; enumNames?: unknown[] }; minItems?: number; maxItems?: number;
 }
 
-export const UNSUPPORTED = 'This form format is not supported here. Cancel to let the agent continue.';
+export const UNSUPPORTED = "This form format is not supported here. Cancel to let the agent continue.";
 const TOP = new Set(['type', 'properties', 'required', 'title', 'description', 'additionalProperties', '$schema', '$id']);
 const KEYS = new Set(['type', 'title', 'description', 'default', 'enum', 'enumNames', 'minimum', 'maximum', 'minLength', 'maxLength', 'format', 'items', 'minItems', 'maxItems', 'uniqueItems']);
 const FORMATS = ['email', 'uri', 'date', 'date-time', 'password'];
@@ -69,25 +70,25 @@ export function readForm(fields: Field[], input: Record<string, unknown>): Recor
 
 function read(field: Field, raw: unknown): unknown {
   const { schema, title, required } = field;
-  const invalid = () => new Error(`Enter a valid value for “${title}”.`);
+  const invalid = () => new Error(msg('mobile.form.valid', { name: title }));
   if (field.kind === 'boolean') return raw === true;
   if (field.kind === 'multi') {
     const list = [...new Set(Array.isArray(raw) ? raw.map(String) : [])];
-    if ((typeof schema.minItems === 'number' && list.length < schema.minItems) || (typeof schema.maxItems === 'number' && list.length > schema.maxItems)) throw new Error(`Choose the requested number of options for “${title}”.`);
+    if ((typeof schema.minItems === 'number' && list.length < schema.minItems) || (typeof schema.maxItems === 'number' && list.length > schema.maxItems)) throw new Error(msg('mobile.form.options', { name: title }));
     return !required && !list.length ? undefined : list;
   }
   if (field.kind === 'enum') {
-    if (raw === '' || raw === undefined) { if (required) throw new Error(`Choose a value for “${title}”.`); return undefined; }
+    if (raw === '' || raw === undefined) { if (required) throw new Error(msg('mobile.form.choose', { name: title })); return undefined; }
     const option = field.options[Number(raw)];
     if (!option) throw invalid();
     return option.value;
   }
   const text = typeof raw === 'string' ? raw : '';
-  if (!text) { if (required) throw new Error(`Fill in “${title}”.`); return undefined; }
+  if (!text) { if (required) throw new Error(msg('mobile.form.fill', { name: title })); return undefined; }
   if (field.kind === 'number') {
     const n = Number(text.trim());
     if (!text.trim() || !Number.isFinite(n) || (schema.type === 'integer' && !Number.isInteger(n))) throw invalid();
-    if ((typeof schema.minimum === 'number' && n < schema.minimum) || (typeof schema.maximum === 'number' && n > schema.maximum)) throw new Error(`“${title}” must be ${range(schema)}.`);
+    if ((typeof schema.minimum === 'number' && n < schema.minimum) || (typeof schema.maximum === 'number' && n > schema.maximum)) throw new Error(msg('mobile.form.range', { name: title, range: range(schema) }));
     return n;
   }
   const length = [...text].length;
@@ -101,8 +102,8 @@ function read(field: Field, raw: unknown): unknown {
 
 export function range(schema: Prop): string {
   const { minimum: lo, maximum: hi } = schema;
-  if (typeof lo === 'number' && typeof hi === 'number') return `between ${lo} and ${hi}`;
-  if (typeof lo === 'number') return `at least ${lo}`;
-  if (typeof hi === 'number') return `at most ${hi}`;
-  return 'a number';
+  if (typeof lo === 'number' && typeof hi === 'number') return msg('mobile.form.between', { min: lo, max: hi });
+  if (typeof lo === 'number') return msg('mobile.form.min', { min: lo });
+  if (typeof hi === 'number') return msg('mobile.form.max', { max: hi });
+  return msg("mobile.text.a_number");
 }

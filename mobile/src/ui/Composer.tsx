@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { errorText, t as msg } from '../i18n.ts';
+import { useLocale } from './locale.ts';
 // The task composer: a floating glass panel with the prompt over a row of a + menu, the task's
 // branch chip, the harness (opens the model picker) and a round send button. Send queues while
 // running (like the desktop's Enter) and a long press steers; "Steer instead of queue" swaps
@@ -23,6 +27,7 @@ import { useColors } from './theme.ts';
 export const SIZE = 36;
 
 export function Composer({ deviceId, sessionId, running, bot }: { deviceId: string; sessionId: string; running: boolean; bot?: Pick<Bot, 'id' | 'name'> }) {
+  useLocale();
   const botId = bot?.id;
   const colors = useColors();
   // The text lives in the draft store, so generative UI can fill it (fillDraft) and it survives leaving the task.
@@ -54,15 +59,15 @@ export function Composer({ deviceId, sessionId, running, bot }: { deviceId: stri
         await connect.steerTask(deviceId, sessionId, prompt);
         markSteered(prompt);
         setText('');
-        setNote('Steering…');
+        setNote(msg("mobile.text.steering"));
       } else {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         const result = await sendOrQueue(deviceId, sessionId, prompt);
         setText('');
-        setNote(result.outbox ? 'Saved. Sends when the computer is back' : result.queued ? 'Queued for after this run' : '');
+        setNote(result.outbox ? msg("mobile.text.saved_sends_when_the_computer_is_back") : result.queued ? msg("mobile.text.queued_for_after_this_run") : '');
       }
     } catch (error) {
-      Alert.alert(kind === 'stop' ? 'Could not stop' : 'Could not send', (error as Error).message);
+      Alert.alert(kind === 'stop' ? msg("mobile.text.could_not_stop") : msg("mobile.text.could_not_send_8b34d3"), errorText(error), [{ text: msg('mobile.text.ok') }]);
     } finally {
       setBusy(false);
     }
@@ -78,23 +83,23 @@ export function Composer({ deviceId, sessionId, running, bot }: { deviceId: stri
         ref={input}
         value={text}
         onChangeText={t => { setText(t); if (note) setNote(''); }}
-        placeholder={note || (bot ? `Message ${bot.name}…` : running && steer ? 'Steer the agent…' : 'Ask the agent…')}
+        placeholder={note || (bot ? msg('mobile.bot.message', { name: bot.name }) : running && steer ? msg("mobile.text.steer_the_agent") : msg("mobile.text.ask_the_agent"))}
         placeholderTextColor={colors.tertiary as string}
         multiline
         style={[styles.input, { color: colors.text }]}
-        accessibilityLabel="Message"
+        accessibilityLabel={msg("mobile.text.message")}
       />
       <View style={styles.row}>
-        <Menu ios="plus" android="add" color={colors.text} label="More options" modifiers={nativeGlass ? [frame({ width: SIZE, height: SIZE }), interactiveGlass('circle')] : undefined} items={[
-          ...(botId ? [] : [{ label: 'Steer instead of queue', ios: 'arrow.uturn.right', android: 'alt_route', checked: steer, onPress: () => setSteer(s => !s) } as const]),
-          { label: 'Model…', ios: 'cpu', android: 'memory', onPress: settings('model') },
-          { label: 'Permissions…', ios: 'lock.shield', android: 'shield', onPress: settings('mode') },
-          { label: 'Effort…', ios: 'gauge.with.dots.needle.67percent', android: 'speed', onPress: settings('effort') },
+        <Menu ios="plus" android="add" color={colors.text} label={msg("mobile.text.more_options")} modifiers={nativeGlass ? [frame({ width: SIZE, height: SIZE }), interactiveGlass('circle')] : undefined} items={[
+          ...(botId ? [] : [{ label: msg("mobile.text.steer_instead_of_queue"), ios: 'arrow.uturn.right', android: 'alt_route', checked: steer, onPress: () => setSteer(s => !s) } as const]),
+          { label: msg("mobile.text.model_0787eb"), ios: 'cpu', android: 'memory', onPress: settings('model') },
+          { label: msg("mobile.text.permissions_e67ba4"), ios: 'lock.shield', android: 'shield', onPress: settings('mode') },
+          { label: msg("mobile.text.effort_b72cc1"), ios: 'gauge.with.dots.needle.67percent', android: 'speed', onPress: settings('effort') },
         ]}>
           {icon => (nativeGlass ? icon : <View style={[styles.round, { backgroundColor: colors.fill }]}>{icon}</View>)}
         </Menu>
         {!!branch && (
-          <Pressable onPress={() => router.push({ pathname: '/task-info', params: { device: deviceId, session: sessionId } })} accessibilityRole="button" accessibilityLabel={`Branch ${branch}`} accessibilityHint="Shows task info"
+          <Pressable onPress={() => router.push({ pathname: '/task-info', params: { device: deviceId, session: sessionId } })} accessibilityRole="button" accessibilityLabel={msg('mobile.task.branch', { name: branch })} accessibilityHint={msg("mobile.text.shows_task_info")}
             style={({ pressed }) => [styles.chip, { backgroundColor: colors.fill, opacity: pressed ? 0.7 : 1 }]}>
             <Icon ios="arrow.triangle.branch" android="call_split" size={13} color={colors.green} />
             <Text style={[styles.chipText, { color: colors.green }]} numberOfLines={1}>{branch}</Text>
@@ -108,8 +113,8 @@ export function Composer({ deviceId, sessionId, running, bot }: { deviceId: stri
           </Pressable>
         )}
         {running && !hasText
-          ? <Round label="Stop" ios="stop.fill" android="stop" onPress={() => act('stop')} disabled={busy} bg={colors.text} fg={colors.background} />
-          : <Round label={tap === 'steer' ? 'Steer' : running ? 'Queue' : 'Send'} hint={hold && (hold === 'steer' ? 'Long press to steer' : 'Long press to queue')}
+          ? <Round label={msg("mobile.text.stop")} ios="stop.fill" android="stop" onPress={() => act('stop')} disabled={busy} bg={colors.text} fg={colors.background} />
+          : <Round label={tap === 'steer' ? msg("mobile.text.steer") : running ? msg("mobile.text.queue") : msg("mobile.text.send")} hint={hold && (hold === 'steer' ? msg("mobile.text.long_press_to_steer") : msg("mobile.text.long_press_to_queue"))}
               ios={running ? (tap === 'steer' ? 'arrow.uturn.right' : 'list.number') : 'arrow.up'} android={running ? (tap === 'steer' ? 'alt_route' : 'format_list_numbered') : 'arrow_upward'}
               onPress={() => act(tap)} onLongPress={hold && (() => act(hold))} disabled={busy || !hasText} bg={hasText ? colors.tint : colors.fill} fg={hasText ? colors.onTint : colors.tertiary} />}
       </View>
@@ -118,6 +123,7 @@ export function Composer({ deviceId, sessionId, running, bot }: { deviceId: stri
 }
 
 export function Round({ label, hint, ios, android, onPress, onLongPress, disabled, bg, fg }: { label: string; hint?: string; ios: Parameters<typeof Icon>[0]['ios']; android: Parameters<typeof Icon>[0]['android']; onPress: () => void; onLongPress?: () => void; disabled?: boolean; bg: ColorValue; fg: ColorValue }) {
+  useLocale();
   if (nativeGlass) return <GlassIcon icon={ios} label={label} hint={hint} onPress={onPress} onLongPress={onLongPress} disabled={disabled} size={SIZE} iconSize={15} color={fg} tint={bg} />;
   return (
     <Pressable onPress={onPress} onLongPress={onLongPress} disabled={disabled} accessibilityRole="button" accessibilityLabel={label} accessibilityHint={hint} hitSlop={6}

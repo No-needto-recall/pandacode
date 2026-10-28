@@ -1,14 +1,15 @@
+import { t as msg } from '../i18n.ts';
 // The desktop's daily wallpaper schedule (src/wallpapers.ts), kept identical so the phone and the
 // computer show the same scene at the same time. Pure: the images and the store are in Wallpaper.tsx.
 
 export const wallpaperSets = [
-  { id: 'mon', label: 'Monday' }, { id: 'tue', label: 'Tuesday' },
-  { id: 'wed', label: 'Wednesday' }, { id: 'thu', label: 'Thursday' },
-  { id: 'fri', label: 'Friday' }, { id: 'sat', label: 'Saturday' },
-  { id: 'sun', label: 'Sunday' },
+  { id: 'mon', get label() { return msg("mobile.text.monday"); } }, { id: 'tue', get label() { return msg("mobile.text.tuesday"); } },
+  { id: 'wed', get label() { return msg("mobile.text.wednesday"); } }, { id: 'thu', get label() { return msg("mobile.text.thursday"); } },
+  { id: 'fri', get label() { return msg("mobile.text.friday"); } }, { id: 'sat', get label() { return msg("mobile.text.saturday"); } },
+  { id: 'sun', get label() { return msg("mobile.text.sunday"); } },
 ] as const;
 export const wallpaperPeriods = [
-  { id: 'morning', label: 'Morning' }, { id: 'afternoon', label: 'Afternoon' }, { id: 'night', label: 'Night' },
+  { id: 'morning', get label() { return msg("mobile.text.morning"); } }, { id: 'afternoon', get label() { return msg("mobile.text.afternoon"); } }, { id: 'night', get label() { return msg("mobile.text.night"); } },
 ] as const;
 type WallpaperDay = typeof wallpaperSets[number]['id'];
 export interface WallpaperPreferences {

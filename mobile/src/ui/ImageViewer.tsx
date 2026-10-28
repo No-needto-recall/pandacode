@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { t as msg } from '../i18n.ts';
 // The full-screen image viewer: a native modal on black with pinch and double-tap zoom, swipes
 // between a message's images, swipe down to dismiss, and Share (the iOS share sheet offers Save
 // Image). One host is mounted by Transcript; openViewer() shows it from any row.
@@ -24,6 +28,7 @@ const DISMISS_V = 900;
 const EASE = { duration: 180 };
 
 export function ImageViewerHost() {
+  useLocale();
   const { images, index, opened } = useViewer();
   return (
     <Modal visible={images.length > 0} transparent animationType="fade" presentationStyle="overFullScreen" statusBarTranslucent onRequestClose={close}>
@@ -34,6 +39,7 @@ export function ImageViewerHost() {
 }
 
 function Viewer({ images, index }: { images: ViewerImage[]; index: number }) {
+  useLocale();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [current, setCurrent] = useState(index);
@@ -63,12 +69,12 @@ function Viewer({ images, index }: { images: ViewerImage[]; index: number }) {
           showsHorizontalScrollIndicator={false}
         />
         <View style={[styles.bar, { top: insets.top + 6, left: insets.left + 12, right: insets.right + 12 }]} pointerEvents="box-none">
-          <Pressable onPress={close} hitSlop={10} style={styles.button} accessibilityRole="button" accessibilityLabel="Close">
+          <Pressable onPress={close} hitSlop={10} style={styles.button} accessibilityRole="button" accessibilityLabel={msg("mobile.text.close")}>
             <Icon ios="xmark" android="close" size={18} color="#fff" />
           </Pressable>
-          <Text style={styles.title} numberOfLines={1}>{images.length > 1 ? `${current + 1} of ${images.length}` : shown?.name}</Text>
+          <Text style={styles.title} numberOfLines={1}>{images.length > 1 ? msg('mobile.image.position', { current: current + 1, total: images.length }) : shown?.name}</Text>
           {Platform.OS === 'ios'
-            ? <Pressable onPress={share} disabled={!fullUri} hitSlop={10} style={[styles.button, !fullUri && styles.dim]} accessibilityRole="button" accessibilityLabel="Share or save">
+            ? <Pressable onPress={share} disabled={!fullUri} hitSlop={10} style={[styles.button, !fullUri && styles.dim]} accessibilityRole="button" accessibilityLabel={msg("mobile.text.share_or_save")}>
               <Icon ios="square.and.arrow.up" android="share" size={18} color="#fff" />
             </Pressable>
             : <View style={styles.button} />}
@@ -79,6 +85,7 @@ function Viewer({ images, index }: { images: ViewerImage[]; index: number }) {
 
 /** One zoomable image. Not zoomed: a vertical drag dismisses (horizontal swipes page the list). Zoomed: drags pan. */
 function Page({ image, width, height, active, drag, onZoom }: { image: ViewerImage; width: number; height: number; active: boolean; drag: SharedValue<number>; onZoom: (zoomed: boolean) => void }) {
+  useLocale();
   const thumb = useAttachment(image, 'thumb', active);
   const full = useAttachment(image, 'full', active);
   const scale = useSharedValue(1);
@@ -144,13 +151,13 @@ function Page({ image, width, height, active, drag, onZoom }: { image: ViewerIma
   const uri = full.uri ?? thumb.uri;
   return (
     <GestureDetector gesture={gesture}>
-      <View style={{ width, height }} collapsable={false} accessible accessibilityLabel={image.name} accessibilityHint="Pinch or double-tap to zoom, swipe down to close">
+      <View style={{ width, height }} collapsable={false} accessible accessibilityLabel={image.name} accessibilityHint={msg("mobile.text.pinch_or_double_tap_to_zoom_swipe_down_to_close")}>
         <Animated.View style={[StyleSheet.absoluteFill, style]}>
           {/* The thumbnail, blurred, until the full image arrives. */}
           {uri && <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="contain" blurRadius={full.uri ? 0 : 12} transition={full.uri ? 150 : 0} />}
         </Animated.View>
         {!uri && !full.error && <ActivityIndicator color="#fff" style={StyleSheet.absoluteFill} />}
-        {!full.uri && !!full.error && !thumb.uri && <Text style={styles.error}>Couldn’t load this image. {full.error}</Text>}
+        {!full.uri && !!full.error && !thumb.uri && <Text style={styles.error}>{msg("mobile.text.couldn_t_load_this_image")}{full.error}</Text>}
       </View>
     </GestureDetector>
   );

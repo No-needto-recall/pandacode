@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { errorText, date, t as msg } from '../i18n.ts';
+import { useLocale } from '../ui/locale.ts';
 // The task's pull request, like the desktop's PR tab: title, state, author, branches, counts,
 // review decision, checks, labels, body, changed files (each opens its diff), commits and the
 // timeline, with Merge (merge/squash/rebase, confirmed) and Open on GitHub.
@@ -18,17 +22,17 @@ import { mono, useColors, type Colors } from '../ui/theme.ts';
 type IconName = Pick<ComponentProps<typeof Icon>, 'ios' | 'android'>;
 
 const METHODS: { method: MergeMethod; label: string; verb: string }[] = [
-  { method: 'merge', label: 'Create a merge commit', verb: 'Merge' },
-  { method: 'squash', label: 'Squash and merge', verb: 'Squash and merge' },
-  { method: 'rebase', label: 'Rebase and merge', verb: 'Rebase and merge' },
+  { method: 'merge', get label() { return msg("mobile.text.create_a_merge_commit"); }, get verb() { return msg("mobile.text.merge"); } },
+  { method: 'squash', get label() { return msg("mobile.text.squash_and_merge"); }, get verb() { return msg("mobile.text.squash_and_merge"); } },
+  { method: 'rebase', get label() { return msg("mobile.text.rebase_and_merge"); }, get verb() { return msg("mobile.text.rebase_and_merge"); } },
 ];
-const REVIEW: Record<string, string> = { approved: 'Approved', changes_requested: 'Changes requested', review_required: 'Review required', commented: 'Commented' };
+const REVIEW: Record<string, string> = { get approved() { return msg("mobile.text.approved"); }, get changes_requested() { return msg("mobile.text.changes_requested"); }, get review_required() { return msg("mobile.text.review_required"); }, get commented() { return msg("mobile.text.commented"); } };
 
 function stateBadge(pull: PullDetail, colors: Colors): { label: string; color: ColorValue } {
-  if (pull.state === 'merged' || pull.mergedAt) return { label: 'Merged', color: '#8250df' };
-  if (pull.state === 'closed') return { label: 'Closed', color: colors.red };
-  if (pull.state === 'draft') return { label: 'Draft', color: colors.secondary };
-  return { label: 'Open', color: colors.green };
+  if (pull.state === 'merged' || pull.mergedAt) return { label: msg("mobile.text.merged"), color: '#8250df' };
+  if (pull.state === 'closed') return { label: msg("mobile.text.closed"), color: colors.red };
+  if (pull.state === 'draft') return { label: msg("mobile.text.draft"), color: colors.secondary };
+  return { label: msg('mobile.pull.open'), color: colors.green };
 }
 
 function checkIcon(state: PullCheck['state'], colors: Colors): IconName & { color: ColorValue } {
@@ -38,9 +42,10 @@ function checkIcon(state: PullCheck['state'], colors: Colors): IconName & { colo
   return { ios: 'minus.circle.fill', android: 'remove_circle', color: colors.tertiary };
 }
 
-const when = (iso: string) => (iso ? new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' }) : '');
+const when = (iso: string) => (iso ? date(new Date(iso), { month: 'short', day: 'numeric' }) : '');
 
 export default function PullScreen() {
+  useLocale();
   const { device = '', session = '' } = useLocalSearchParams<{ device: string; session: string }>();
   const colors = useColors();
   const backdrop = useBackdrop();
@@ -49,22 +54,22 @@ export default function PullScreen() {
   const [merging, setMerging] = useState(false);
   const refresh = async () => {
     setRefreshing(true);
-    await connect.loadPull(device, session, true).catch(e => Alert.alert('Could not refresh', (e as Error).message));
+    await connect.loadPull(device, session, true).catch(e => Alert.alert(msg("mobile.text.could_not_refresh"), errorText(e), [{ text: msg('mobile.text.ok') }]));
     setRefreshing(false);
   };
-  if (!pull) return <Text style={[styles.empty, { color: colors.secondary }]}>No pull request is linked to this task.</Text>;
+  if (!pull) return <Text style={[styles.empty, { color: colors.secondary }]}>{msg("mobile.text.no_pull_request_is_linked_to_this_task")}</Text>;
 
   const badge = stateBadge(pull, colors);
   const open = pull.state === 'open';
-  const merge = (m: (typeof METHODS)[number]) => Alert.alert(`${m.verb} #${pull.number}?`, `Into ${pull.base} on GitHub. This can't be undone from here.`, [
-    { text: 'Cancel', style: 'cancel' },
+  const merge = (m: (typeof METHODS)[number]) => Alert.alert(`${m.verb} #${pull.number}?`, msg('mobile.pull.merge_confirm', { branch: pull.base }), [
+    { text: msg("mobile.text.cancel"), style: 'cancel' },
     { text: m.verb, style: 'destructive', onPress: async () => {
       setMerging(true);
       try {
         await connect.mergePull(device, session, m.method);
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (e) {
-        Alert.alert('Could not merge', (e as Error).message);
+        Alert.alert(msg("mobile.text.could_not_merge"), errorText(e), [{ text: msg('mobile.text.ok') }]);
       } finally {
         setMerging(false);
       }
@@ -99,15 +104,15 @@ export default function PullScreen() {
 
       <View style={styles.actions}>
         {open && (
-          <Button label={merging ? 'Merging…' : 'Merge'} icon={{ ios: 'arrow.triangle.merge', android: 'merge' }} primary disabled={merging || pull.mergeable === 'conflicting'}
-            onPress={() => showActions(`Merge #${pull.number}`, METHODS.map(m => ({ label: m.label, onPress: () => merge(m) })))} />
+          <Button label={merging ? msg("mobile.text.merging") : msg("mobile.text.merge")} icon={{ ios: 'arrow.triangle.merge', android: 'merge' }} primary disabled={merging || pull.mergeable === 'conflicting'}
+            onPress={() => showActions(msg('mobile.pull.merge_number', { number: pull.number }), METHODS.map(m => ({ label: m.label, onPress: () => merge(m) })))} />
         )}
-        <Button label="Open on GitHub" icon={{ ios: 'safari', android: 'open_in_new' }} onPress={() => void Linking.openURL(pull.url)} disabled={!/^https:\/\//.test(pull.url)} />
+        <Button label={msg("mobile.text.open_on_github")} icon={{ ios: 'safari', android: 'open_in_new' }} onPress={() => void Linking.openURL(pull.url)} disabled={!/^https:\/\//.test(pull.url)} />
       </View>
-      {open && pull.mergeable === 'conflicting' && <Text style={[styles.meta, { color: colors.orange }]}>This branch has conflicts to resolve before it can merge.</Text>}
+      {open && pull.mergeable === 'conflicting' && <Text style={[styles.meta, { color: colors.orange }]}>{msg("mobile.text.this_branch_has_conflicts_to_resolve_before_it_can_merge")}</Text>}
 
       {!!pull.checks.length && (
-        <Group title="Checks" style={card}>
+        <Group title={msg("mobile.text.checks")} style={card}>
           {pull.checks.map((c, i) => {
             const icon = checkIcon(c.state, colors);
             return (
@@ -119,14 +124,14 @@ export default function PullScreen() {
           })}
         </Group>
       )}
-      {!!pull.body.trim() && <Group title="Description" style={[card, styles.body]}><Markdown text={pull.body} /></Group>}
+      {!!pull.body.trim() && <Group title={msg("mobile.text.description")} style={[card, styles.body]}><Markdown text={pull.body} /></Group>}
       {!!pull.files.length && (
-        <Group title={`Files (${pull.changedFiles || pull.files.length})`} style={card}>
+        <Group title={msg('mobile.pull.files', { count: pull.changedFiles || pull.files.length })} style={card}>
           {pull.files.map((f, i) => <FileRow key={f.path} path={f.path} additions={f.additions} deletions={f.deletions} last={i === pull.files.length - 1} diff={{ device, session, source: 'pull' }} />)}
         </Group>
       )}
       {!!pull.commits.length && (
-        <Group title={`Commits (${pull.commits.length})`} style={card}>
+        <Group title={msg('mobile.pull.commits', { count: pull.commits.length })} style={card}>
           {pull.commits.map((c, i) => (
             <Row key={c.oid} last={i === pull.commits.length - 1}>
               <Text style={[styles.oid, { color: colors.secondary }]}>{c.oid.slice(0, 7)}</Text>
@@ -144,12 +149,13 @@ export default function PullScreen() {
           {!!c.body.trim() && <Markdown text={c.body} />}
         </View>
       ))}
-      {pull.truncated && <Text style={[styles.meta, { color: colors.secondary }]}>Some of this pull request was left out to fit. Open it on GitHub for the rest.</Text>}
+      {pull.truncated && <Text style={[styles.meta, { color: colors.secondary }]}>{msg("mobile.text.some_of_this_pull_request_was_left_out_to_fit_open_it_on_github_for_the_rest")}</Text>}
     </ScrollView>
   );
 }
 
 function Group({ title, style, children }: { title: string; style: object; children: ReactNode }) {
+  useLocale();
   const colors = useColors();
   return (
     <View style={styles.section}>
@@ -160,11 +166,13 @@ function Group({ title, style, children }: { title: string; style: object; child
 }
 
 function Row({ last, children }: { last?: boolean; children: ReactNode }) {
+  useLocale();
   const colors = useColors();
   return <View style={[styles.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.separator }]}>{children}</View>;
 }
 
 function Button({ label, icon, onPress, primary, disabled }: { label: string; icon: IconName; onPress: () => void; primary?: boolean; disabled?: boolean }) {
+  useLocale();
   const colors = useColors();
   const fg = primary ? colors.onTint : colors.tint;
   return (

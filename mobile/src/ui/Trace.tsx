@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { statusText, countNoun, t as msg } from '../i18n.ts';
 // Agent traces as the desktop draws them (src/tool-activity.ts, src/subagents.ts): one sentence per
 // tool call with its kind's icon, status and duration, tapping open to a diff, checklist, command
 // output or the raw input/output; subagent panels; the run's checklist; the Thinking line.
@@ -50,6 +54,7 @@ const traceIcon = (kind: TraceKind, own?: string) => (own && OWN_ICONS[own]) || 
 
 /** Spinner while running, a check when done, a red cross when it failed. */
 export function StatusMark({ status, color }: { status: ToolActivity['status'] | Subagent['status']; color: ColorValue }) {
+  useLocale();
   const colors = useColors();
   if (status === 'running') return <ActivityIndicator size="small" style={styles.small} />;
   if (status === 'waiting') return <Icon ios="hand.raised.fill" android="front_hand" size={12} color={colors.orange} />;
@@ -59,17 +64,18 @@ export function StatusMark({ status, color }: { status: ToolActivity['status'] |
 }
 
 export const ToolRow = memo(function ToolRow({ tool, startedAt, endedAt }: { tool: ToolActivity; startedAt?: number; endedAt?: number }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(false);
   const fields = useMemo(() => parseFields(tool.input), [tool.input]);
   const names = useWorkerNames();
-  const trace = useMemo(() => describeTool(tool, fields, names), [tool, fields, names]);
+  const trace = describeTool(tool, fields, names);
   const failed = tool.status === 'failed';
   const took = startedAt && endedAt && endedAt - startedAt >= 1000 ? duration(endedAt - startedAt) : '';
   return (
     <View style={styles.tool}>
       <Pressable onPress={() => setOpen(o => !o)} style={styles.toolHead} hitSlop={4}
-        accessibilityRole="button" accessibilityState={{ expanded: open }} accessibilityLabel={`${trace.verb} ${trace.chip} ${trace.object}, ${tool.status}${took ? `, ${took}` : ''}`}>
+        accessibilityRole="button" accessibilityState={{ expanded: open }} accessibilityLabel={`${trace.verb} ${trace.chip} ${trace.object}, ${statusText(tool.status)}${took ? `, ${took}` : ''}`}>
         <Icon {...traceIcon(trace.kind, trace.own)} size={13} color={failed ? colors.red : colors.secondary} />
         <Text style={styles.sentence} numberOfLines={1}>
           <Text style={[styles.verb, { color: failed ? colors.red : colors.secondary }]}>{trace.verb}</Text>
@@ -88,6 +94,7 @@ export const ToolRow = memo(function ToolRow({ tool, startedAt, endedAt }: { too
 });
 
 function ToolBody({ tool, kind, fields }: { tool: ToolActivity; kind: TraceKind; fields: Record<string, unknown> }) {
+  useLocale();
   const colors = useColors();
   const card = (() => {
     if (kind === 'edit') return <Diff fields={fields} />;
@@ -98,7 +105,7 @@ function ToolBody({ tool, kind, fields }: { tool: ToolActivity; kind: TraceKind;
       return (
         <>
           {!!command && <Code text={`$ ${command}`} />}
-          {code !== undefined && <Text style={[styles.exit, { color: code ? colors.red : colors.secondary }]}>{`exit ${code}`}</Text>}
+          {code !== undefined && <Text style={[styles.exit, { color: code ? colors.red : colors.secondary }]}>{msg('mobile.code.exit_lower', { code })}</Text>}
           {!!body.trim() && <Code text={tail(body)} />}
         </>
       );
@@ -112,7 +119,7 @@ function ToolBody({ tool, kind, fields }: { tool: ToolActivity; kind: TraceKind;
         {!!tool.output && <Code text={tool.output} />}
       </>}
       {!tool.output.trim() && kind !== 'edit' && kind !== 'todo' && (
-        <Text style={[styles.note, { color: colors.secondary }]}>{tool.status === 'running' ? 'Waiting for output…' : 'No output was returned.'}</Text>
+        <Text style={[styles.note, { color: colors.secondary }]}>{tool.status === 'running' ? msg("mobile.text.waiting_for_output") : msg("mobile.text.no_output_was_returned")}</Text>
       )}
     </View>
   );
@@ -125,6 +132,7 @@ const tail = (text: string) => {
 };
 
 export function Code({ text }: { text: string }) {
+  useLocale();
   const colors = useColors();
   const shown = text.length > MAX_OUTPUT ? `${text.slice(0, MAX_OUTPUT)}\n…` : text;
   return (
@@ -136,22 +144,24 @@ export function Code({ text }: { text: string }) {
 
 /** An edit's removed and added lines, red and green, as the desktop's diff card. */
 function Diff({ fields }: { fields: Record<string, unknown> }) {
+  useLocale();
   const colors = useColors();
   const lines = useMemo(() => diffLines(fields), [fields]);
-  if (!lines.length) return <Text style={[styles.note, { color: colors.secondary }]}>No changes were recorded.</Text>;
+  if (!lines.length) return <Text style={[styles.note, { color: colors.secondary }]}>{msg("mobile.text.no_changes_were_recorded")}</Text>;
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <View>
         {lines.slice(0, DIFF_LINES).map((line, i) => (
           <Text key={i} style={[styles.code, { color: colors.text, backgroundColor: line.kind === 'add' ? ADD_FILL : DEL_FILL }]}>{`${line.kind === 'add' ? '+' : '-'} ${line.text}`}</Text>
         ))}
-        {lines.length > DIFF_LINES && <Text style={[styles.note, { color: colors.secondary }]}>+{lines.length - DIFF_LINES} more lines</Text>}
+        {lines.length > DIFF_LINES && <Text style={[styles.note, { color: colors.secondary }]}>+{lines.length - DIFF_LINES} {msg("mobile.text.more_lines")}</Text>}
       </View>
     </ScrollView>
   );
 }
 
 function Checklist({ todos }: { todos: readonly Todo[] }) {
+  useLocale();
   const colors = useColors();
   return (
     <View style={styles.todos}>
@@ -159,7 +169,7 @@ function Checklist({ todos }: { todos: readonly Todo[] }) {
         const done = todo.status === 'completed';
         const doing = todo.status === 'in_progress';
         return (
-          <View key={i} style={styles.todo} accessible accessibilityLabel={`${todo.text}, ${done ? 'done' : doing ? 'in progress' : 'to do'}`}>
+          <View key={i} style={styles.todo} accessible accessibilityLabel={`${todo.text}, ${done ? msg('mobile.text.done') : doing ? msg("mobile.text.in_progress") : msg("mobile.text.to_do")}`}>
             {done ? <Icon ios="checkmark.circle.fill" android="check_circle" size={15} color={colors.green} />
               : doing ? <Icon ios="circle.dotted.circle" android="radio_button_checked" size={15} color={colors.tint} />
               : <Icon ios="circle" android="radio_button_unchecked" size={15} color={colors.tertiary} />}
@@ -173,14 +183,15 @@ function Checklist({ todos }: { todos: readonly Todo[] }) {
 
 /** The run's plan, updated in place by each TodoWrite/update_plan call. */
 export const PlanCard = memo(function PlanCard({ todos }: { todos: readonly Todo[] }) {
+  useLocale();
   const colors = useColors();
   const done = todos.filter(t => t.status === 'completed').length;
   return (
     <View style={[styles.card, { backgroundColor: colors.fill }]}>
       <View style={styles.cardHead}>
         <Icon ios="checklist" android="checklist" size={14} color={colors.secondary} />
-        <Text style={[styles.cardTitle, { color: colors.text }]}>Plan</Text>
-        <Text style={[styles.cardMeta, { color: colors.secondary }]}>{done} of {todos.length} done</Text>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>{msg("mobile.text.plan")}</Text>
+        <Text style={[styles.cardMeta, { color: colors.secondary }]}>{done} {msg("mobile.text.of")}{todos.length} {'done'}</Text>
       </View>
       <Checklist todos={todos} />
     </View>
@@ -198,10 +209,11 @@ export function useNow(ticking: boolean) {
   return now;
 }
 
-const SUB_LABEL: Record<Subagent['status'], string> = { running: 'Working', waiting: 'Waiting', completed: 'Done', failed: 'Failed', stopped: 'Stopped' };
+const SUB_LABEL: Record<Subagent['status'], string> = { get running() { return msg("mobile.text.working"); }, get waiting() { return msg("mobile.text.waiting"); }, get completed() { return msg("mobile.text.done"); }, get failed() { return msg("mobile.text.failed"); }, get stopped() { return msg("mobile.text.stopped"); } };
 
 /** One subagent: name, live status with its current tool, elapsed time and tool count; open for its tools and reply. */
 export const SubagentPanel = memo(function SubagentPanel({ agent }: { agent: Subagent }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(false);
   const live = subagentActive(agent);
@@ -214,10 +226,10 @@ export const SubagentPanel = memo(function SubagentPanel({ agent }: { agent: Sub
   return (
     <View style={[styles.card, { backgroundColor: colors.fill }, !live && styles.doneCard]}>
       <Pressable onPress={() => setOpen(o => !o)} style={styles.cardHead} accessibilityRole="button" accessibilityState={{ expanded: open }}
-        accessibilityLabel={`Subagent ${subagentName(agent)}, ${SUB_LABEL[agent.status]}, ${status}`}>
+        accessibilityLabel={msg('mobile.agents.subagent_status', { name: subagentName(agent), state: SUB_LABEL[agent.status], status })}>
         <StatusMark status={agent.status} color={colors.green} />
         <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>{subagentName(agent)}</Text>
-        <Text style={[styles.cardMeta, { color: colors.secondary }]}>{[elapsed, agent.tools.length ? `${agent.tools.length} tool${agent.tools.length === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ')}</Text>
+        <Text style={[styles.cardMeta, { color: colors.secondary }]}>{[elapsed, agent.tools.length ? msg('mobile.trace.tool_count', { tools: countNoun(agent.tools.length, 'tool') }) : ''].filter(Boolean).join(' · ')}</Text>
         <Icon ios={open ? 'chevron.down' : 'chevron.right'} android={open ? 'expand_more' : 'chevron_right'} size={11} color={colors.secondary} />
       </Pressable>
       <Text style={[styles.subStatus, { color }]} numberOfLines={1}>{status}</Text>
@@ -234,6 +246,7 @@ export const SubagentPanel = memo(function SubagentPanel({ agent }: { agent: Sub
 
 /** The model thinking: one quiet line, open for the whole status text. */
 export function ThinkingLine({ text }: { text: string }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(false);
   return (
@@ -246,6 +259,7 @@ export function ThinkingLine({ text }: { text: string }) {
 
 /** Tool calls in a row: older groups fold behind their summary sentence, the newest stays open. */
 export const ToolGroup = memo(function ToolGroup({ items, initiallyOpen }: { items: readonly { tool: ToolActivity; startedAt?: number; endedAt?: number }[]; initiallyOpen: boolean }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(initiallyOpen);
   if (items.length === 1) return <ToolRow tool={items[0].tool} startedAt={items[0].startedAt} endedAt={items[0].endedAt} />;

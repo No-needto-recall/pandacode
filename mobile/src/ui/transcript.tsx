@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { date, countNoun, t as msg } from '../i18n.ts';
 // Transcript rows. Stored messages are grouped into turns (src/store/turns.ts) and render once
 // each; the live run is its own component reading useLive, so streamed deltas re-render only it.
 import * as Clipboard from 'expo-clipboard';
@@ -27,7 +31,7 @@ const CONTEXT_BOUNDARY = /\n\n(?=(?:File|Document|Folder|GitHub|Browser element)
 /** How far from the newest message (pt) before the jump-to-latest button shows. */
 const AWAY = 240;
 
-const clock = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const clock = (ms: number) => date(ms, { hour: 'numeric', minute: '2-digit' });
 
 function copy(text: string) {
   void Clipboard.setStringAsync(text);
@@ -35,9 +39,10 @@ function copy(text: string) {
 }
 
 function Meta({ text, at, align }: { text: string; at: number; align: 'left' | 'right' }) {
+  useLocale();
   const colors = useColors();
   const copyButton = (
-    <Pressable onPress={() => copy(text)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Copy">
+    <Pressable onPress={() => copy(text)} hitSlop={10} accessibilityRole="button" accessibilityLabel={msg("mobile.text.copy")}>
       <Icon ios="doc.on.doc" android="content_copy" size={13} color={colors.tertiary} />
     </Pressable>
   );
@@ -46,6 +51,7 @@ function Meta({ text, at, align }: { text: string; at: number; align: 'left' | '
 }
 
 function UserBubble({ message }: { message: Message }) {
+  useLocale();
   const colors = useColors();
   const [showContext, setShowContext] = useState(false);
   const content = message.content;
@@ -61,14 +67,14 @@ function UserBubble({ message }: { message: Message }) {
         <Chips chips={files.chips} />
         {cut >= 0 && (
           <Pressable onPress={() => setShowContext(s => !s)} accessibilityRole="button">
-            <Text style={[styles.context, { color: colors.secondary }]}>{showContext ? content.slice(cut + 2) : 'Attached context'}</Text>
+            <Text style={[styles.context, { color: colors.secondary }]}>{showContext ? content.slice(cut + 2) : msg("mobile.text.attached_context")}</Text>
           </Pressable>
         )}
       </View>
       {steeredAt != null && (
         <View style={[styles.meta, styles.metaRight]}>
           <Icon ios="arrow.uturn.right" android="alt_route" size={11} color={colors.secondary} />
-          <Text style={[styles.time, { color: colors.secondary }]}>Steer · {clock(steeredAt)}</Text>
+          <Text style={[styles.time, { color: colors.secondary }]}>{msg("mobile.text.steer_ba71c3")}{clock(steeredAt)}</Text>
         </View>
       )}
       <Meta text={prompt} at={message.createdAt} align="right" />
@@ -77,10 +83,11 @@ function UserBubble({ message }: { message: Message }) {
 }
 
 function WorkRow({ steps, durationMs }: { steps: Message[]; durationMs: number | null }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(false);
   const tools = steps.filter(s => s.role === 'tool').length;
-  const label = durationMs != null ? `Worked for ${duration(durationMs)}` : `${tools} step${tools === 1 ? '' : 's'}`;
+  const label = durationMs != null ? msg('mobile.task.worked_for', { time: duration(durationMs) }) : msg('mobile.trace.steps', { steps: countNoun(tools, 'step') });
   return (
     <View style={styles.work}>
       <Pressable onPress={() => setOpen(o => !o)} disabled={!steps.length} style={styles.workHead} accessibilityRole="button" accessibilityState={{ expanded: open }} hitSlop={6}>
@@ -94,6 +101,7 @@ function WorkRow({ steps, durationMs }: { steps: Message[]; durationMs: number |
 
 /** A stored turn's steps: tool calls grouped as on the desktop, interim notes between them. Parsed once per open. */
 function Steps({ steps }: { steps: Message[] }) {
+  useLocale();
   const colors = useColors();
   const runs = useMemo(() => groupRuns(steps.map(m => (m.role === 'tool' ? { id: m.id, tool: parseToolMessage(m.content) } : { id: m.id, text: m.content })), e => 'tool' in e), [steps]);
   // One group opens with its turn; several stay folded behind their summaries.
@@ -108,6 +116,7 @@ function Steps({ steps }: { steps: Message[] }) {
 }
 
 const Row = memo(function Row({ row }: { row: TurnRow }) {
+  useLocale();
   const colors = useColors();
   switch (row.kind) {
     case 'user': return <UserBubble message={row.message} />;
@@ -124,6 +133,7 @@ const Row = memo(function Row({ row }: { row: TurnRow }) {
 
 /** Messages waiting in the outbox for this task. */
 function Pending({ deviceId, sessionId }: { deviceId: string; sessionId: string }) {
+  useLocale();
   const colors = useColors();
   const outbox = useLocal(s => s.outbox);
   const entries = useMemo(() => outbox.filter(e => e.deviceId === deviceId && e.sessionId === sessionId), [outbox, deviceId, sessionId]);
@@ -131,19 +141,19 @@ function Pending({ deviceId, sessionId }: { deviceId: string; sessionId: string 
   return (
     <>
       {entries.map(entry => {
-        const menu = () => showActions(entry.error ?? 'This message sends when the computer is back.', [
-          { label: 'Send now', ios: 'arrow.up.circle', android: 'send', onPress: () => retryOutbox(entry.id) },
-          { label: 'Copy', ios: 'doc.on.doc', android: 'content_copy', onPress: () => copy(entry.text) },
-          { label: 'Delete', ios: 'trash', android: 'delete', destructive: true, onPress: () => removeOutbox(entry.id) },
+        const menu = () => showActions(entry.error ?? msg("mobile.text.this_message_sends_when_the_computer_is_back"), [
+          { label: msg("mobile.text.send_now"), ios: 'arrow.up.circle', android: 'send', onPress: () => retryOutbox(entry.id) },
+          { label: msg("mobile.text.copy"), ios: 'doc.on.doc', android: 'content_copy', onPress: () => copy(entry.text) },
+          { label: msg("mobile.text.delete"), ios: 'trash', android: 'delete', destructive: true, onPress: () => removeOutbox(entry.id) },
         ]);
         return (
-          <Pressable key={entry.id} onPress={menu} onLongPress={menu} style={styles.userTurn} accessibilityRole="button" accessibilityHint="Retry or delete">
+          <Pressable key={entry.id} onPress={menu} onLongPress={menu} style={styles.userTurn} accessibilityRole="button" accessibilityHint={msg("mobile.text.retry_or_delete")}>
             <View style={[styles.bubble, styles.pending, { backgroundColor: colors.bubble, borderColor: entry.error ? colors.red : colors.separator }]}>
               <Text style={[styles.userText, { color: colors.text }]}>{entry.text}</Text>
             </View>
             <View style={[styles.meta, styles.metaRight]}>
               <Icon ios={entry.error ? 'exclamationmark.circle' : 'clock.arrow.circlepath'} android={entry.error ? 'error' : 'schedule_send'} size={12} color={entry.error ? colors.red : colors.orange} />
-              <Text style={[styles.time, { color: entry.error ? colors.red : colors.orange }]} numberOfLines={1}>{entry.error ? 'Not sent · tap to retry' : 'Sends on reconnect'}</Text>
+              <Text style={[styles.time, { color: entry.error ? colors.red : colors.orange }]} numberOfLines={1}>{entry.error ? msg("mobile.text.not_sent_tap_to_retry") : msg("mobile.text.sends_on_reconnect")}</Text>
             </View>
           </Pressable>
         );
@@ -152,11 +162,12 @@ function Pending({ deviceId, sessionId }: { deviceId: string; sessionId: string 
   );
 }
 
-const SENT_LABEL: Record<Sent['state'], string> = { sending: 'Sending…', steering: 'Steer · Sending…', queued: 'Queued' };
+const SENT_LABEL: Record<Sent['state'], string> = { get sending() { return msg("mobile.text.sending"); }, get steering() { return msg("mobile.text.steer_sending"); }, get queued() { return msg("mobile.text.queued"); } };
 
 /** Prompts sent from this phone, shown at once until the stored copy replaces them: the ones
  * starting a turn above the live run (`before`), steers and queued ones after it. */
 function SentBubbles({ deviceId, sessionId, before }: { deviceId: string; sessionId: string; before: boolean }) {
+  useLocale();
   const colors = useColors();
   const sent = useSent(deviceId, sessionId);
   const shown = sent.filter(e => (e.state === 'sending') === before);
@@ -182,6 +193,7 @@ function SentBubbles({ deviceId, sessionId, before }: { deviceId: string; sessio
 /** The in-flight run: the plan, subagent panels, the turn's tools grouped (the newest group open),
  * streamed text, and a compact Working row. Rows are memoized, so an event re-renders only what it changed. */
 const LiveRun = memo(function LiveRun({ deviceId, sessionId }: { deviceId: string; sessionId: string }) {
+  useLocale();
   const colors = useColors();
   const live = useLive(deviceId, sessionId);
   // A copy made mid-run can already hold the segment still streaming here; show it once.
@@ -213,7 +225,7 @@ const LiveRun = memo(function LiveRun({ deviceId, sessionId }: { deviceId: strin
       {live.status === 'running' && (
         <View style={styles.activity}>
           <ActivityIndicator size="small" style={styles.small} />
-          <Text style={[styles.workText, { color: colors.secondary }]}>Working…</Text>
+          <Text style={[styles.workText, { color: colors.secondary }]}>{msg("mobile.text.working_ellipsis")}</Text>
           {!!current && current !== 'Working…' && <Text style={[styles.current, { color: colors.tertiary }]} numberOfLines={1}>{current}</Text>}
         </View>
       )}
@@ -228,9 +240,10 @@ const toolKey = (item: LiveItem, i: number) => (item.kind === 'tool' && item.too
 
 /** Grey bubbles in the shape of a transcript, while a thread with nothing cached loads. */
 function Skeleton() {
+  useLocale();
   const colors = useColors();
   return (
-    <View accessible accessibilityLabel="Loading messages" style={styles.skeleton}>
+    <View accessible accessibilityLabel={msg("mobile.text.loading_messages")} style={styles.skeleton}>
       {SKELETON.map((width, i) => <View key={i} style={[styles.bone, i % 2 ? styles.boneReply : styles.boneUser, { width, backgroundColor: colors.fill }]} />)}
     </View>
   );
@@ -240,6 +253,7 @@ const SKELETON = ['62%', '88%', '48%', '80%'] as const;
 /** The message copy: a skeleton until anything (cached or fetched) shows, then nothing while it
  * refreshes; a failure with Retry ("Couldn't refresh" over cached or older messages). */
 function History({ deviceId, sessionId, empty }: { deviceId: string; sessionId: string; empty: boolean }) {
+  useLocale();
   const colors = useColors();
   const history = useHistory(deviceId, sessionId);
   const loaded = useLoaded(deviceId, sessionId);
@@ -247,9 +261,9 @@ function History({ deviceId, sessionId, empty }: { deviceId: string; sessionId: 
   return (
     <View style={styles.failed}>
       <Icon ios="exclamationmark.circle" android="error" size={14} color={colors.red} />
-      <Text style={[styles.failedText, { color: colors.red }]} numberOfLines={3}>{empty ? `Couldn't load this task: ${history}` : `Couldn't refresh: ${history}`}</Text>
-      <Pressable onPress={() => connect.loadMessages(deviceId, sessionId).catch(() => undefined)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Retry loading messages">
-        <Text style={[styles.retry, { color: colors.tint }]}>Retry</Text>
+      <Text style={[styles.failedText, { color: colors.red }]} numberOfLines={3}>{empty ? msg('mobile.task.load_error', { error: history }) : msg('mobile.task.refresh_error', { error: history })}</Text>
+      <Pressable onPress={() => connect.loadMessages(deviceId, sessionId).catch(() => undefined)} hitSlop={8} accessibilityRole="button" accessibilityLabel={msg("mobile.text.retry_loading_messages")}>
+        <Text style={[styles.retry, { color: colors.tint }]}>{msg("mobile.text.retry")}</Text>
       </Pressable>
     </View>
   );
@@ -257,12 +271,13 @@ function History({ deviceId, sessionId, empty }: { deviceId: string; sessionId: 
 
 /** Above the oldest message: a spinner while an older page loads. */
 function Older({ deviceId, sessionId }: { deviceId: string; sessionId: string }) {
+  useLocale();
   const colors = useColors();
   if (useOlder(deviceId, sessionId) !== 'loading') return null;
   return (
-    <View style={[styles.activity, styles.older]} accessibilityLabel="Loading older messages">
+    <View style={[styles.activity, styles.older]} accessibilityLabel={msg("mobile.text.loading_older_messages")}>
       <ActivityIndicator size="small" style={styles.small} />
-      <Text style={[styles.workText, { color: colors.secondary }]}>Loading older messages…</Text>
+      <Text style={[styles.workText, { color: colors.secondary }]}>{msg("mobile.text.loading_older_messages_5255fa")}</Text>
     </View>
   );
 }
@@ -276,6 +291,7 @@ const render = ({ item }: { item: TurnRow }) => <Row row={item} />;
 export const Transcript = memo(function Transcript({ deviceId, sessionId, top, bottom, listRef, onAway }: {
   deviceId: string; sessionId: string; top: number; bottom: number; listRef?: Ref<FlatList<TurnRow>>; onAway?: (away: boolean) => void;
 }) {
+  useLocale();
   const messages = useMessages(deviceId, sessionId);
   const data = useMemo(() => turnRows(messages).reverse(), [messages]);
   useEffect(() => { if (data.length) markPaint(taskKey(deviceId, sessionId), data.length); }, [data.length, deviceId, sessionId]);

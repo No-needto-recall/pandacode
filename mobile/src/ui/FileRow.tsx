@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { t as msg } from '../i18n.ts';
 // A changed file in the Changes and pull request lists: status letter, path, +/− counts; opens its diff.
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -5,10 +9,11 @@ import { Icon } from './Icon.tsx';
 import { mono, useColors } from './theme.ts';
 
 export function Counts({ additions, deletions }: { additions?: number; deletions?: number }) {
+  useLocale();
   const colors = useColors();
   if (additions === undefined && deletions === undefined) return null;
   return (
-    <Text style={styles.counts} accessibilityLabel={`${additions ?? 0} added, ${deletions ?? 0} removed`}>
+    <Text style={styles.counts} accessibilityLabel={msg('mobile.diff.counts', { added: additions ?? 0, removed: deletions ?? 0 })}>
       <Text style={{ color: colors.green }}>+{additions ?? 0}</Text> <Text style={{ color: colors.red }}>−{deletions ?? 0}</Text>
     </Text>
   );
@@ -18,11 +23,12 @@ export function FileRow({ letter, path, additions, deletions, note, diff, last }
   letter?: string; path: string; additions?: number; deletions?: number; note?: string; last?: boolean;
   diff: { device: string; session: string; source: 'pull' | 'changes'; staged?: string };
 }) {
+  useLocale();
   const colors = useColors();
   const slash = path.lastIndexOf('/');
   const color = letter === 'A' ? colors.green : letter === 'D' ? colors.red : letter === 'U' ? colors.orange : colors.tint;
   return (
-    <Pressable onPress={() => router.push({ pathname: '/diff', params: { ...diff, path } })} accessibilityRole="button" accessibilityHint="Shows the diff"
+    <Pressable onPress={() => router.push({ pathname: '/diff', params: { ...diff, path } })} accessibilityRole="button" accessibilityHint={msg("mobile.text.shows_the_diff")}
       style={({ pressed }) => [styles.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.separator }, pressed && { opacity: 0.6 }]}>
       {!!letter && <Text style={[styles.letter, { color }]}>{letter}</Text>}
       <View style={styles.text}>

@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { errorText, t as msg } from '../i18n.ts';
+import { useLocale } from '../ui/locale.ts';
 // New task: computer, project, harness + model, effort, mode, worktree, prompt → task.start.
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, type ReactNode } from 'react';
@@ -10,6 +14,7 @@ import { useColors } from '../ui/theme.ts';
 import { useNewTask } from '../ui/useNewTask.ts';
 
 export default function NewTask() {
+  useLocale();
   const colors = useColors();
   const params = useLocalSearchParams<{ device?: string }>();
   const form = useNewTask(params.device);
@@ -20,34 +25,35 @@ export default function NewTask() {
       const { sessionId: session, note } = await form.start(prompt);
       router.dismiss();
       router.push({ pathname: '/task/[device]/[session]', params: { device: deviceId, session } });
-      if (note) Alert.alert('Started in a worktree', note.replace(/^Started in a worktree: /, ''));
+      if (note) Alert.alert(msg("mobile.text.started_in_a_worktree"), note.replace(/^Started in a worktree: /, ''), [{ text: msg('mobile.text.ok') }]);
     } catch (e) {
-      Alert.alert('Could not start the task', (e as Error).message);
+      Alert.alert(msg("mobile.text.could_not_start_the_task"), errorText(e), [{ text: msg('mobile.text.ok') }]);
     }
   };
 
-  if (!hosts.length) return <Text style={[styles.empty, { color: colors.secondary }]}>No computer with remote access is online.</Text>;
+  if (!hosts.length) return <Text style={[styles.empty, { color: colors.secondary }]}>{msg("mobile.text.no_computer_with_remote_access_is_online")}</Text>;
   return (
     <ScrollView style={{ backgroundColor: colors.grouped }} contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic">
       <View style={[styles.group, { backgroundColor: colors.card }]}>
-        <Row label="Computer"><Choice value={deviceId} options={hosts.map(h => ({ value: h.id, label: h.name }))} onChange={form.pickDevice} /></Row>
-        <Row label="Project">{list ? <View style={styles.project}><ProjectTile deviceId={deviceId} projectId={projectId} name={list.projects.find(p => p.id === projectId)?.name ?? ''} /><Choice value={projectId} options={list.projects.map(p => ({ value: p.id, label: p.name }))} onChange={id => pick({ projectId: id })} /></View> : <ActivityIndicator />}</Row>
-        <Row label="Harness">{options.loaded ? <Choice value={provider} options={options.harnesses} onChange={form.pickProvider} /> : <ActivityIndicator />}</Row>
-        <Row label="Model"><Choice value={model} options={[{ value: 'default', label: 'Default' }, ...options.models.filter(m => m.value !== 'default')]} onChange={form.pickModel} /></Row>
-        {efforts.length > 0 && <Row label="Effort"><Choice value={effort ?? ''} options={efforts} onChange={e => pick({ effort: e })} /></Row>}
-        <Row label="Permissions"><Choice value={mode} options={MODES.map(m => ({ value: m.id, label: m.label }))} onChange={m => pick({ mode: m })} /></Row>
-        <Row label="New worktree" last><Switch value={worktree} onValueChange={form.setWorktree} /></Row>
+        <Row label={msg("mobile.text.computer")}><Choice value={deviceId} options={hosts.map(h => ({ value: h.id, label: h.name }))} onChange={form.pickDevice} /></Row>
+        <Row label={msg("mobile.text.project")}>{list ? <View style={styles.project}><ProjectTile deviceId={deviceId} projectId={projectId} name={list.projects.find(p => p.id === projectId)?.name ?? ''} /><Choice value={projectId} options={list.projects.map(p => ({ value: p.id, label: p.name }))} onChange={id => pick({ projectId: id })} /></View> : <ActivityIndicator />}</Row>
+        <Row label={msg("mobile.text.harness")}>{options.loaded ? <Choice value={provider} options={options.harnesses} onChange={form.pickProvider} /> : <ActivityIndicator />}</Row>
+        <Row label={msg("mobile.text.model")}><Choice value={model} options={[{ value: 'default', label: msg("mobile.text.default") }, ...options.models.filter(m => m.value !== 'default')]} onChange={form.pickModel} /></Row>
+        {efforts.length > 0 && <Row label={msg("mobile.text.effort")}><Choice value={effort ?? ''} options={efforts} onChange={e => pick({ effort: e })} /></Row>}
+        <Row label={msg("mobile.text.permissions")}><Choice value={mode} options={MODES.map(m => ({ value: m.id, label: m.label }))} onChange={m => pick({ mode: m })} /></Row>
+        <Row label={msg("mobile.text.new_worktree")} last><Switch value={worktree} onValueChange={form.setWorktree} /></Row>
       </View>
-      <TextInput value={prompt} onChangeText={setPrompt} placeholder="What should the agent do?" placeholderTextColor={colors.tertiary as string} multiline autoFocus
-        style={[styles.prompt, { backgroundColor: colors.card, color: colors.text }]} accessibilityLabel="Prompt" />
+      <TextInput value={prompt} onChangeText={setPrompt} placeholder={msg("mobile.text.what_should_the_agent_do")} placeholderTextColor={colors.tertiary as string} multiline autoFocus
+        style={[styles.prompt, { backgroundColor: colors.card, color: colors.text }]} accessibilityLabel={msg("mobile.text.prompt")} />
       {starting
-        ? <View style={styles.starting}><ActivityIndicator /><Text style={{ color: colors.secondary }}>Starting on the computer…</Text></View>
-        : <Button label="Start task" kind="primary" onPress={start} disabled={!form.canStart(prompt)} />}
+        ? <View style={styles.starting}><ActivityIndicator /><Text style={{ color: colors.secondary }}>{msg("mobile.text.starting_on_the_computer")}</Text></View>
+        : <Button label={msg("mobile.text.start_task")} kind="primary" onPress={start} disabled={!form.canStart(prompt)} />}
     </ScrollView>
   );
 }
 
 function Row({ label, children, last }: { label: string; children: ReactNode; last?: boolean }) {
+  useLocale();
   const colors = useColors();
   return (
     <View style={[styles.row, !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.separator }]}>

@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { number, t as msg } from '../../i18n.ts';
+import { useLocale } from '../locale.ts';
 // Charts from plain Views (the app ships no SVG renderer): bars are columns, lines are rotated
 // hairline segments with point dots, area adds faint columns under the line, a pie is a 100 %
 // stacked bar with a percentage legend. Colours match the desktop's palette after the tint.
@@ -17,6 +21,7 @@ export function useWidth(): [number, (e: LayoutChangeEvent) => void] {
 
 /** A polyline as rotated Views inside a box of `width` × `height`. */
 export function Line({ values, width, height, color, min, max, dots }: { values: number[]; width: number; height: number; color: ColorValue; min: number; max: number; dots?: boolean }) {
+  useLocale();
   if (!width || values.length < 2) return null;
   const span = max - min || 1;
   const points = values.map((v, i) => ({ x: (i / (values.length - 1)) * width, y: height - 2 - ((v - min) / span) * (height - 4) }));
@@ -30,19 +35,22 @@ export function Line({ values, width, height, color, min, max, dots }: { values:
 }
 
 export function Spark({ values, height = 28 }: { values: number[]; height?: number }) {
+  useLocale();
   const colors = useColors();
   const [width, onLayout] = useWidth();
-  return <View onLayout={onLayout} style={{ height }} accessible accessibilityLabel={`Trend from ${values[0]} to ${values[values.length - 1]}`}>
+  return <View onLayout={onLayout} style={{ height }} accessible accessibilityLabel={msg('mobile.chart.trend', { start: values[0], end: values[values.length - 1] })}>
     <Line values={values} width={width} height={height} color={colors.tint} min={Math.min(...values)} max={Math.max(...values)} />
   </View>;
 }
 
 export function Chart({ spec }: { spec: ChartSpec }) {
+  useLocale();
   const colors = useColors();
   const [width, onLayout] = useWidth();
   const color = (s: number) => (s === 0 ? colors.tint : PALETTE[(s - 1) % PALETTE.length]);
   const { labels, series } = spec;
-  const label = spec.title ?? `${spec.chart} chart`;
+  const chartLabels = { bar: 'mobile.chart.bar', line: 'mobile.chart.line', pie: 'mobile.chart.pie', area: 'mobile.chart.area', sparkline: 'mobile.chart.sparkline' } as const;
+  const label = spec.title ?? msg(chartLabels[spec.chart]);
   if (spec.chart === 'sparkline') return <View style={styles.box}>{!!spec.title && <Text style={[styles.title, { color: colors.secondary }]}>{spec.title}</Text>}<Spark values={series[0].values} height={48} /></View>;
   if (spec.chart === 'pie') {
     const values = series[0].values.map(v => Math.max(0, v)), total = values.reduce((a, b) => a + b, 0) || 1;
@@ -63,8 +71,8 @@ export function Chart({ spec }: { spec: ChartSpec }) {
       {!!spec.title && <Text style={[styles.title, { color: colors.secondary }]}>{spec.title}</Text>}
       <View style={styles.row}>
         <View style={[styles.axis, { height: HEIGHT }]}>
-          <Text style={[styles.tick, { color: colors.tertiary }]}>{Number(max.toFixed(2)).toLocaleString()}</Text>
-          <Text style={[styles.tick, { color: colors.tertiary }]}>{Number(min.toFixed(2)).toLocaleString()}</Text>
+          <Text style={[styles.tick, { color: colors.tertiary }]}>{number(Number(max.toFixed(2)))}</Text>
+          <Text style={[styles.tick, { color: colors.tertiary }]}>{number(Number(min.toFixed(2)))}</Text>
         </View>
         <View style={styles.flex}>
           <View onLayout={onLayout} style={[styles.plot, { height: HEIGHT, borderColor: colors.separator }]}>
@@ -94,6 +102,7 @@ export function Chart({ spec }: { spec: ChartSpec }) {
 }
 
 function Key({ color, text }: { color: ColorValue; text: string }) {
+  useLocale();
   const colors = useColors();
   return <View style={styles.key}><View style={[styles.swatch, { backgroundColor: color }]} /><Text style={[styles.tick, { color: colors.secondary }]}>{text}</Text></View>;
 }

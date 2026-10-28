@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { t as msg } from '../i18n.ts';
 // Expanded views for MCP tool calls: PandaCode's team tools get proper cards (a card per
 // dispatched assignment, the finish summary as Markdown, a message with its recipient), screenshot
 // tools show their image when the result carries the bytes, and any other MCP call shows
@@ -28,17 +32,20 @@ function pretty(input: string, fields: Fields): string {
 }
 
 function Label({ children }: { children: string }) {
+  useLocale();
   const colors = useColors();
   return <Text style={[styles.label, { color: colors.secondary }]}>{children}</Text>;
 }
 
 function Mono({ text }: { text: string }) {
+  useLocale();
   const colors = useColors();
   return <Text selectable style={[styles.code, { color: colors.text }]}>{text}</Text>;
 }
 
 /** A model badge: the harness logo, then the model (or profile) name. */
 export function ModelBadge({ provider, model }: { provider: string; model: string }) {
+  useLocale();
   const colors = useColors();
   if (!provider && !model) return null;
   return (
@@ -50,6 +57,7 @@ export function ModelBadge({ provider, model }: { provider: string; model: strin
 }
 
 function AssignmentCard({ a, names }: { a: Assignment; names: WorkerNames }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(false);
   const deps = a.dependsOn.map(id => names[id] || id);
@@ -60,12 +68,12 @@ function AssignmentCard({ a, names }: { a: Assignment; names: WorkerNames }) {
         <ModelBadge provider={a.provider} model={a.model || a.profileId} />
       </View>
       <Text style={[styles.meta, { color: colors.tertiary }]} numberOfLines={3}>
-        {[a.key && `key ${a.key}`, a.readOnly && 'read-only', a.files.length ? a.files.join(', ') : 'whole checkout', deps.length && `after ${deps.join(', ')}`].filter(Boolean).join(' · ')}
+        {[a.key && msg('mobile.agents.key', { key: a.key }), a.readOnly && 'read-only', a.files.length ? a.files.join(', ') : msg("mobile.text.whole_checkout_0fe278"), deps.length && msg('mobile.agents.after_lower', { names: deps.join(', ') })].filter(Boolean).join(' · ')}
       </Text>
       {!!a.prompt && (
         <Pressable onPress={() => setOpen(o => !o)} accessibilityRole="button" accessibilityState={{ expanded: open }} style={styles.fold}>
           <Icon ios={open ? 'chevron.down' : 'chevron.right'} android={open ? 'expand_more' : 'chevron_right'} size={10} color={colors.secondary} />
-          <Text style={[styles.meta, { color: colors.secondary }]}>Assignment</Text>
+          <Text style={[styles.meta, { color: colors.secondary }]}>{msg("mobile.text.assignment")}</Text>
         </Pressable>
       )}
       {open && <Markdown text={a.prompt} />}
@@ -85,6 +93,7 @@ function hasOwnCard(own: string, fields: Fields): boolean {
 
 /** The tool's own card (only where hasOwnCard). */
 function OwnCard({ own, fields, names }: { own: string; fields: Fields; names: WorkerNames }) {
+  useLocale();
   const colors = useColors();
   switch (own) {
     case 'dispatch_workers': {
@@ -96,7 +105,7 @@ function OwnCard({ own, fields, names }: { own: string; fields: Fields; names: W
     case 'followup_worker':
       return (
         <View style={styles.gap}>
-          <Label>{`To ${names[str(fields, 'workerId')] || 'worker'}${fields.readOnly === true ? ' · read-only' : ''}`}</Label>
+          <Label>{msg('mobile.agents.to_readonly', { name: names[str(fields, 'workerId')] || msg('mobile.text.worker'), mode: fields.readOnly === true ? msg('mobile.text.read_only') : '' })}</Label>
           {!!str(fields, 'prompt') && <Markdown text={str(fields, 'prompt')} />}
         </View>
       );
@@ -104,7 +113,7 @@ function OwnCard({ own, fields, names }: { own: string; fields: Fields; names: W
       const to = str(fields, 'recipient');
       return (
         <View style={styles.gap}>
-          <Label>{`To ${to === 'architect' ? 'the architect' : names[to] || to || 'teammate'}`}</Label>
+          <Label>{msg('mobile.agents.to', { name: to === 'architect' ? msg('mobile.text.the_architect') : names[to] || to || msg('mobile.text.a_teammate') })}</Label>
           <Markdown text={str(fields, 'message')} />
         </View>
       );
@@ -113,8 +122,8 @@ function OwnCard({ own, fields, names }: { own: string; fields: Fields; names: W
       return (
         <View style={styles.gap}>
           {!!str(fields, 'summary') && <Text selectable style={[styles.body, { color: colors.text }]}>{str(fields, 'summary')}</Text>}
-          {!!str(fields, 'nextSteps') && <><Label>Next</Label><Text selectable style={[styles.body, { color: colors.text }]}>{str(fields, 'nextSteps')}</Text></>}
-          {!!str(fields, 'blocker') && <><Label>Blocker</Label><Text selectable style={[styles.body, { color: colors.red }]}>{str(fields, 'blocker')}</Text></>}
+          {!!str(fields, 'nextSteps') && <><Label>{msg("mobile.text.next")}</Label><Text selectable style={[styles.body, { color: colors.text }]}>{str(fields, 'nextSteps')}</Text></>}
+          {!!str(fields, 'blocker') && <><Label>{msg("mobile.text.blocker")}</Label><Text selectable style={[styles.body, { color: colors.red }]}>{str(fields, 'blocker')}</Text></>}
         </View>
       );
     default: return null;
@@ -123,6 +132,7 @@ function OwnCard({ own, fields, names }: { own: string; fields: Fields; names: W
 
 /** The expanded body of an MCP tool call. */
 export function McpBody({ tool, fields, own }: { tool: ToolActivity; fields: Fields; own?: string }) {
+  useLocale();
   const colors = useColors();
   const names = useWorkerNames();
   const image = useMemo(() => (own && /screenshot|control/.test(own) ? imageOf(tool.output) : undefined), [own, tool.output]);
@@ -133,9 +143,9 @@ export function McpBody({ tool, fields, own }: { tool: ToolActivity; fields: Fie
     <View style={styles.gap}>
       {!own && <Label>{`${server} › ${name}`}</Label>}
       {hasCard ? card : !!tool.input.trim() && tool.input.trim() !== '{}' && <Mono text={pretty(tool.input, fields)} />}
-      {image ? <Image source={{ uri: image }} style={styles.shot} contentFit="contain" accessibilityLabel="Screenshot" />
+      {image ? <Image source={{ uri: image }} style={styles.shot} contentFit="contain" accessibilityLabel={msg("mobile.text.screenshot")} />
         : !hasCard && !!tool.output.trim() && <Mono text={tool.output.length > MAX_ARGS ? `${tool.output.slice(0, MAX_ARGS)}\n…` : tool.output} />}
-      {!tool.output.trim() && !hasCard && <Text style={[styles.body, { color: colors.secondary }]}>{tool.status === 'running' ? 'Waiting for output…' : 'No output was returned.'}</Text>}
+      {!tool.output.trim() && !hasCard && <Text style={[styles.body, { color: colors.secondary }]}>{tool.status === 'running' ? msg("mobile.text.waiting_for_output") : msg("mobile.text.no_output_was_returned")}</Text>}
     </View>
   );
 }

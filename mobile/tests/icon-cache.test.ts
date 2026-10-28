@@ -1,4 +1,6 @@
 /// <reference types="node" />
+import { setRuntimeLocale } from '../src/i18n.ts';
+setRuntimeLocale('en'); // Existing fixtures assert the English product copy explicitly.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { chunks, DAY_MS, dueIcons, iconKey, mergeIcons, parseIcons, RETRY_MS, validIcon } from '../src/store/icon-cache.ts';

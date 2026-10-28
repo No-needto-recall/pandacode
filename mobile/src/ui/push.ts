@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // Push notifications, native side: permission, the raw APNs/FCM device token, registration with
 // the relay, foreground presentation and tap-to-inbox. Registration is quiet about a relay that
 // predates the endpoint: classifyRegister sorts 404/405
@@ -32,13 +33,17 @@ export async function pushAvailable(): Promise<boolean> {
 
 export async function notificationsGranted(): Promise<boolean> {
   const status = await Notifications.getPermissionsAsync();
+  // SDK 58 exports this runtime enum through a .types barrel; tsc and the versioned docs verify it.
+  // eslint-disable-next-line import/namespace
   return status.granted || status.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL;
 }
 
 /** Asks (once, from the Settings toggle only) and registers if granted. Returns whether push is on. */
 export async function enableNotifications(): Promise<boolean> {
   if (Platform.OS === 'android' && Platform.Version >= 33) {
-    await Notifications.setNotificationChannelAsync('tasks', { name: 'Tasks', importance: Notifications.AndroidImportance.HIGH });
+    // SDK 58's runtime enum re-export is not followed by eslint-plugin-import.
+    // eslint-disable-next-line import/namespace
+    await Notifications.setNotificationChannelAsync('tasks', { name: msg("mobile.text.tasks"), importance: Notifications.AndroidImportance.HIGH });
   }
   const status = await Notifications.requestPermissionsAsync();
   if (!status.granted) return false;

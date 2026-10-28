@@ -1,4 +1,6 @@
 /// <reference types="node" />
+import { setRuntimeLocale } from '../src/i18n.ts';
+setRuntimeLocale('en'); // Existing fixtures assert the English product copy explicitly.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { applyEvent, ended, fromList, fromSubscribe, idleLive, mergeMessages, staleLists, withHostActivity, type Live } from '../src/store/reduce.ts';

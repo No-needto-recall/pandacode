@@ -10,15 +10,15 @@ import type { LiveSummary } from './summary.ts';
 export const PandaActivity: LiveActivityComponent<LiveSummary> = (props, environment) => {
   'widget';
   const STATUS = {
-    approval: { label: 'Approval', color: '#FFD60A' },
-    input: { label: 'Input', color: '#BF5AF2' },
-    working: { label: 'Working', color: '#0A84FF' },
-    done: { label: 'Done', color: '#30D158' },
-    failed: { label: 'Failed', color: '#FF453A' },
+    approval: { label: props.labels.approval, color: '#FFD60A' },
+    input: { label: props.labels.input, color: '#BF5AF2' },
+    working: { label: props.labels.working, color: '#0A84FF' },
+    done: { label: props.labels.done, color: '#30D158' },
+    failed: { label: props.labels.failed, color: '#FF453A' },
   };
   const dim = 'rgba(255,255,255,0.6)';
   const stale = !!environment.isStale;
-  const footer = stale ? `Open PandaCode to refresh · ${props.updated}` : null;
+  const footer = stale ? props.stale : null;
   const mark = (size: number) =>
     props.mark
       ? <Image uiImage={props.mark} modifiers={[resizable(), frame({ width: size, height: size })]} />
@@ -60,7 +60,7 @@ export const PandaActivity: LiveActivityComponent<LiveSummary> = (props, environ
         <Text modifiers={[font({ size: 15, weight: 'bold' }), foregroundStyle('#FFFFFF')]}>PandaCode</Text>
       </HStack>
     ),
-    expandedTrailing: <Text modifiers={[font({ size: 13 }), foregroundStyle(props.attention ? STATUS.approval.color : dim), padding({ trailing: 4 })]}>{props.attention ? `${props.attention} need you` : `${props.active} active`}</Text>,
+    expandedTrailing: <Text modifiers={[font({ size: 13 }), foregroundStyle(props.attention ? STATUS.approval.color : dim), padding({ trailing: 4 })]}>{props.compact}</Text>,
     expandedBottom: (
       <VStack alignment="leading" spacing={6} modifiers={[padding({ horizontal: 4, top: 4 })]}>
         {props.rows.slice(0, 3).map(r => row(r, true))}

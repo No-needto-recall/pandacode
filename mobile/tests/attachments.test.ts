@@ -1,4 +1,6 @@
 /// <reference types="node" />
+import { setRuntimeLocale } from '../src/i18n.ts';
+setRuntimeLocale('en'); // Existing fixtures assert the English product copy explicitly.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { acceptChunk, attachmentKey, base64Bytes, blobName, bubbleAttachments, MAX_BYTES, parseAttachments, parseBlobIndex, replyParts, workspaceId, type Progress } from '../src/store/attachments.ts';

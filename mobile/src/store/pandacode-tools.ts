@@ -1,3 +1,4 @@
+import { countNoun, t as msg } from '../i18n.ts';
 // Sentences for PandaCode's own MCP tools (team coordination, title, change tracking, simulator,
 // VM, design canvas, preview), as the desktop's pandacodeTrace in src/tool-trace.ts and the team
 // lines in src/team-progress.ts word them. Pure (tested in node).
@@ -14,7 +15,6 @@ const clip = (value: string, limit = MAX) => {
 };
 const str = (f: Fields, key: string) => (typeof f[key] === 'string' ? f[key] as string : '');
 const num = (f: Fields, key: string) => (typeof f[key] === 'number' && Number.isFinite(f[key]) ? Math.round(f[key] as number) : undefined);
-const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const quoted = (value: string) => (value ? `“${clip(value)}”` : '');
 const point = (f: Fields, x = 'x', y = 'y') => (num(f, x) !== undefined && num(f, y) !== undefined ? `(${num(f, x)}, ${num(f, y)})` : '');
 const list = (f: Fields, key: string) => (Array.isArray(f[key]) ? f[key] as unknown[] : []);
@@ -29,87 +29,87 @@ export function ownTool(name: string): string | undefined {
 }
 
 /** A worker's name from the team, else a generic word. */
-function worker(id: string, names: WorkerNames, fallback = 'a worker'): string {
-  if (id === 'architect') return 'the architect';
+function worker(id: string, names: WorkerNames, fallback = msg("mobile.text.a_worker")): string {
+  if (id === 'architect') return msg("mobile.text.the_architect");
   return names[id] || fallback;
 }
 
 const SIM_CONTROL: Record<string, [string, string]> = {
-  tap: ['Tapping', 'Tapped'], double_tap: ['Double-tapping', 'Double-tapped'], long_press: ['Long-pressing', 'Long-pressed'],
-  swipe: ['Swiping', 'Swiped'], type: ['Typing', 'Typed'], key: ['Pressing', 'Pressed'], button: ['Pressing', 'Pressed'], tap_label: ['Tapping', 'Tapped'],
+  get tap(): [string, string] { return [msg("mobile.text.tapping"), msg("mobile.text.tapped")]; }, get double_tap(): [string, string] { return [msg("mobile.text.double_tapping"), msg("mobile.text.double_tapped")]; }, get long_press(): [string, string] { return [msg("mobile.text.long_pressing"), msg("mobile.text.long_pressed")]; },
+  get swipe(): [string, string] { return [msg("mobile.text.swiping"), msg("mobile.text.swiped")]; }, get type(): [string, string] { return [msg("mobile.text.typing"), msg("mobile.text.typed")]; }, get key(): [string, string] { return [msg("mobile.text.pressing"), msg("mobile.text.pressed")]; }, get button(): [string, string] { return [msg("mobile.text.pressing"), msg("mobile.text.pressed")]; }, get tap_label(): [string, string] { return [msg("mobile.text.tapping"), msg("mobile.text.tapped")]; },
 };
 const VM_CONTROL: Record<string, [string, string]> = {
-  click: ['Clicking', 'Clicked'], double_click: ['Double-clicking', 'Double-clicked'], right_click: ['Right-clicking', 'Right-clicked'],
-  middle_click: ['Middle-clicking', 'Middle-clicked'], move: ['Moving to', 'Moved to'], drag: ['Dragging', 'Dragged'],
-  scroll: ['Scrolling', 'Scrolled'], type: ['Typing', 'Typed'], key: ['Pressing', 'Pressed'],
+  get click(): [string, string] { return [msg("mobile.text.clicking"), msg("mobile.text.clicked")]; }, get double_click(): [string, string] { return [msg("mobile.text.double_clicking"), msg("mobile.text.double_clicked")]; }, get right_click(): [string, string] { return [msg("mobile.text.right_clicking"), msg("mobile.text.right_clicked")]; },
+  get middle_click(): [string, string] { return [msg("mobile.text.middle_clicking"), msg("mobile.text.middle_clicked")]; }, get move(): [string, string] { return [msg("mobile.text.moving_to"), msg("mobile.text.moved_to")]; }, get drag(): [string, string] { return [msg("mobile.text.dragging"), msg("mobile.text.dragged")]; },
+  get scroll(): [string, string] { return [msg("mobile.text.scrolling"), msg("mobile.text.scrolled")]; }, get type(): [string, string] { return [msg("mobile.text.typing"), msg("mobile.text.typed")]; }, get key(): [string, string] { return [msg("mobile.text.pressing"), msg("mobile.text.pressed")]; },
 };
 const MANAGE: Record<string, [string, string]> = {
-  boot: ['Booting', 'Booted'], shutdown: ['Shutting down', 'Shut down'], show: ['Showing', 'Showed'], install: ['Installing', 'Installed'],
-  launch: ['Launching', 'Launched'], terminate: ['Quitting', 'Quit'], open_url: ['Opening', 'Opened'], appearance: ['Switching', 'Switched'],
-  pose: ['Folding', 'Folded'], create: ['Creating', 'Created'], start: ['Starting', 'Started'], stop: ['Stopping', 'Stopped'],
-  suspend: ['Suspending', 'Suspended'], delete: ['Deleting', 'Deleted'], install_desktop: ['Installing a desktop on', 'Installed a desktop on'],
+  get boot(): [string, string] { return [msg("mobile.text.booting"), msg("mobile.text.booted")]; }, get shutdown(): [string, string] { return [msg("mobile.text.shutting_down"), msg("mobile.text.shut_down")]; }, get show(): [string, string] { return [msg("mobile.text.showing"), msg("mobile.text.showed")]; }, get install(): [string, string] { return [msg("mobile.text.installing"), msg("mobile.text.installed")]; },
+  get launch(): [string, string] { return [msg("mobile.text.launching"), msg("mobile.text.launched")]; }, get terminate(): [string, string] { return [msg("mobile.text.quitting"), msg("mobile.text.quit")]; }, get open_url(): [string, string] { return [msg("mobile.text.opening"), msg("mobile.text.opened")]; }, get appearance(): [string, string] { return [msg("mobile.text.switching"), msg("mobile.text.switched")]; },
+  get pose(): [string, string] { return [msg("mobile.text.folding"), msg("mobile.text.folded")]; }, get create(): [string, string] { return [msg("mobile.text.creating"), msg("mobile.text.created")]; }, get start(): [string, string] { return [msg("mobile.text.starting"), msg("mobile.text.started")]; }, get stop(): [string, string] { return [msg("mobile.text.stopping_930576"), msg("mobile.text.stopped")]; },
+  get suspend(): [string, string] { return [msg("mobile.text.suspending"), msg("mobile.text.suspended")]; }, get delete(): [string, string] { return [msg("mobile.text.deleting"), msg("mobile.text.deleted")]; }, get install_desktop(): [string, string] { return [msg("mobile.text.installing_a_desktop_on"), msg("mobile.text.installed_a_desktop_on")]; },
 };
 
 function control(f: Fields, verbs: Record<string, [string, string]>): Sentence {
   const action = str(f, 'action');
-  const [run, done] = verbs[action] ?? ['Using', 'Used'];
+  const [run, done] = verbs[action] ?? [msg("mobile.text.using"), msg("mobile.text.used")];
   const object = action === 'swipe' || action === 'drag' ? [point(f), point(f, 'endX', 'endY')].filter(Boolean).join(' → ')
     : action === 'type' ? quoted(str(f, 'text'))
     : action === 'key' ? str(f, 'key') || str(f, 'keys')
     : action === 'button' ? str(f, 'button')
     : action === 'tap_label' ? quoted(str(f, 'label'))
-    : action === 'scroll' ? [str(f, 'direction'), point(f) && `at ${point(f)}`].filter(Boolean).join(' ')
+    : action === 'scroll' ? [str(f, 'direction'), point(f) && msg('mobile.trace.at', { point: point(f) })].filter(Boolean).join(' ')
     : point(f) || action.replace(/_/g, ' ');
   return [run, done, object];
 }
 
 function manage(f: Fields, what: string): Sentence {
   const action = str(f, 'action');
-  const [run, done] = MANAGE[action] ?? ['Managing', 'Managed'];
-  const object = action === 'launch' || action === 'terminate' ? str(f, 'bundleId') || 'the app'
-    : action === 'install' ? (str(f, 'path').split('/').pop() || 'the app')
+  const [run, done] = MANAGE[action] ?? [msg("mobile.text.managing"), msg("mobile.text.managed")];
+  const object = action === 'launch' || action === 'terminate' ? str(f, 'bundleId') || msg("mobile.text.the_app")
+    : action === 'install' ? (str(f, 'path').split('/').pop() || msg("mobile.text.the_app"))
     : action === 'open_url' ? clip(str(f, 'url'))
-    : action === 'appearance' ? `to ${str(f, 'appearance') || 'another'} mode`
-    : action === 'pose' ? `to ${str(f, 'pose') || 'a new pose'}`
-    : str(f, 'name') ? `${what} ${str(f, 'name')}` : `the ${what}`;
+    : action === 'appearance' ? msg('mobile.trace.appearance_mode', { mode: str(f, 'appearance') || msg('mobile.trace.another') })
+    : action === 'pose' ? msg('mobile.trace.pose', { pose: str(f, 'pose') || msg('mobile.text.a_new_pose') })
+    : str(f, 'name') ? `${what} ${str(f, 'name')}` : msg('mobile.trace.the', { name: what });
   return [run, done, object];
 }
 
 const SENTENCES: Record<string, (f: Fields, names: WorkerNames) => Sentence> = {
   dispatch_workers: f => {
     const n = list(f, 'assignments').length || list(f, 'workers').length || list(f, 'tasks').length;
-    return ['Dispatching', 'Dispatched', n ? count(n, 'worker') : 'workers'];
+    return [msg("mobile.text.dispatching"), msg("mobile.text.dispatched"), n ? countNoun(n, 'worker') : msg('mobile.text.the_workers')];
   },
-  followup_worker: (f, names) => ['Asking', 'Asked', `${worker(str(f, 'workerId'), names)} for a follow-up`],
-  cancel_worker: (f, names) => ['Cancelling', 'Cancelled', worker(str(f, 'workerId'), names)],
-  read_worker: (f, names) => ['Checking on', 'Checked on', worker(str(f, 'workerId'), names)],
-  list_workers: () => ['Checking', 'Checked', 'the workers'],
-  finish_team: () => ['Finishing', 'Finished', 'the team'],
-  send_team_message: (f, names) => ['Messaging', 'Messaged', worker(str(f, 'recipient'), names, str(f, 'recipient') ? clip(str(f, 'recipient'), 30) : 'a teammate')],
-  read_team_mailbox: () => ['Reading', 'Read', 'the team mailbox'],
-  team_directory: () => ['Looking up', 'Looked up', 'the team'],
-  checkpoint_worker: f => ['Saving', 'Saved', str(f, 'blocker') ? 'a checkpoint with a blocker' : 'a checkpoint'],
-  title: f => ['Renaming', 'Renamed', str(f, 'title') ? `thread to ${quoted(str(f, 'title'))}` : 'the thread'],
+  followup_worker: (f, names) => [msg("mobile.text.asking"), msg("mobile.text.asked"), msg('mobile.trace.followup', { name: worker(str(f, 'workerId'), names) })],
+  cancel_worker: (f, names) => [msg("mobile.text.cancelling"), msg("mobile.text.cancelled"), worker(str(f, 'workerId'), names)],
+  read_worker: (f, names) => [msg("mobile.text.checking_on"), msg("mobile.text.checked_on"), worker(str(f, 'workerId'), names)],
+  list_workers: () => [msg("mobile.text.checking"), msg("mobile.text.checked"), msg("mobile.text.the_workers")],
+  finish_team: () => [msg("mobile.text.finishing"), msg("mobile.text.finished"), msg("mobile.text.the_team")],
+  send_team_message: (f, names) => [msg("mobile.text.messaging"), msg("mobile.text.messaged"), worker(str(f, 'recipient'), names, str(f, 'recipient') ? clip(str(f, 'recipient'), 30) : msg("mobile.text.a_teammate"))],
+  read_team_mailbox: () => [msg("mobile.text.reading"), msg("mobile.text.read"), msg("mobile.text.the_team_mailbox")],
+  team_directory: () => [msg("mobile.text.looking_up"), msg("mobile.text.looked_up"), msg("mobile.text.the_team")],
+  checkpoint_worker: f => [msg("mobile.text.saving"), msg("mobile.text.saved"), str(f, 'blocker') ? msg("mobile.text.a_checkpoint_with_a_blocker") : msg("mobile.text.a_checkpoint")],
+  title: f => [msg("mobile.text.renaming"), msg("mobile.text.renamed"), str(f, 'title') ? msg('mobile.trace.rename', { name: quoted(str(f, 'title')) }) : msg("mobile.text.the_thread")],
   track_files: f => {
     const n = list(f, 'paths').length;
-    return str(f, 'action') === 'complete' ? ['Recording', 'Recorded', n ? count(n, 'changed file') : 'changed files'] : ['Tracking', 'Tracked', n ? count(n, 'file') : 'files'];
+    return str(f, 'action') === 'complete' ? [msg("mobile.text.recording"), msg("mobile.text.recorded"), n ? countNoun(n, 'changed_file') : msg("mobile.text.changed_files")] : [msg("mobile.text.tracking"), msg("mobile.text.tracked"), n ? countNoun(n, 'file') : msg('mobile.text.files')];
   },
-  simulator_screenshot: () => ['Taking', 'Took', 'a simulator screenshot'],
-  simulator_describe: f => ['Reading', 'Read', point(f) ? `the simulator element at ${point(f)}` : 'the simulator screen'],
-  simulator_devices: () => ['Listing', 'Listed', 'simulators'],
+  simulator_screenshot: () => [msg("mobile.text.taking"), msg("mobile.text.took"), msg("mobile.text.a_simulator_screenshot")],
+  simulator_describe: f => [msg("mobile.text.reading"), msg("mobile.text.read"), point(f) ? msg('mobile.trace.simulator_element', { point: point(f) }) : msg("mobile.text.the_simulator_screen")],
+  simulator_devices: () => [msg("mobile.text.listing"), msg("mobile.text.listed"), msg('mobile.trace.simulators')],
   simulator_control: f => control(f, SIM_CONTROL),
-  simulator_manage: f => manage(f, 'simulator'),
-  vm_screenshot: () => ['Taking', 'Took', 'a VM screenshot'],
-  vm_list: () => ['Listing', 'Listed', 'VMs'],
+  simulator_manage: f => manage(f, msg('mobile.trace.simulator')),
+  vm_screenshot: () => [msg("mobile.text.taking"), msg("mobile.text.took"), msg("mobile.text.a_vm_screenshot")],
+  vm_list: () => [msg("mobile.text.listing"), msg("mobile.text.listed"), msg("mobile.text.vms")],
   vm_control: f => control(f, VM_CONTROL),
-  vm_manage: f => manage(f, 'VM'),
-  design_write: f => ['Drawing', 'Drew', str(f, 'name') || str(f, 'title') ? `artboard ${quoted(str(f, 'name') || str(f, 'title'))}` : 'an artboard'],
-  design_list: () => ['Listing', 'Listed', 'artboards'],
-  design_comments: () => ['Reading', 'Read', 'design comments'],
-  design_resolve: () => ['Resolving', 'Resolved', 'a design comment'],
-  preview_file: f => ['Previewing', 'Previewed', str(f, 'path').split('/').pop() || 'a file'],
-  run_project: () => ['Running', 'Ran', 'the project'],
-  cloud_cli: f => ['Running', 'Ran', clip(str(f, 'cli') || str(f, 'tool') || 'a deploy command', 40)],
+  vm_manage: f => manage(f, msg("mobile.text.vm")),
+  design_write: f => [msg("mobile.text.drawing"), msg("mobile.text.drew"), str(f, 'name') || str(f, 'title') ? msg('mobile.trace.artboard', { name: quoted(str(f, 'name') || str(f, 'title')) }) : msg("mobile.text.an_artboard")],
+  design_list: () => [msg("mobile.text.listing"), msg("mobile.text.listed"), msg('mobile.trace.artboards')],
+  design_comments: () => [msg("mobile.text.reading"), msg("mobile.text.read"), msg("mobile.text.design_comments")],
+  design_resolve: () => [msg("mobile.text.resolving"), msg("mobile.text.resolved"), msg("mobile.text.a_design_comment")],
+  preview_file: f => [msg("mobile.text.previewing"), msg("mobile.text.previewed"), str(f, 'path').split('/').pop() || msg("mobile.text.a_file")],
+  run_project: () => [msg("mobile.text.running"), msg("mobile.text.ran"), msg("mobile.text.the_project")],
+  cloud_cli: f => [msg("mobile.text.running"), msg("mobile.text.ran"), clip(str(f, 'cli') || str(f, 'tool') || msg("mobile.text.a_deploy_command"), 40)],
 };
 
 /** `Dispatched 3 workers`, `Tapped (200, 618)`: the sentence for one of PandaCode's own tools, or undefined. */
@@ -123,7 +123,7 @@ export interface Assignment { key: string; name: string; prompt: string; provide
 /** dispatch_workers' assignments, for the expanded card per worker. */
 export function assignmentsOf(fields: Fields): Assignment[] {
   return list(fields, 'assignments').filter((a): a is Fields => !!a && typeof a === 'object').slice(0, 12).map(a => ({
-    key: str(a, 'key'), name: str(a, 'name') || str(a, 'key') || 'Worker', prompt: str(a, 'prompt'), provider: str(a, 'provider'), model: str(a, 'model'),
+    key: str(a, 'key'), name: str(a, 'name') || str(a, 'key') || msg("mobile.text.worker"), prompt: str(a, 'prompt'), provider: str(a, 'provider'), model: str(a, 'model'),
     profileId: str(a, 'profileId'), readOnly: a.readOnly === true,
     files: list(a, 'files').filter((x): x is string => typeof x === 'string'), dependsOn: list(a, 'dependsOn').filter((x): x is string => typeof x === 'string'),
   }));

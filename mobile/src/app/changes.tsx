@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../ui/locale.ts';
+import { t as msg } from '../i18n.ts';
 // The task's uncommitted changes (task.changes): branch, ahead/behind and each file with its Git
 // status and +/− counts (from task.diff). Tapping a file opens its diff. Pull to refresh; it also
 // refreshes when a run ends.
@@ -17,6 +21,7 @@ import { mono, useColors } from '../ui/theme.ts';
 type Loaded = Changes & { counts: ReturnType<typeof fileCounts> };
 
 export default function ChangesScreen() {
+  useLocale();
   const { device = '', session = '' } = useLocalSearchParams<{ device: string; session: string }>();
   const colors = useColors();
   const backdrop = useBackdrop();
@@ -40,14 +45,14 @@ export default function ChangesScreen() {
   return (
     <ScrollView style={{ backgroundColor: backdrop.background }} contentContainerStyle={styles.page} contentInsetAdjustmentBehavior="automatic"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}>
-      <Stack.Screen options={{ title: 'Changes' }} />
+      <Stack.Screen options={{ title: msg("mobile.text.changes") }} />
       {!changes && !error && <ActivityIndicator style={styles.spinner} />}
       {!!error && <Text style={[styles.note, { color: colors.secondary }]}>{error}</Text>}
       {changes && (
         <>
           <View style={styles.branch}>
             <Icon ios="arrow.triangle.branch" android="call_split" size={15} color={colors.green} />
-            <Text style={[styles.branchName, { color: colors.text }]} numberOfLines={1}>{changes.branch || 'No branch'}</Text>
+            <Text style={[styles.branchName, { color: colors.text }]} numberOfLines={1}>{changes.branch || msg("mobile.text.no_branch")}</Text>
             {!!sync && <Text style={[styles.sync, { color: colors.secondary }]}>{sync}</Text>}
           </View>
           {changes.files.length ? (
@@ -55,10 +60,10 @@ export default function ChangesScreen() {
               {changes.files.map((f, i) => {
                 const counts = changes.counts[f.path];
                 return <FileRow key={`${f.staged}/${f.path}`} letter={statusLetter(f.status)} path={f.path} additions={counts?.additions} deletions={counts?.deletions}
-                  note={f.staged ? 'Staged' : undefined} last={i === changes.files.length - 1} diff={{ device, session, source: 'changes', staged: f.staged ? '1' : '0' }} />;
+                  note={f.staged ? msg("mobile.text.staged") : undefined} last={i === changes.files.length - 1} diff={{ device, session, source: 'changes', staged: f.staged ? '1' : '0' }} />;
               })}
             </View>
-          ) : <Text style={[styles.note, { color: colors.secondary }]}>No uncommitted changes.</Text>}
+          ) : <Text style={[styles.note, { color: colors.secondary }]}>{msg("mobile.text.no_uncommitted_changes")}</Text>}
         </>
       )}
     </ScrollView>

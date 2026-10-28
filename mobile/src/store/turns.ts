@@ -1,5 +1,6 @@
 // Groups stored messages into transcript rows: a user prompt, then the turn's work (tools and
 // interim notes, folded behind "Worked for 2m"), then the reply. Pure (tested in node).
+import { t as msg } from '../i18n.ts';
 import type { Message } from '../connect/types.ts';
 
 export type TurnRow =
@@ -37,9 +38,9 @@ export function turnRows(messages: readonly Message[]): TurnRow[] {
 /** "41s", "2m", "1h 5m" */
 export function duration(ms: number): string {
   const s = Math.round(ms / 1000);
-  if (s < 60) return `${s}s`;
+  if (s < 60) return msg('mobile.time.seconds', { count: s });
   const m = Math.round(s / 60);
-  return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}`;
+  return m < 60 ? msg('mobile.time.minutes', { count: m }) : m % 60 ? msg('mobile.time.hours_minutes', { hours: Math.floor(m / 60), minutes: m % 60 }) : msg('mobile.time.hours', { count: Math.floor(m / 60) });
 }
 
 // Attachment headers the desktop writes into a prompt (src/attachments.ts, src/main.ts).

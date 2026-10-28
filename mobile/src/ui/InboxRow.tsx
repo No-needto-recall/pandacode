@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { errorText, date, countNoun, t as msg } from '../i18n.ts';
+import { useLocale } from './locale.ts';
 // One inbox row: project tile + name and status, the title, then `branch · computer` and the
 // harness logo. Swipe for Snooze / Pin / Stop; long press for the same as a menu.
 import * as Haptics from 'expo-haptics';
@@ -32,53 +36,56 @@ function actions(row: Row, snoozed: boolean): MenuItem[] {
   if (row.outboxId) {
     const id = row.outboxId;
     return [
-      { label: 'Send now', ios: 'arrow.up.circle', android: 'send', onPress: () => retryOutbox(id) },
-      { label: 'Delete message', ios: 'trash', android: 'delete', destructive: true, onPress: () => removeOutbox(id) },
+      { label: msg("mobile.text.send_now"), ios: 'arrow.up.circle', android: 'send', onPress: () => retryOutbox(id) },
+      { label: msg("mobile.text.delete_message"), ios: 'trash', android: 'delete', destructive: true, onPress: () => removeOutbox(id) },
     ];
   }
   const items: MenuItem[] = snoozed
-    ? [{ label: 'Unsnooze', ios: 'bell', android: 'notifications', onPress: tap(() => unsnooze(row.key)) }]
+    ? [{ label: msg("mobile.text.unsnooze"), ios: 'bell', android: 'notifications', onPress: tap(() => unsnooze(row.key)) }]
     : [
-      { label: 'Snooze 1 hour', ios: 'moon.zzz', android: 'snooze', onPress: tap(() => snooze(row.key, Date.now() + HOUR)) },
-      { label: 'Snooze until tomorrow', ios: 'sunrise', android: 'wb_twilight', onPress: tap(() => snooze(row.key, tomorrowMorning(Date.now()))) },
+      { label: msg("mobile.text.snooze_1_hour"), ios: 'moon.zzz', android: 'snooze', onPress: tap(() => snooze(row.key, Date.now() + HOUR)) },
+      { label: msg("mobile.text.snooze_until_tomorrow"), ios: 'sunrise', android: 'wb_twilight', onPress: tap(() => snooze(row.key, tomorrowMorning(Date.now()))) },
     ];
-  items.push({ label: row.pinned ? 'Unpin' : 'Pin', ios: row.pinned ? 'pin.slash' : 'pin', android: 'push_pin', onPress: tap(() => togglePin(row.key)) });
+  items.push({ label: row.pinned ? msg("mobile.text.unpin") : msg("mobile.text.pin"), ios: row.pinned ? 'pin.slash' : 'pin', android: 'push_pin', onPress: tap(() => togglePin(row.key)) });
   if (row.badge === 'working' || row.badge === 'approval' || row.badge === 'question') {
-    items.push({ label: 'Stop', ios: 'stop.circle', android: 'stop_circle', destructive: true, onPress: () => stop(row) });
+    items.push({ label: msg("mobile.text.stop"), ios: 'stop.circle', android: 'stop_circle', destructive: true, onPress: () => stop(row) });
   }
   return items;
 }
 
 function stop(row: Row) {
   void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-  connect.stopTask(row.deviceId, row.task.sessionId).catch(error => Alert.alert('Could not stop', (error as Error).message));
+  connect.stopTask(row.deviceId, row.task.sessionId).catch(error => Alert.alert(msg("mobile.text.could_not_stop"), errorText(error), [{ text: msg('mobile.text.ok') }]));
 }
 
-const clockTime = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const clockTime = (ms: number) => date(ms, { hour: 'numeric', minute: '2-digit' });
 
 /** A row from the inbox cache that looked active: when it was last seen, never a live spinner. */
 const seenActive = (row: Row) => row.task.seenAt !== undefined && (row.badge === 'working' || row.badge === 'approval' || row.badge === 'question');
 
 function LastSeen({ at, colors }: { at: number; colors: Colors }) {
+  useLocale();
   const when = ago(at);
-  return <Label ios="clock" android="schedule" color={colors.secondary} text={when === 'now' ? 'Last seen just now' : `Last seen ${when} ago`} />;
+  return <Label ios="clock" android="schedule" color={colors.secondary} text={when === msg('mobile.time.now') ? msg("mobile.text.last_seen_just_now") : msg('mobile.computer.last_seen', { time: when })} />;
 }
 
 function Status({ row, colors }: { row: Row; colors: Colors }) {
+  useLocale();
   if (seenActive(row)) return <LastSeen at={row.task.seenAt!} colors={colors} />;
   switch (row.badge) {
     case 'working': return <RunClock row={row} colors={colors} />;
-    case 'approval': return <Label ios="hand.raised.fill" android="front_hand" color={colors.orange} text="Approval" />;
-    case 'question': return <Label ios="questionmark.bubble.fill" android="help" color={colors.orange} text="Question" />;
-    case 'failed': return <Label ios="xmark.octagon.fill" android="error" color={colors.red} text="Failed" />;
-    case 'stopped': return <Label ios="stop.circle" android="stop_circle" color={colors.secondary} text="Stopped" />;
-    case 'limited': return <Label ios="gauge.with.needle" android="speed" color={colors.orange} text={row.run.limitedUntil ? `Limited until ${clockTime(row.run.limitedUntil)}` : 'Limited'} />;
-    case 'unsent': return <Label ios="clock.arrow.circlepath" android="schedule_send" color={colors.orange} text="Sends on reconnect" />;
+    case 'approval': return <Label ios="hand.raised.fill" android="front_hand" color={colors.orange} text={msg("mobile.text.approval")} />;
+    case 'question': return <Label ios="questionmark.bubble.fill" android="help" color={colors.orange} text={msg("mobile.text.question")} />;
+    case 'failed': return <Label ios="xmark.octagon.fill" android="error" color={colors.red} text={msg("mobile.text.failed")} />;
+    case 'stopped': return <Label ios="stop.circle" android="stop_circle" color={colors.secondary} text={msg("mobile.text.stopped")} />;
+    case 'limited': return <Label ios="gauge.with.needle" android="speed" color={colors.orange} text={row.run.limitedUntil ? msg('mobile.task.limited_until', { time: clockTime(row.run.limitedUntil) }) : msg("mobile.text.limited")} />;
+    case 'unsent': return <Label ios="clock.arrow.circlepath" android="schedule_send" color={colors.orange} text={msg("mobile.text.sends_on_reconnect")} />;
     default: return <Text style={[styles.time, { color: colors.secondary }]}>{ago(row.at)}</Text>;
   }
 }
 
 function Label({ ios, android, color, text }: { ios: MenuItem['ios']; android: MenuItem['android']; color: ColorValue; text: string }) {
+  useLocale();
   return <View style={styles.status}><Icon ios={ios!} android={android!} size={12} color={color} /><Text style={[styles.statusText, { color }]} numberOfLines={1}>{text}</Text></View>;
 }
 
@@ -97,24 +104,27 @@ function useTick() {
 /** "Working 6m" beside a spinner, or "Stalled 4m" once no event came for STALL_MS. Only this ticks;
  * it reads the run's newest event time when it does, so streamed events never re-render the list. */
 function RunClock({ row, colors }: { row: Row; colors: Colors }) {
+  useLocale();
   const now = useTick();
   const lastEventAt = useConnect.getState().live[row.key]?.lastEventAt ?? row.task.lastEventAt;
   const stalled = stalledFor(lastEventAt, now);
-  if (stalled !== null) return <Label ios="hourglass" android="hourglass_empty" color={colors.orange} text={`Stalled ${elapsedLabel(stalled)}`} />;
+  if (stalled !== null) return <Label ios="hourglass" android="hourglass_empty" color={colors.orange} text={msg('mobile.task.stalled', { time: elapsedLabel(stalled) })} />;
   const since = row.run.startedAt ?? row.task.lastPromptAt ?? row.at;
-  return <View style={styles.status}><ActivityIndicator size="small" color={colors.tint} style={styles.spinner} /><Text style={[styles.statusText, { color: colors.tint }]}>Working {elapsedLabel(now - since)}</Text></View>;
+  return <View style={styles.status}><ActivityIndicator size="small" color={colors.tint} style={styles.spinner} /><Text style={[styles.statusText, { color: colors.tint }]}>{msg('mobile.task.working_time', { time: elapsedLabel(now - since) })}</Text></View>;
 }
 
 /** "Waiting 54m": only this text ticks. */
 function Elapsed({ prefix, since, color }: { prefix: string; since: number; color: ColorValue }) {
+  useLocale();
   const now = useTick();
   return <Text style={[styles.statusText, { color }]}>{prefix} {elapsedLabel(now - since)}</Text>;
 }
 
 /** The sidebar's status: waiting time on approvals and questions, otherwise as in the inbox. */
 function SidebarStatus({ row, colors }: { row: Row; colors: Colors }) {
+  useLocale();
   if (!seenActive(row) && row.badge === 'approval' || row.badge === 'question') {
-    return <View style={styles.status}><Icon ios={row.badge === 'approval' ? 'hand.raised.fill' : 'questionmark.bubble.fill'} android={row.badge === 'approval' ? 'front_hand' : 'help'} size={12} color={colors.orange} /><Elapsed prefix="Waiting" since={row.at} color={colors.orange} /></View>;
+    return <View style={styles.status}><Icon ios={row.badge === 'approval' ? 'hand.raised.fill' : 'questionmark.bubble.fill'} android={row.badge === 'approval' ? 'front_hand' : 'help'} size={12} color={colors.orange} /><Elapsed prefix={msg("mobile.text.waiting")} since={row.at} color={colors.orange} /></View>;
   }
   return <Status row={row} colors={colors} />;
 }
@@ -122,18 +132,19 @@ function SidebarStatus({ row, colors }: { row: Row; colors: Colors }) {
 /** A running row's second line: what the agent is doing now and how many subagents and team
  * workers (once the task's team is known) are working; the count opens the Agents screen. */
 function Activity({ row, colors }: { row: Row; colors: Colors }) {
+  useLocale();
   const workers = useConnect(s => { const team = s.teams[row.key]; return team && team !== 'outdated' ? team.workers.filter(workerActive).length : 0; });
   const activity = row.run.activity;
   const agents = row.run.agents + workers;
   if (row.badge !== 'working' || (!activity && !agents)) return null;
   return (
     <View style={styles.line}>
-      <Icon ios={activity === 'Thinking' ? 'brain' : 'arrow.turn.down.right'} android={activity === 'Thinking' ? 'psychology' : 'subdirectory_arrow_right'} size={11} color={colors.secondary} />
-      <Text style={[styles.activity, { color: colors.secondary }]} numberOfLines={1}>{activity || 'Working'}</Text>
+      <Icon ios={activity === msg("mobile.text.thinking") ? 'brain' : 'arrow.turn.down.right'} android={activity === msg("mobile.text.thinking") ? 'psychology' : 'subdirectory_arrow_right'} size={11} color={colors.secondary} />
+      <Text style={[styles.activity, { color: colors.secondary }]} numberOfLines={1}>{activity || msg("mobile.text.working")}</Text>
       {agents > 0 && (
         <Pressable onPress={() => router.push({ pathname: '/agents', params: { device: row.deviceId, session: row.task.sessionId } })} hitSlop={8}
-          accessibilityRole="button" accessibilityLabel={`${agents} agent${agents === 1 ? '' : 's'} working. Show agents`}>
-          <Text style={[styles.agents, { color: colors.tint, backgroundColor: colors.tintFill }]}>+{agents} agent{agents === 1 ? '' : 's'}</Text>
+          accessibilityRole="button" accessibilityLabel={msg('mobile.agents.show_running', { agents: countNoun(agents, 'agent') })}>
+          <Text style={[styles.agents, { color: colors.tint, backgroundColor: colors.tintFill }]}>{msg('mobile.agents.extra', { agents: countNoun(agents, 'agent') })}</Text>
         </Pressable>
       )}
     </View>
@@ -145,6 +156,7 @@ const sameRun = (a: Row['run'], b: Row['run']) => a === b || (a.activity === b.a
 /** Swipe actions sit behind the row; over the wallpaper the row is see-through, so they appear
  * only once a swipe starts. */
 function Reveal({ progress, children }: { progress: SharedValue<number>; children: ReactNode }) {
+  useLocale();
   const style = useAnimatedStyle(() => ({ opacity: progress.value > 0 ? 1 : 0 }));
   return <Animated.View style={[styles.swipeRow, style]}>{children}</Animated.View>;
 }
@@ -156,6 +168,7 @@ function warm(deviceId: string, sessionId: string) {
 }
 
 function SwipeAction({ label, ios, android, color, onPress }: { label: string; ios: MenuItem['ios']; android: MenuItem['android']; color: string; onPress: () => void }) {
+  useLocale();
   return (
     <Pressable onPress={onPress} style={[styles.swipe, { backgroundColor: color }]} accessibilityRole="button" accessibilityLabel={label}>
       <Icon ios={ios!} android={android!} size={20} color="#ffffff" />
@@ -167,10 +180,11 @@ function SwipeAction({ label, ios, android, color, onPress }: { label: string; i
 /** `sidebar` is the iPhone Duo's compact list: no separators, a rounded fill on the `selected`
  * row, and `replace` swaps the open task instead of stacking another. */
 export const InboxRow = memo(function InboxRow({ row, snoozed, last, sidebar, selected, replace }: { row: Row; snoozed: boolean; last: boolean; minute: number; sidebar?: boolean; selected?: boolean; replace?: boolean }) {
+  useLocale();
   const colors = useColors();
   const backdrop = useBackdrop();
   const { task } = row;
-  const project = task.chat ? 'Chat' : task.projectName || 'Project';
+  const project = task.chat ? msg("mobile.text.chat") : task.projectName || msg("mobile.text.project");
   const menu = actions(row, snoozed);
   const href = { pathname: '/task/[device]/[session]' as const, params: { device: row.deviceId, session: task.sessionId } };
   const body = (
@@ -180,14 +194,14 @@ export const InboxRow = memo(function InboxRow({ row, snoozed, last, sidebar, se
         ? [styles.row, styles.sidebarRow, { backgroundColor: selected ? colors.fill : backdrop.grouped }]
         : [styles.row, last && styles.lastRow, { backgroundColor: backdrop.background }])}
       accessibilityState={{ selected: !!selected }}
-      accessibilityRole="button" accessibilityHint="Opens the task">
+      accessibilityRole="button" accessibilityHint={msg("mobile.text.opens_the_task")}>
       <View style={styles.line}>
         <ProjectTile deviceId={row.deviceId} projectId={task.chat ? undefined : task.projectId} name={project} />
         <Text style={[styles.project, { color: colors.secondary }]} numberOfLines={1}>{project}</Text>
         {row.pinned && <Icon ios="pin.fill" android="push_pin" size={11} color={colors.tertiary} />}
         {sidebar ? <SidebarStatus row={row} colors={colors} /> : <Status row={row} colors={colors} />}
       </View>
-      <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{row.outboxId ? `“${row.text}”` : task.title || 'Untitled task'}</Text>
+      <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{row.outboxId ? `“${row.text}”` : task.title || msg("mobile.text.untitled_task")}</Text>
       <Activity row={row} colors={colors} />
       <View style={styles.line}>
         <Icon ios="desktopcomputer" android="computer" size={12} color={colors.tertiary} />
@@ -202,13 +216,13 @@ export const InboxRow = memo(function InboxRow({ row, snoozed, last, sidebar, se
     const find = (label: string) => menu.find(m => m.label.startsWith(label));
     return (
       <Reveal progress={progress}>
-        {row.outboxId ? <SwipeAction label="Delete" ios="trash" android="delete" color="#ff3b30" onPress={run(find('Delete'))} /> : <>
-          {find('Stop') && <SwipeAction label="Stop" ios="stop.fill" android="stop" color="#ff3b30" onPress={run(find('Stop'))} />}
-          <SwipeAction label={row.pinned ? 'Unpin' : 'Pin'} ios="pin.fill" android="push_pin" color="#ff9f0a" onPress={run(find(row.pinned ? 'Unpin' : 'Pin'))} />
+        {row.outboxId ? <SwipeAction label={msg("mobile.text.delete")} ios="trash" android="delete" color="#ff3b30" onPress={run(find(msg("mobile.text.delete")))} /> : <>
+          {find(msg("mobile.text.stop")) && <SwipeAction label={msg("mobile.text.stop")} ios="stop.fill" android="stop" color="#ff3b30" onPress={run(find(msg("mobile.text.stop")))} />}
+          <SwipeAction label={row.pinned ? msg("mobile.text.unpin") : msg("mobile.text.pin")} ios="pin.fill" android="push_pin" color="#ff9f0a" onPress={run(find(row.pinned ? msg("mobile.text.unpin") : msg("mobile.text.pin")))} />
           {snoozed
-            ? <SwipeAction label="Wake" ios="bell.fill" android="notifications" color="#5e5ce6" onPress={run(find('Unsnooze'))} />
-            : <SwipeAction label="1 h" ios="moon.zzz.fill" android="snooze" color="#5e5ce6" onPress={run(find('Snooze 1'))} />}
-          {!snoozed && <SwipeAction label="Tomorrow" ios="sunrise.fill" android="wb_twilight" color="#af52de" onPress={run(find('Snooze until'))} />}
+            ? <SwipeAction label={msg("mobile.text.wake")} ios="bell.fill" android="notifications" color="#5e5ce6" onPress={run(find(msg("mobile.text.unsnooze")))} />
+            : <SwipeAction label="1 h" ios="moon.zzz.fill" android="snooze" color="#5e5ce6" onPress={run(find(msg("mobile.text.snooze_1")))} />}
+          {!snoozed && <SwipeAction label={msg("mobile.text.tomorrow")} ios="sunrise.fill" android="wb_twilight" color="#af52de" onPress={run(find(msg("mobile.text.snooze_until")))} />}
         </>}
       </Reveal>
     );

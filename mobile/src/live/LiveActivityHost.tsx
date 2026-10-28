@@ -10,6 +10,8 @@ import { requireOptionalNativeModule } from 'expo';
 import { Asset } from 'expo-asset';
 import { File } from 'expo-file-system';
 import type { LiveActivity, LiveActivityFactory } from 'expo-widgets';
+import { date } from '../i18n.ts';
+import { useLocale } from '../ui/locale.ts';
 import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
 import type { Inbox } from '../store/inbox.ts';
@@ -62,7 +64,7 @@ async function copyMark() {
   schedule();
 }
 
-const clock = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const clock = () => date(Date.now(), { hour: 'numeric', minute: '2-digit' });
 const staleDate = () => (state.backgroundAt ? new Date(state.backgroundAt + STALE_MS) : undefined);
 
 function schedule() {
@@ -113,6 +115,7 @@ function adopt() {
 }
 
 function useLiveActivity() {
+  const locale = useLocale();
   const { inbox } = useInbox();
   useEffect(() => {
     // A binary built before expo-widgets was added (or an update reaching one) has no native module.
@@ -131,7 +134,7 @@ function useLiveActivity() {
   useEffect(() => {
     state.inbox = inbox;
     schedule();
-  }, [inbox]);
+  }, [inbox, locale]);
 }
 
 function LiveActivitySync() {

@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { t as msg } from '../i18n.ts';
 // Settings → Wallpaper: the desktop's controls (docs/wallpapers.md). On/off, Automatic or one
 // day's set, a pinned scene from the thumbnail strip, and visibility and blur sliders.
 import { Host, Slider } from '@expo/ui';
@@ -8,13 +12,14 @@ import { setWallpaper, THUMBNAILS, useBackdrop, useWallpaper } from './Backdrop.
 import { Icon } from './Icon.tsx';
 import { PHONE_DEFAULTS, sceneIds, wallpaperAt, wallpaperPeriods, wallpaperSets } from './wallpaper.ts';
 
-const SETS = [{ id: 'automatic', label: 'Automatic' }, ...wallpaperSets] as const;
+const SETS = [{ id: 'automatic', get label() { return msg("mobile.text.automatic"); } }, ...wallpaperSets] as const;
 const label = (id: string) => {
   const [day, period] = id.split('-');
   return `${wallpaperSets.find(d => d.id === day)?.label.slice(0, 3)} ${wallpaperPeriods.find(p => p.id === period)?.label.toLowerCase()}`;
 };
 
 export function WallpaperSettings() {
+  useLocale();
   const colors = useBackdrop();
   const { preferences, reduceTransparency } = useWallpaper();
   const on = preferences.enabled && preferences.visibility > 0;
@@ -22,10 +27,10 @@ export function WallpaperSettings() {
   return (
     <>
       <View style={styles.row}>
-        <Text style={[styles.value, { color: colors.text }]}>Daily wallpaper</Text>
+        <Text style={[styles.value, { color: colors.text }]}>{msg("mobile.text.daily_wallpaper")}</Text>
         <Switch value={on} onValueChange={enabled => setWallpaper({ enabled, visibility: preferences.visibility || PHONE_DEFAULTS.visibility })} />
       </View>
-      {reduceTransparency && <Text style={[styles.small, { color: colors.secondary }]}>Hidden while Reduce Transparency is on.</Text>}
+      {reduceTransparency && <Text style={[styles.small, { color: colors.secondary }]}>{msg("mobile.text.hidden_while_reduce_transparency_is_on")}</Text>}
       {on && <>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.strip}>
           {SETS.map(set => {
@@ -43,7 +48,7 @@ export function WallpaperSettings() {
             const pinned = preferences.pinned === id;
             return (
               <Pressable key={id} onPress={() => setWallpaper({ pinned: pinned ? null : id })} accessibilityRole="button"
-                accessibilityLabel={label(id)} accessibilityHint={pinned ? 'Resumes the rotation' : 'Keeps this scene'} accessibilityState={{ selected: pinned }} style={styles.scene}>
+                accessibilityLabel={label(id)} accessibilityHint={pinned ? msg("mobile.text.resumes_the_rotation") : msg("mobile.text.keeps_this_scene")} accessibilityState={{ selected: pinned }} style={styles.scene}>
                 <Image source={THUMBNAILS[id]} style={[styles.thumb, { borderColor: id === current ? colors.tint : 'transparent' }]} contentFit="cover" />
                 <View style={styles.caption}>
                   {pinned && <Icon ios="pin.fill" android="push_pin" size={10} color={colors.tint} />}
@@ -53,10 +58,10 @@ export function WallpaperSettings() {
             );
           })}
         </ScrollView>
-        <Labeled title="Visibility" value={`${preferences.visibility}%`} color={colors.text} muted={colors.secondary}>
+        <Labeled title={msg("mobile.text.visibility")} value={`${preferences.visibility}%`} color={colors.text} muted={colors.secondary}>
           <NativeSlider value={preferences.visibility} max={100} onChange={visibility => setWallpaper({ visibility })} />
         </Labeled>
-        <Labeled title="Blur" value={`${preferences.blur} px`} color={colors.text} muted={colors.secondary}>
+        <Labeled title={msg("mobile.text.blur")} value={`${preferences.blur} px`} color={colors.text} muted={colors.secondary}>
           <NativeSlider value={preferences.blur} max={24} onChange={blur => setWallpaper({ blur })} />
         </Labeled>
       </>}
@@ -65,6 +70,7 @@ export function WallpaperSettings() {
 }
 
 function Labeled({ title, value, color, muted, children }: { title: string; value: string; color: ColorValue; muted: ColorValue; children: ReactNode }) {
+  useLocale();
   return (
     <View style={styles.slider}>
       <View style={styles.row}>
@@ -77,6 +83,7 @@ function Labeled({ title, value, color, muted, children }: { title: string; valu
 }
 
 function NativeSlider({ value, max, onChange }: { value: number; max: number; onChange: (value: number) => void }) {
+  useLocale();
   const scheme = useColorScheme();
   return (
     <Host matchContents={{ vertical: true }} colorScheme={scheme ?? undefined} style={styles.host}>

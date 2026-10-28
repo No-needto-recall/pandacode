@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // Message attachments: the host's `attachments` rows (newer hosts), the context blocks a prompt
 // carries, chunk assembly for task.attachment / task.workspaceImage, the on-disk cache index and
 // Markdown image extraction. Pure: tests/attachments.test.ts covers it; the file and call work is
@@ -87,17 +88,17 @@ export function base64Bytes(data: string): number {
  * anything that doesn't continue it (wrong offset, a changed total or type, too large, bad data). */
 export function acceptChunk(at: Progress, reply: unknown): Progress & { data: string; done: boolean } {
   const c = reply as Partial<Chunk> | null;
-  if (!c || typeof c.data !== 'string' || typeof c.mime !== 'string' || typeof c.total !== 'number' || typeof c.offset !== 'number') throw new Error('The computer sent an unreadable attachment.');
-  if (!IMAGE_MIME.test(c.mime)) throw new Error('That attachment is not an image.');
-  if (!Number.isSafeInteger(c.total) || c.total <= 0 || c.total > MAX_BYTES) throw new Error('That attachment is too large to show here.');
-  if (c.offset !== at.offset) throw new Error('The attachment arrived out of order.');
-  if ((at.total !== undefined && at.total !== c.total) || (at.mime !== undefined && at.mime !== c.mime)) throw new Error('The attachment changed while it downloaded.');
+  if (!c || typeof c.data !== 'string' || typeof c.mime !== 'string' || typeof c.total !== 'number' || typeof c.offset !== 'number') throw new Error(msg("mobile.text.the_computer_sent_an_unreadable_attachment"));
+  if (!IMAGE_MIME.test(c.mime)) throw new Error(msg("mobile.text.that_attachment_is_not_an_image"));
+  if (!Number.isSafeInteger(c.total) || c.total <= 0 || c.total > MAX_BYTES) throw new Error(msg("mobile.text.that_attachment_is_too_large_to_show_here"));
+  if (c.offset !== at.offset) throw new Error(msg("mobile.text.the_attachment_arrived_out_of_order"));
+  if ((at.total !== undefined && at.total !== c.total) || (at.mime !== undefined && at.mime !== c.mime)) throw new Error(msg("mobile.text.the_attachment_changed_while_it_downloaded"));
   const size = base64Bytes(c.data);
-  if (size < 0) throw new Error('The computer sent an unreadable attachment.');
+  if (size < 0) throw new Error(msg("mobile.text.the_computer_sent_an_unreadable_attachment"));
   const offset = at.offset + size;
-  if (offset > c.total || (!size && !c.done)) throw new Error('The attachment arrived out of order.');
+  if (offset > c.total || (!size && !c.done)) throw new Error(msg("mobile.text.the_attachment_arrived_out_of_order"));
   const done = offset === c.total;
-  if (c.done === true && !done) throw new Error('The attachment arrived incomplete.');
+  if (c.done === true && !done) throw new Error(msg("mobile.text.the_attachment_arrived_incomplete"));
   return { offset, total: c.total, mime: c.mime, data: c.data, done };
 }
 

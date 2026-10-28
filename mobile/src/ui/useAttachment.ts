@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // Loads one attachment or workspace image for display (connect.attachment → a file:// URI).
 import { useEffect, useState } from 'react';
 import { connect } from '../connect/client.ts';
@@ -23,7 +24,7 @@ export function useAttachment(image: ViewerImage, variant: Variant, enabled = tr
     const from: Source = path !== undefined ? { path } : { id: id ?? '' };
     connect.attachment(deviceId, sessionId, from, variant).then(
       uri => { if (live) setState({ key, uri }); },
-      (error: Error) => { if (live) setState({ key, error: error?.message || 'Could not load this image.' }); },
+      (error: Error) => { if (live) setState({ key, error: error?.message || msg("mobile.text.could_not_load_this_image") }); },
     );
     return () => { live = false; };
   }, [key, enabled, done, deviceId, sessionId, id, path, variant]);

@@ -1,7 +1,10 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
 // Inbox data for the inbox screen and the iPhone Duo sidebar: sections from src/store/inbox.ts
 // over the store, a minute clock for relative times, and `load`, which lists every online
 // computer's tasks (and with them its bots) now (client.ts also refreshes lists on presence, foreground, run ends and a timer).
 // `updating`: rows drawn from the inbox cache at launch are still waiting for their live list.
+import { useLocale } from './locale.ts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { connect, NOT_SIGNED_IN } from '../connect/client.ts';
@@ -29,6 +32,7 @@ function liveSignature(live: Record<string, Live>, tasks: ConnectState['tasks'])
 }
 
 function useLiteLive(): { live: Record<string, Live>; glances: Record<string, RunGlance> } {
+  useLocale();
   const signature = useConnect(s => liveSignature(s.live, s.tasks));
   return useMemo(() => {
     const live: Record<string, Live> = {};

@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // End-to-end encryption between two devices of one account; byte-for-byte the same as
 // src-tauri/src/remote/crypto.rs (docs/remote-access.md, "End-to-end encryption").
 import { xchacha20poly1305 } from '@noble/ciphers/chacha.js';
@@ -52,15 +53,15 @@ export function fingerprint(publicKeyBase64: string): string {
 /** HKDF-SHA256 over the X25519 secret, salted with the sorted device ids. */
 export function pairKey(mine: Uint8Array, myId: string, theirPublic: string, theirId: string): Uint8Array {
   const theirs = decodeKey(theirPublic);
-  if (!theirs) throw new Error("That computer's key is malformed.");
+  if (!theirs) throw new Error(msg("mobile.text.that_computer_s_key_is_malformed"));
   let shared: Uint8Array;
   try {
     shared = x25519.getSharedSecret(mine, theirs);
   } catch {
-    throw new Error("That computer's key is unusable.");
+    throw new Error(msg("mobile.text.that_computer_s_key_is_unusable"));
   }
   // Rust refuses a non-contributory (all-zero) secret; noble throws on it, but check anyway.
-  if (shared.every(b => b === 0)) throw new Error("That computer's key is unusable.");
+  if (shared.every(b => b === 0)) throw new Error(msg("mobile.text.that_computer_s_key_is_unusable"));
   const salt = [myId, theirId].sort().join('|');
   return hkdf(sha256, shared, utf8.encode(salt), INFO, 32);
 }
@@ -79,7 +80,7 @@ export function seal(key: Uint8Array, from: string, to: string, plaintext: strin
 /** Opens a body, inflating a packed plaintext; throws on anything unreadable, forged or too large. */
 export function open(key: Uint8Array, from: string, to: string, body: string): string {
   const bytes = fromBase64(body);
-  if (bytes.length < NONCE + 16) throw new Error('Unreadable frame.');
+  if (bytes.length < NONCE + 16) throw new Error(msg("mobile.text.unreadable_frame"));
   const plain = xchacha20poly1305(key, bytes.subarray(0, NONCE), aad(from, to)).decrypt(bytes.subarray(NONCE));
   return new TextDecoder().decode(plain[0] === PACKED ? unpack(plain.subarray(1)) : plain);
 }
@@ -98,14 +99,14 @@ export function unpack(deflated: Uint8Array): Uint8Array {
   let done = false;
   const inflate = new Inflate((chunk, final) => {
     size += chunk.length;
-    if (size > MAX_UNPACKED) throw new Error('A frame was too large.');
+    if (size > MAX_UNPACKED) throw new Error(msg("mobile.text.a_frame_was_too_large"));
     chunks.push(chunk);
     done = final;
   });
   for (let at = 0; at < deflated.length || at === 0; at += SLICE) {
     inflate.push(deflated.subarray(at, at + SLICE), at + SLICE >= deflated.length);
   }
-  if (!done) throw new Error('Unreadable frame.');
+  if (!done) throw new Error(msg("mobile.text.unreadable_frame"));
   const out = new Uint8Array(size);
   chunks.reduce((at, chunk) => (out.set(chunk, at), at + chunk.length), 0);
   return out;

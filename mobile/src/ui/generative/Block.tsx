@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../locale.ts';
+import { statusText, t as msg } from '../../i18n.ts';
 // Generative UI fences drawn natively, matching the desktop (src/generative-ui-components.ts).
 // Parsing is pure and memoized by source (parseBlock in src/store/generative.ts); a view that
 // throws while drawing falls back to its source, so a row never crashes.
@@ -14,16 +18,17 @@ import { Form } from './Form.tsx';
 import { Body } from './MarkdownText.tsx';
 
 export const GenerativeBlock = memo(function GenerativeBlock({ lang, source, pending }: { lang: string; source: string; pending: boolean }) {
-  if (pending) return <View style={styles.pending} accessibilityLabel="Building view"><ActivityIndicator /></View>;
+  useLocale();
+  if (pending) return <View style={styles.pending} accessibilityLabel={msg("mobile.text.building_view")}><ActivityIndicator /></View>;
   const block = parseBlock(lang, source);
-  const fallback = <Failed message="This view could not be shown." source={source} />;
+  const fallback = <Failed message={msg("mobile.text.this_view_could_not_be_shown")} source={source} />;
   return (
     <Guard fallback={fallback}>
       <View style={styles.block}>
         {block.kind === 'view' ? <Node spec={block.view} />
           : block.kind === 'code' ? <CodeBox label={block.label} code={block.code} />
             : block.kind === 'error' ? <Failed message={block.message} source={block.source} />
-              : <Note icon={block.kind === 'svg' ? 'scribble' : 'chevron.left.forwardslash.chevron.right'} title={block.kind === 'svg' ? 'Diagram' : 'Static HTML'} body="View it on the desktop." />}
+              : <Note icon={block.kind === 'svg' ? 'scribble' : 'chevron.left.forwardslash.chevron.right'} title={block.kind === 'svg' ? msg("mobile.text.diagram") : msg("mobile.text.static_html")} body={msg("mobile.text.view_it_on_the_desktop")} />}
       </View>
     </Guard>
   );
@@ -36,11 +41,13 @@ class Guard extends Component<{ fallback: ReactNode; children: ReactNode }, { fa
 }
 
 function Failed({ message, source }: { message: string; source: string }) {
+  useLocale();
   const colors = useColors();
   return <View style={styles.gap}><Text style={[styles.small, { color: colors.red }]}>{message}</Text><CodeBox code={source} /></View>;
 }
 
 function Note({ icon, title, body }: { icon: Parameters<typeof Icon>[0]['ios']; title?: string; body: string }) {
+  useLocale();
   const colors = useColors();
   return (
     <View style={[styles.card, styles.note, { backgroundColor: colors.fill }]}>
@@ -62,6 +69,7 @@ const STATUS: Record<Status, { ios: Parameters<typeof Icon>[0]['ios']; android: 
 const Markdown = ({ text }: { text?: string }) => (text ? <Body text={text} /> : null);
 
 function Node({ spec }: { spec: Spec }): ReactNode {
+  useLocale();
   const colors = useColors();
   switch (spec.type) {
     case 'markdown': return <Markdown text={spec.text} />;
@@ -88,17 +96,17 @@ function Node({ spec }: { spec: Spec }): ReactNode {
     case 'chart': return <Chart spec={spec} />;
     case 'progress': {
       const percent = Math.round((spec.value / spec.max) * 100);
-      return <View style={styles.gap} accessible accessibilityRole="progressbar" accessibilityLabel={spec.label ?? 'Progress'} accessibilityValue={{ min: 0, max: spec.max, now: spec.value }}>
-        <View style={styles.between}><Text style={[styles.body, { color: colors.text }]}>{spec.label ?? 'Progress'}</Text><Text style={[styles.body, { color: colors.secondary }]}>{`${percent}%`}</Text></View>
+      return <View style={styles.gap} accessible accessibilityRole="progressbar" accessibilityLabel={spec.label ?? msg("mobile.text.progress")} accessibilityValue={{ min: 0, max: spec.max, now: spec.value }}>
+        <View style={styles.between}><Text style={[styles.body, { color: colors.text }]}>{spec.label ?? msg("mobile.text.progress")}</Text><Text style={[styles.body, { color: colors.secondary }]}>{`${percent}%`}</Text></View>
         <View style={[styles.track, { backgroundColor: colors.fill }]}><View style={[styles.fillBar, { width: `${percent}%`, backgroundColor: colors.tint }]} /></View>
         {!!spec.note && <Text style={[styles.small, { color: colors.secondary }]}>{spec.note}</Text>}
       </View>;
     }
     case 'steps': case 'plan': case 'timeline': return <View style={styles.gap}>
-      <Title text={spec.title ?? (spec.type === 'plan' ? 'Plan' : undefined)} /><Markdown text={spec.summary} />
+      <Title text={spec.title ?? (spec.type === 'plan' ? msg("mobile.text.plan") : undefined)} /><Markdown text={spec.summary} />
       {spec.items.map((step, i) => {
         const status = STATUS[step.status];
-        return <View key={i} style={styles.step} accessible accessibilityLabel={`${step.title} (${step.status})`}>
+        return <View key={i} style={styles.step} accessible accessibilityLabel={`${step.title} (${statusText(step.status)})`}>
           <Icon ios={status.ios} android={status.android} size={17} color={colors[status.color]} />
           <View style={styles.flex}>
             {!!step.time && <Text style={[styles.small, { color: colors.tertiary }]}>{step.time}</Text>}
@@ -113,7 +121,7 @@ function Node({ spec }: { spec: Spec }): ReactNode {
       const done = spec.items.filter(item => item.done).length;
       return <View style={styles.gap}>
         <Title text={spec.title ? `${spec.title} · ${done}/${spec.items.length}` : undefined} />
-        {spec.items.map((item, i) => <View key={i} style={styles.step} accessible accessibilityLabel={`${item.text}, ${item.done ? 'done' : 'not done'}`}>
+        {spec.items.map((item, i) => <View key={i} style={styles.step} accessible accessibilityLabel={`${item.text}, ${item.done ? msg('mobile.text.done') : msg("mobile.text.not_done")}`}>
           <Icon ios={item.done ? 'checkmark.square.fill' : 'square'} android={item.done ? 'check_box' : 'check_box_outline_blank'} size={17} color={item.done ? colors.green : colors.tertiary} />
           <Text style={[styles.body, styles.flex, { color: item.done ? colors.secondary : colors.text }]}>{item.text}</Text>
         </View>)}
@@ -124,7 +132,7 @@ function Node({ spec }: { spec: Spec }): ReactNode {
     case 'tree': return <View style={styles.gap}><Title text={spec.title} /><Branch items={spec.items} depth={0} /></View>;
     case 'diff': return <DiffBox file={spec.file} diff={spec.diff} />;
     case 'code': return <CodeBox label={spec.file ?? spec.language} code={spec.code} />;
-    case 'terminal': return <CodeBox label={spec.exitCode === undefined ? 'Terminal' : `Exit ${spec.exitCode}`} command={spec.command} code={spec.output} />;
+    case 'terminal': return <CodeBox label={spec.exitCode === undefined ? msg("mobile.text.terminal") : msg('mobile.code.exit', { code: spec.exitCode })} command={spec.command} code={spec.output} />;
     case 'compare': return <View style={styles.gap}><Title text={spec.title} />{spec.items.map((item, i) => (
       <View key={i} style={[styles.card, { backgroundColor: colors.card }]}>
         <Title text={item.title} />
@@ -140,14 +148,15 @@ function Node({ spec }: { spec: Spec }): ReactNode {
     case 'stack': return <View style={styles.gap}>{spec.children.map((child, i) => <Node key={i} spec={child} />)}</View>;
     // ponytail: phones get at most 2 columns; a wider grid wraps.
     case 'grid': return <View style={styles.grid}>{spec.children.map((child, i) => <View key={i} style={{ width: spec.columns > 1 ? '48%' : '100%' }}><Node spec={child} /></View>)}</View>;
-    case 'custom': return <Note icon="macwindow" title={spec.title ?? 'Interactive view'} body="Interactive view, open on the desktop." />;
-    case 'unknown': return <Failed message={`PandaCode has no “${spec.name}” view. Showing its data instead.`} source={spec.raw} />;
+    case 'custom': return <Note icon="macwindow" title={spec.title ?? msg("mobile.text.interactive_view")} body={msg("mobile.text.interactive_view_open_on_the_desktop")} />;
+    case 'unknown': return <Failed message={msg('mobile.view.unknown', { name: spec.name })} source={spec.raw} />;
   }
 }
 
 function Point({ text, good }: { text: string; good?: boolean }) {
+  useLocale();
   const colors = useColors();
-  return <View style={styles.step} accessible accessibilityLabel={`${good ? 'Pro' : 'Con'}: ${text}`}>
+  return <View style={styles.step} accessible accessibilityLabel={`${good ? msg("mobile.text.pro") : msg("mobile.text.con")}: ${text}`}>
     <Icon ios={good ? 'plus.circle.fill' : 'minus.circle.fill'} android={good ? 'add_circle' : 'do_not_disturb_on'} size={15} color={good ? colors.green : colors.red} />
     <Text style={[styles.body, styles.flex, { color: colors.text }]}>{text}</Text>
   </View>;
@@ -155,6 +164,7 @@ function Point({ text, good }: { text: string; good?: boolean }) {
 
 const COLUMN = { min: 72, max: 220, char: 7.5 };
 function Table({ spec }: { spec: Extract<Spec, { type: 'table' }> }) {
+  useLocale();
   const colors = useColors();
   const widths = spec.columns.map((column, i) => Math.min(COLUMN.max, Math.max(COLUMN.min, Math.max(column.label.length, ...spec.rows.map(row => row[i].length)) * COLUMN.char + 16)));
   const cell = (text: string, i: number, head?: boolean) => (
@@ -175,6 +185,7 @@ function Table({ spec }: { spec: Extract<Spec, { type: 'table' }> }) {
 const PanelBody = ({ item }: { item: Panel }) => <View style={styles.gap}><Markdown text={item.body} />{item.children.map((child, i) => <Node key={i} spec={child} />)}</View>;
 
 function Tabs({ items }: { items: Panel[] }) {
+  useLocale();
   const colors = useColors();
   const [index, setIndex] = useState(0);
   return <View style={styles.gap}>
@@ -190,6 +201,7 @@ function Tabs({ items }: { items: Panel[] }) {
 }
 
 function Fold({ item }: { item: Panel }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(!!item.open);
   return <View style={[styles.card, { backgroundColor: colors.card }]}>
@@ -202,10 +214,12 @@ function Fold({ item }: { item: Panel }) {
 }
 
 function Branch({ items, depth }: { items: TreeItem[]; depth: number }) {
+  useLocale();
   return <>{items.map((item, i) => <TreeRow key={i} item={item} depth={depth} />)}</>;
 }
 
 function TreeRow({ item, depth }: { item: TreeItem; depth: number }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState(true);
   const folder = item.children.length > 0;
@@ -213,7 +227,7 @@ function TreeRow({ item, depth }: { item: TreeItem; depth: number }) {
     <Pressable disabled={!folder} onPress={() => setOpen(o => !o)} accessibilityState={folder ? { expanded: open } : undefined} style={[styles.treeRow, { paddingLeft: depth * 16 }]}>
       <Icon ios={folder ? (open ? 'folder.fill' : 'folder') : 'doc'} android={folder ? 'folder' : 'description'} size={14} color={folder ? colors.tint : colors.secondary} />
       <Text style={[styles.mono, { color: colors.text }]} numberOfLines={1}>{item.name}</Text>
-      {!!item.status && <Text style={[styles.badge, { color: colors.secondary, backgroundColor: colors.fill }]}>{item.status}</Text>}
+      {!!item.status && <Text style={[styles.badge, { color: colors.secondary, backgroundColor: colors.fill }]}>{statusText(item.status)}</Text>}
       {!!item.note && <Text style={[styles.small, styles.flex, { color: colors.tertiary }]} numberOfLines={1}>{item.note}</Text>}
     </Pressable>
     {folder && open && <Branch items={item.children} depth={depth + 1} />}

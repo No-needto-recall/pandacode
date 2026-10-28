@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // Generative UI in agent replies, parsed for the phone. A port of the desktop's validation
 // (`normalize` in src/generative-ui-components.ts, the chart spec in src/rich-markdown.ts and the
 // followup directive in src/enriched-markdown.ts), kept pure so Node tests run it. Nothing here
@@ -89,9 +90,9 @@ export function treeFromPaths(paths: string[]): TreeItem[] {
 export function normalize(value: unknown, depth = 0, budget = { nodes: 0 }): View {
   const raw = obj(value);
   const type = typeof raw.type === 'string' ? raw.type : '';
-  if (!type) throw new Error('A view needs a "type".');
-  if (++budget.nodes > LIMITS.nodes) throw new Error(`A view may hold at most ${LIMITS.nodes} parts.`);
-  if (depth > LIMITS.depth) throw new Error(`Views nest at most ${LIMITS.depth} deep.`);
+  if (!type) throw new Error(msg("mobile.text.a_view_needs_a_type"));
+  if (++budget.nodes > LIMITS.nodes) throw new Error(msg('mobile.view.parts', { count: LIMITS.nodes }));
+  if (depth > LIMITS.depth) throw new Error(msg('mobile.view.depth', { count: LIMITS.depth }));
   const children = (entries: unknown) => list(entries, 24).map(child => normalize(child, depth + 1, budget));
   const title = str(raw.title, 200);
   switch (type) {
@@ -112,7 +113,7 @@ export function normalize(value: unknown, depth = 0, budget = { nodes: 0 }): Vie
         const label = str(column.label ?? column.key, 80);
         return label ? [{ label, key: str(column.key, 80) ?? label, align: pick(column.align, ['left', 'center', 'right'] as const, 'left') }] : [];
       });
-      if (!columns.length) throw new Error('A table needs "columns".');
+      if (!columns.length) throw new Error(msg("mobile.text.a_table_needs_columns"));
       const rows = list(raw.rows, LIMITS.rows).map(row => Array.isArray(row)
         ? columns.map((_, i) => str(row[i], 400) ?? '')
         : columns.map(column => str(obj(row)[column.key], 400) ?? ''));
@@ -121,7 +122,7 @@ export function normalize(value: unknown, depth = 0, budget = { nodes: 0 }): Vie
     case 'chart': {
       const labels = list(raw.labels, 48).map(label => str(label, 40) ?? '');
       const series = list(raw.series, 6).map(entry => { const item = obj(entry); return { name: str(item.name, 60), values: list(item.values, labels.length || 60).map(v => num(v) ?? 0) }; });
-      if (!series.some(entry => entry.values.length)) throw new Error('A chart needs at least one series of "values".');
+      if (!series.some(entry => entry.values.length)) throw new Error(msg("mobile.text.a_chart_needs_at_least_one_series_of_values"));
       const chart = pick(raw.chart ?? raw.kind, ['bar', 'line', 'pie', 'area', 'sparkline'] as const, 'bar');
       return { type: 'chart', chart, title, labels: labels.length ? labels : series[0].values.map((_, i) => String(i + 1)), series };
     }
@@ -137,7 +138,7 @@ export function normalize(value: unknown, depth = 0, budget = { nodes: 0 }): Vie
         const item = obj(entry), label = str(item.label ?? item.title, 80);
         return label ? [{ label, body: str(item.body, LIMITS.text), children: children(item.children), open: item.open === true }] : [];
       });
-      if (!items.length) throw new Error(`${type === 'tabs' ? 'Tabs need "tabs"' : 'An accordion needs "items"'} with a label.`);
+      if (!items.length) throw new Error(msg('mobile.view.labels', { message: type === 'tabs' ? msg("mobile.text.tabs_need_tabs") : msg("mobile.text.an_accordion_needs_items") }));
       return { type, items };
     }
     case 'tree': case 'files': return { type: 'tree', title, items: Array.isArray(raw.paths) ? treeFromPaths(list(raw.paths, 200).map(path => str(path, 300) ?? '').filter(Boolean)) : tree(raw.items, 0) };
@@ -154,7 +155,7 @@ export function normalize(value: unknown, depth = 0, budget = { nodes: 0 }): Vie
     }) };
     case 'actions': case 'buttons': return { type: 'actions', label: str(raw.label, 120), buttons: actions(raw.buttons ?? raw.actions) };
     case 'chips': return { type: 'chips', label: str(raw.label, 120), options: actions(raw.options) };
-    case 'followups': return { type: 'chips', label: str(raw.label, 120) ?? 'Suggested follow-ups', options: actions(raw.items ?? raw.options) };
+    case 'followups': return { type: 'chips', label: str(raw.label, 120) ?? msg("mobile.text.suggested_follow_ups"), options: actions(raw.items ?? raw.options) };
     case 'form': {
       const fields = list(raw.fields, 12).flatMap(entry => {
         const field = obj(entry), name = str(field.name, 40)?.replace(/[^\w-]/g, '');
@@ -162,8 +163,8 @@ export function normalize(value: unknown, depth = 0, budget = { nodes: 0 }): Vie
         const options = strings(field.options);
         return [{ name, label: str(field.label, 120) ?? name, type: pick(field.type, ['text', 'textarea', 'number', 'select', 'checkbox'] as const, options.length ? 'select' : 'text'), options, placeholder: str(field.placeholder, 120), value: str(field.value, 400), required: field.required === true }];
       });
-      if (!fields.length) throw new Error('A form needs "fields" with a "name".');
-      return { type: 'form', title, fields, submit: str(raw.submit, 40) ?? 'Add to prompt', prompt: str(raw.prompt, LIMITS.prompt) };
+      if (!fields.length) throw new Error(msg("mobile.text.a_form_needs_fields_with_a_name"));
+      return { type: 'form', title, fields, submit: str(raw.submit, 40) ?? msg("mobile.text.add_to_prompt"), prompt: str(raw.prompt, LIMITS.prompt) };
     }
     case 'stack': case 'grid': return { type, columns: Math.min(4, Math.max(1, Math.round(num(raw.columns) ?? 2))), children: children(raw.children) };
     // The phone never runs agent HTML; the desktop draws it.
@@ -208,17 +209,17 @@ export type Block =
 export const GENERATIVE = new Set(['ui', 'chart', 'svg', 'html', 'mermaid']);
 
 function parseFence(lang: string, source: string): Block {
-  if (lang === 'mermaid') return { kind: 'code', label: 'Diagram · Mermaid', code: source };
+  if (lang === 'mermaid') return { kind: 'code', label: msg("mobile.text.diagram_mermaid"), code: source };
   if (lang === 'html') return { kind: 'html' };
   if (lang === 'svg') return { kind: 'svg', xml: sanitizeSvg(source) };
-  if (source.length > LIMITS.source) return { kind: 'error', message: 'This view is larger than 64 KB.', source: source.slice(0, 4000) };
+  if (source.length > LIMITS.source) return { kind: 'error', message: msg("mobile.text.this_view_is_larger_than_64_kb"), source: source.slice(0, 4000) };
   let value: unknown;
-  try { value = JSON.parse(source); } catch { return { kind: 'error', message: 'This view is not valid JSON.', source: source.slice(0, 4000) }; }
+  try { value = JSON.parse(source); } catch { return { kind: 'error', message: msg("mobile.text.this_view_is_not_valid_json"), source: source.slice(0, 4000) }; }
   try {
     // ```chart uses the questions' spec: {"type": "bar" | "line" | "pie", labels, series}.
     if (lang === 'chart') {
       const raw = obj(value);
-      if (!['bar', 'line', 'pie'].includes(raw.type as string)) throw new Error('A chart needs "type": "bar", "line" or "pie".');
+      if (!['bar', 'line', 'pie'].includes(raw.type as string)) throw new Error(msg("mobile.text.a_chart_needs_type_bar_line_or_pie"));
       value = { ...raw, type: 'chart', chart: raw.type };
     }
     return { kind: 'view', view: normalize(value) };

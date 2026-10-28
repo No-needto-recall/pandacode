@@ -1,3 +1,4 @@
+import { t as msg, type MessageKey } from '../i18n.ts';
 // Pure state transitions for messages and live runs; no React Native imports (tested in node).
 import type { AgentEvent, HostActivity, Message, PendingRequest, TaskStatus, ToolActivity } from '../connect/types.ts';
 import { decodeTeamRun, teamBusy, waitingOn, type TeamRun } from './team.ts';
@@ -21,6 +22,8 @@ export interface Live {
   status: TaskStatus;
   /** Status line, e.g. "Generating response", "Waiting for approval". */
   activity: string;
+  /** App-owned status key; host text stays untouched. */
+  activityKey?: MessageKey;
   items: LiveItem[];
   approvals: PendingRequest[];
   inputs: PendingRequest[];
@@ -112,7 +115,7 @@ function reduce(live: Live, event: AgentEvent, now: number): Live {
     case 'approval_cancelled':
     case 'input_cancelled': {
       const next = { ...live, approvals: remove(live.approvals, event.requestId), inputs: remove(live.inputs, event.requestId) };
-      return waiting(next) ? next : { ...next, status: live.status === 'idle' ? 'idle' : 'running', activity: live.status === 'waiting' ? 'Continuing task' : live.activity };
+      return waiting(next) ? next : { ...next, status: live.status === 'idle' ? 'idle' : 'running', activityKey: live.status === 'waiting' ? "mobile.text.continuing_task" : live.activityKey, activity: live.status === 'waiting' ? msg("mobile.text.continuing_task") : live.activity };
     }
   }
   // A run starting: a limit from the last one no longer applies. The main agent working again
@@ -128,7 +131,7 @@ function reduce(live: Live, event: AgentEvent, now: number): Live {
       const tail = items[items.length - 1];
       if (tail?.kind === 'text') items[items.length - 1] = { kind: 'text', text: (tail.text + event.text).slice(-MAX_TEXT) };
       else items.push({ kind: 'text', text: event.text.slice(-MAX_TEXT) });
-      return { ...running, items: cap(items), activity: event.text.trim() ? 'Generating response' : live.activity, thinking: event.text.trim() ? undefined : live.thinking };
+      return { ...running, items: cap(items), activityKey: event.text.trim() ? "mobile.text.generating_response" : live.activityKey, activity: event.text.trim() ? msg("mobile.text.generating_response") : live.activity, thinking: event.text.trim() ? undefined : live.thinking };
     }
     case 'tool': {
       const tool = event.tool;
@@ -139,18 +142,18 @@ function reduce(live: Live, event: AgentEvent, now: number): Live {
       const item: LiveItem = { kind: 'tool', tool, startedAt, endedAt: tool.status === 'running' ? undefined : before?.endedAt ?? now };
       const items = index < 0 ? [...live.items, item] : live.items.map((x, i) => (i === index ? item : x));
       const todos = toolKind(tool.name) === 'todo' ? todosOf(parseFields(tool.input)) : [];
-      return { ...running, items: cap(items), activity: tool.status === 'running' ? traceText(describeTool(tool)).slice(0, 80) : 'Working…', thinking: undefined, todos: todos.length ? todos : live.todos };
+      return { ...running, items: cap(items), activityKey: undefined, activity: tool.status === 'running' ? traceText(describeTool(tool)).slice(0, 80) : 'Working…', thinking: undefined, todos: todos.length ? todos : live.todos };
     }
     case 'status':
-      return { ...running, activity: event.text, thinking: THINKING.test(event.text) ? event.text.slice(0, 200) : running.thinking };
+      return { ...running, activityKey: undefined, activity: event.text, thinking: THINKING.test(event.text) ? event.text.slice(0, 200) : running.thinking };
     case 'error':
       return { ...running, items: cap([...live.items, { kind: 'error', text: event.text.slice(0, 8192) }]) };
     case 'approval':
       if (!event.requestId || live.approvals.some(p => p.requestId === event.requestId)) return live;
-      return { ...running, status: 'waiting', activity: 'Waiting for approval', approvals: [...live.approvals, { kind: 'approval', requestId: event.requestId, text: event.text, data: event.data, tool: event.tool }] };
+      return { ...running, status: 'waiting', activityKey: "mobile.text.waiting_for_approval", activity: msg("mobile.text.waiting_for_approval"), approvals: [...live.approvals, { kind: 'approval', requestId: event.requestId, text: event.text, data: event.data, tool: event.tool }] };
     case 'input_request':
       if (!event.requestId || live.inputs.some(p => p.requestId === event.requestId)) return live;
-      return { ...running, status: 'waiting', activity: 'Waiting for your answer', inputs: [...live.inputs, { kind: 'input_request', requestId: event.requestId, text: event.text, data: event.data }] };
+      return { ...running, status: 'waiting', activityKey: "mobile.text.waiting_for_your_answer", activity: msg("mobile.text.waiting_for_your_answer"), inputs: [...live.inputs, { kind: 'input_request', requestId: event.requestId, text: event.text, data: event.data }] };
     default:
       return live;
   }
@@ -211,7 +214,7 @@ export function fromSubscribe(live: Live, status: TaskStatus, pending?: readonly
   const next = withHostActivity({ ...live, status: approvals.length + inputs.length ? 'waiting' : status, approvals, inputs }, host);
   // Newer hosts list an architect as running while its team works: show what it waits on.
   return teamBusy(team) && (live.held || !active(live.status)) && !approvals.length && !inputs.length
-    ? { ...next, held: live.held ?? 'idle', team, activity: waitingOn(team!.activeWorkers) }
+    ? { ...next, held: live.held ?? 'idle', team, activityKey: undefined, activity: waitingOn(team!.activeWorkers) }
     : next;
 }
 
@@ -234,7 +237,7 @@ export function ended(live: Live | undefined, status: TaskStatus, team?: TeamRun
 /** A team update for a task: a busy team updates what a held task waits on; a settled one ends the hold. */
 export function withTeamRun(live: Live, run: TeamRun): Live {
   if (!live.held) return live;
-  if (teamBusy(run)) return { ...live, team: run, activity: waitingOn(run.activeWorkers) };
+  if (teamBusy(run)) return { ...live, team: run, activityKey: undefined, activity: waitingOn(run.activeWorkers) };
   const status = run.status === 'failed' || run.status === 'stopped' ? run.status : live.held;
   return ended({ ...live, team: undefined }, status);
 }

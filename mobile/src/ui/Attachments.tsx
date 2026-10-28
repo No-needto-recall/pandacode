@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from './locale.ts';
+import { attachmentKindText, t as msg } from '../i18n.ts';
 // Attachments in a thread: the image grid in user bubbles, document/folder chips that open their
 // context text, and workspace images inside agent replies. Bytes come through connect.attachment
 // (src/connect/attachments.ts); a tap opens the full-screen viewer (ImageViewer.tsx).
@@ -20,6 +24,7 @@ const aspect = (a: { width?: number; height?: number }) => (a.width && a.height 
 
 /** A user bubble's images: one large, or two to four in a grid (the fourth says +N for more). */
 export function ImageGrid({ images }: { images: Attachment[] }) {
+  useLocale();
   const thread = useContext(ThreadContext);
   if (!thread || !images.length) return null;
   const all: ViewerImage[] = images.map(a => ({ ...thread, id: a.id, name: a.name, width: a.width, height: a.height }));
@@ -39,10 +44,11 @@ export function ImageGrid({ images }: { images: Attachment[] }) {
 }
 
 function Tile({ image, style, more, onPress }: { image: ViewerImage; style: object; more: number; onPress: () => void }) {
+  useLocale();
   const colors = useColors();
   const { uri, error } = useAttachment(image, 'thumb');
   return (
-    <Pressable onPress={onPress} style={[styles.tile, style, { backgroundColor: colors.fill }]} accessibilityRole="imagebutton" accessibilityLabel={`Image: ${image.name}`} accessibilityHint="Opens the image">
+    <Pressable onPress={onPress} style={[styles.tile, style, { backgroundColor: colors.fill }]} accessibilityRole="imagebutton" accessibilityLabel={msg('mobile.image.named', { name: image.name })} accessibilityHint={msg("mobile.text.opens_the_image")}>
       {uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
         : error ? <Failed name={image.name} /> : <ActivityIndicator style={StyleSheet.absoluteFill} />}
       {more > 0 && <View style={styles.more}><Text style={styles.moreText}>+{more}</Text></View>}
@@ -51,6 +57,7 @@ function Tile({ image, style, more, onPress }: { image: ViewerImage; style: obje
 }
 
 function Failed({ name }: { name: string }) {
+  useLocale();
   const colors = useColors();
   return (
     <View style={styles.failed}>
@@ -65,6 +72,7 @@ const chipIcon = (kind: string) =>
 
 /** Document, folder and file chips; a chip with context text opens it in a sheet. */
 export function Chips({ chips }: { chips: { kind: string; name: string; text?: string }[] }) {
+  useLocale();
   const colors = useColors();
   const [open, setOpen] = useState<{ name: string; text: string } | null>(null);
   if (!chips.length) return null;
@@ -75,7 +83,7 @@ export function Chips({ chips }: { chips: { kind: string; name: string; text?: s
         const text = chip.text;
         return (
           <Pressable key={i} disabled={!text} onPress={() => text && setOpen({ name: chip.name, text })} style={[styles.chip, { backgroundColor: colors.fill }]}
-            accessibilityRole={text ? 'button' : undefined} accessibilityLabel={`${chip.kind}: ${chip.name}`} accessibilityHint={text ? 'Shows the attached text' : undefined}>
+            accessibilityRole={text ? 'button' : undefined} accessibilityLabel={`${attachmentKindText(chip.kind)}: ${chip.name}`} accessibilityHint={text ? msg("mobile.text.shows_the_attached_text") : undefined}>
             <Icon ios={ios} android={android} size={13} color={colors.tint} />
             <Text style={[styles.chipText, { color: colors.tint }]} numberOfLines={1}>{chip.name}</Text>
           </Pressable>
@@ -88,6 +96,7 @@ export function Chips({ chips }: { chips: { kind: string; name: string; text?: s
 
 /** The context text a message carries, monospace and scrollable. */
 function ContextSheet({ item, onClose }: { item: { name: string; text: string } | null; onClose: () => void }) {
+  useLocale();
   const colors = useColors();
   return (
     <Modal visible={!!item} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -95,7 +104,7 @@ function ContextSheet({ item, onClose }: { item: { name: string; text: string } 
         <View style={[styles.sheetHead, { borderColor: colors.separator }]}>
           <Text style={[styles.sheetTitle, { color: colors.text }]} numberOfLines={1}>{item?.name}</Text>
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button">
-            <Text style={[styles.done, { color: colors.tint }]}>Done</Text>
+            <Text style={[styles.done, { color: colors.tint }]}>{msg("mobile.text.done")}</Text>
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.sheetBody}>
@@ -110,6 +119,7 @@ function ContextSheet({ item, onClose }: { item: { name: string; text: string } 
 
 /** A workspace image in an agent reply (`![alt](relative/path)`): its thumbnail, tappable to the viewer. */
 export function ReplyImage({ alt, path }: { alt: string; path: string }) {
+  useLocale();
   const thread = useContext(ThreadContext);
   const colors = useColors();
   const [ratio, setRatio] = useState(4 / 3);
@@ -124,7 +134,7 @@ export function ReplyImage({ alt, path }: { alt: string; path: string }) {
     );
   }
   return (
-    <Pressable onPress={() => openViewer([image], 0)} style={[styles.replyImage, { aspectRatio: ratio, backgroundColor: colors.fill }]} accessibilityRole="imagebutton" accessibilityLabel={alt || path} accessibilityHint="Opens the image">
+    <Pressable onPress={() => openViewer([image], 0)} style={[styles.replyImage, { aspectRatio: ratio, backgroundColor: colors.fill }]} accessibilityRole="imagebutton" accessibilityLabel={alt || path} accessibilityHint={msg("mobile.text.opens_the_image")}>
       {uri
         ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150}
           onLoad={e => { if (e.source.width && e.source.height) setRatio(Math.min(2.4, Math.max(0.5, e.source.width / e.source.height))); }} />

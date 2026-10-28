@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../ui/locale.ts';
+import { statusText, t as msg } from '../i18n.ts';
 // One agent working for a task. A team worker: its assignment, checkpoint, result, files and its
 // own transcript (task.workerMessages, refreshed while it runs, plus its live tools). A subagent:
 // its prompt, tools and reply from the task's live subagent state.
@@ -23,6 +27,7 @@ import { WorkerMark } from './agents.tsx';
 const REFRESH_MS = 5000;
 
 function Card({ title, children, tone }: { title: string; children: React.ReactNode; tone?: string }) {
+  useLocale();
   const colors = useColors();
   const backdrop = useBackdrop();
   return (
@@ -34,12 +39,14 @@ function Card({ title, children, tone }: { title: string; children: React.ReactN
 }
 
 function Plain({ text, color }: { text: string; color?: string }) {
+  useLocale();
   const colors = useColors();
   return <Text selectable style={[styles.body, { color: color ?? colors.text }]}>{text}</Text>;
 }
 
 /** The worker's transcript: stored messages, then live tools the store doesn't hold yet. */
 function Transcript({ deviceId, sessionId, worker }: { deviceId: string; sessionId: string; worker: TeamWorker }) {
+  useLocale();
   const colors = useColors();
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [error, setError] = useState('');
@@ -64,7 +71,7 @@ function Transcript({ deviceId, sessionId, worker }: { deviceId: string; session
   const liveTools = (live?.items ?? []).flatMap(i => (i.kind === 'tool' && !stored.has(i.tool.id) ? [i] : []));
   if (error && !messages) return <Plain text={error} color={colors.secondary as string} />;
   if (!messages) return <ActivityIndicator style={styles.spinner} />;
-  if (!rows.length && !liveTools.length) return <Plain text="No messages yet." color={colors.secondary as string} />;
+  if (!rows.length && !liveTools.length) return <Plain text={msg("mobile.text.no_messages_yet")} color={colors.secondary as string} />;
   return (
     <View style={styles.transcript}>
       {rows.map(m => m.role === 'tool' ? <ToolRow key={m.id} tool={parseToolMessage(m.content)} />
@@ -76,6 +83,7 @@ function Transcript({ deviceId, sessionId, worker }: { deviceId: string; session
 }
 
 function WorkerDetail({ deviceId, sessionId, worker, team }: { deviceId: string; sessionId: string; worker: TeamWorker; team: Team }) {
+  useLocale();
   const colors = useColors();
   const active = workerActive(worker);
   const now = useNow(active);
@@ -87,25 +95,25 @@ function WorkerDetail({ deviceId, sessionId, worker, team }: { deviceId: string;
       <Stack.Screen options={{ title: worker.name }} />
       <View style={styles.status}>
         <WorkerMark worker={worker} team={team} />
-        <Text style={[styles.statusText, { color: worker.status === 'failed' ? colors.red : colors.secondary }]}>{[workerLabel(worker, team), elapsed, worker.attempt > 1 && `attempt ${worker.attempt}`].filter(Boolean).join(' · ')}</Text>
+        <Text style={[styles.statusText, { color: worker.status === 'failed' ? colors.red : colors.secondary }]}>{[workerLabel(worker, team), elapsed, worker.attempt > 1 && msg('mobile.agents.attempt', { count: worker.attempt })].filter(Boolean).join(' · ')}</Text>
         <ModelBadge provider={worker.provider} model={worker.model || harnessName(worker.provider)} />
       </View>
-      {!!worker.error && <Card title="Error" tone={colors.red as string}><Plain text={worker.error} /></Card>}
+      {!!worker.error && <Card title={msg("mobile.text.error")} tone={colors.red as string}><Plain text={worker.error} /></Card>}
       {!!worker.checkpoint && (
-        <Card title="Checkpoint">
+        <Card title={msg("mobile.text.checkpoint")}>
           {!!worker.checkpoint.summary && <Plain text={worker.checkpoint.summary} />}
-          {!!worker.checkpoint.nextSteps && <><Text style={[styles.sub, { color: colors.secondary }]}>Next</Text><Plain text={worker.checkpoint.nextSteps} /></>}
-          {!!worker.checkpoint.blocker && <><Text style={[styles.sub, { color: colors.orange }]}>Blocker</Text><Plain text={worker.checkpoint.blocker} /></>}
+          {!!worker.checkpoint.nextSteps && <><Text style={[styles.sub, { color: colors.secondary }]}>{msg("mobile.text.next")}</Text><Plain text={worker.checkpoint.nextSteps} /></>}
+          {!!worker.checkpoint.blocker && <><Text style={[styles.sub, { color: colors.orange }]}>{msg("mobile.text.blocker")}</Text><Plain text={worker.checkpoint.blocker} /></>}
         </Card>
       )}
-      {!!worker.summary && <Card title="Summary"><Markdown text={worker.summary} /></Card>}
+      {!!worker.summary && <Card title={msg("mobile.text.summary")}><Markdown text={worker.summary} /></Card>}
       {(worker.files.length > 0 || worker.readOnly || deps.length > 0) && (
-        <Card title={worker.readOnly ? 'Files · read-only' : 'Files'}>
-          <Text selectable style={[styles.files, { color: colors.text }]}>{worker.files.length ? worker.files.join('\n') : 'Whole checkout'}</Text>
-          {deps.length > 0 && <Text style={[styles.sub, { color: colors.secondary }]}>{`After ${deps.join(', ')}`}</Text>}
+        <Card title={worker.readOnly ? msg("mobile.text.files_read_only") : msg("mobile.text.files")}>
+          <Text selectable style={[styles.files, { color: colors.text }]}>{worker.files.length ? worker.files.join('\n') : msg("mobile.text.whole_checkout")}</Text>
+          {deps.length > 0 && <Text style={[styles.sub, { color: colors.secondary }]}>{msg('mobile.agents.after', { names: deps.join(', ') })}</Text>}
         </Card>
       )}
-      <Text style={[styles.heading, { color: colors.secondary }]}>Transcript</Text>
+      <Text style={[styles.heading, { color: colors.secondary }]}>{msg("mobile.text.transcript")}</Text>
       <WorkerNamesContext.Provider value={names}>
         <Transcript key={worker.id} deviceId={deviceId} sessionId={sessionId} worker={worker} />
       </WorkerNamesContext.Provider>
@@ -114,6 +122,7 @@ function WorkerDetail({ deviceId, sessionId, worker, team }: { deviceId: string;
 }
 
 export default function AgentScreen() {
+  useLocale();
   const { device = '', session = '', kind = 'worker', id = '' } = useLocalSearchParams<{ device: string; session: string; kind: string; id: string }>();
   const colors = useColors();
   const backdrop = useBackdrop();
@@ -129,15 +138,15 @@ export default function AgentScreen() {
           <Stack.Screen options={{ title: subagentName(agent) }} />
           <View style={styles.status}>
             <StatusMark status={agent.status} color={colors.green} />
-            <Text style={[styles.statusText, { color: colors.secondary }]}>{[agent.status, agent.startedAt && elapsedLabel((subagentActive(agent) ? now : agent.updatedAt || now) - agent.startedAt)].filter(Boolean).join(' · ')}</Text>
+            <Text style={[styles.statusText, { color: colors.secondary }]}>{[statusText(agent.status), agent.startedAt && elapsedLabel((subagentActive(agent) ? now : agent.updatedAt || now) - agent.startedAt)].filter(Boolean).join(' · ')}</Text>
           </View>
-          {!!agent.prompt && <Card title="Prompt"><Plain text={agent.prompt} /></Card>}
+          {!!agent.prompt && <Card title={msg("mobile.text.prompt")}><Plain text={agent.prompt} /></Card>}
           <View style={styles.transcript}>{agent.tools.map((t: ToolActivity) => <ToolRow key={t.id} tool={t} />)}</View>
-          {!!agent.response.trim() && <Card title="Reply"><Markdown text={agent.response} /></Card>}
+          {!!agent.response.trim() && <Card title={msg("mobile.text.reply")}><Markdown text={agent.response} /></Card>}
         </>
       )}
       {!worker && !agent && (kind === 'worker' && team === undefined ? <ActivityIndicator style={styles.spinner} />
-        : <Plain text="This agent is no longer listed." color={colors.secondary as string} />)}
+        : <Plain text={msg("mobile.text.this_agent_is_no_longer_listed")} color={colors.secondary as string} />)}
     </ScrollView>
   );
 }

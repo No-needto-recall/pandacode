@@ -1,3 +1,7 @@
+'use no memo';
+// Translation helpers read the subscribed locale; React Compiler must not cache constant-key calls.
+import { useLocale } from '../../../ui/locale.ts';
+import { t as msg } from '../../../i18n.ts';
 // The inbox (home): every computer's tasks in one list. Running, Needs you, Recent,
 // Unsent (the outbox), Bots (every computer's bots; their conversations stay out of the other
 // sections), then Snoozed and Settled folded away. Logic in src/store/inbox.ts.
@@ -18,17 +22,19 @@ import { useBackdrop } from '../../../ui/Backdrop.tsx';
 import { useColors } from '../../../ui/theme.ts';
 import { useInbox } from '../../../ui/useInbox.ts';
 
-const TITLES: Record<Section | 'bots', string> = { bots: 'Bots', running: 'Running', needs: 'Needs you', recent: 'Recent', unsent: 'Unsent', snoozed: 'Snoozed', settled: 'Settled' };
+const TITLES: Record<Section | 'bots', string> = { get bots() { return msg("mobile.text.bots"); }, get running() { return msg("mobile.text.running"); }, get needs() { return msg("mobile.text.needs_you"); }, get recent() { return msg("mobile.text.recent"); }, get unsent() { return msg("mobile.text.unsent"); }, get snoozed() { return msg("mobile.text.snoozed"); }, get settled() { return msg("mobile.text.settled"); } };
 const FOLDED: (Section | 'bots')[] = ['snoozed', 'settled'];
 
 type Item = { type: 'header'; section: Section | 'bots'; count: number; open?: boolean } | { type: 'row'; section: Section; row: Row; last: boolean } | { type: 'bot'; row: BotItem; last: boolean };
 
 /** On the iPhone Duo the sidebar is the inbox, so this route is the New thread pane. */
 export default function InboxRoute() {
+  useLocale();
   return useSplit() ? <NewThread /> : <Inbox />;
 }
 
 function Inbox() {
+  useLocale();
   const colors = useColors();
   const backdrop = useBackdrop();
   const { connected } = useStatus();
@@ -72,14 +78,14 @@ function Inbox() {
 
   const offline = hosts.filter(h => !h.online).map(h => h.name);
   // Cached rows show at once; until their live lists arrive a quiet note says so.
-  const problems = [...Object.values(errors), ...(updating ? ['Updating…'] : connected ? [] : ['Connecting to PandaCode Connect…'])];
-  const empty = !hosts.length ? 'Turn on remote access on a computer signed in to the same GitHub account to see its tasks here.'
-    : !online.length ? `${offline.join(', ')} ${offline.length > 1 ? 'are' : 'is'} offline.`
-    : 'No tasks yet. Start one with New task.';
+  const problems = [...Object.values(errors), ...(updating ? [msg("mobile.text.updating")] : connected ? [] : [msg("mobile.text.connecting_to_pandacode_connect")])];
+  const empty = !hosts.length ? msg("mobile.text.turn_on_remote_access_on_a_computer_signed_in_to_the_same_github_account_to_see_its_tasks_")
+    : !online.length ? msg('mobile.computers.offline', { names: offline.join(', ') })
+    : msg("mobile.text.no_tasks_yet_start_one_with_new_task");
 
   const menu: MenuItem[] = [
-    { label: 'New task', ios: 'square.and.pencil', android: 'edit_square', onPress: () => router.push('/new-task') },
-    { label: 'Refresh', ios: 'arrow.clockwise', android: 'refresh', onPress: () => void refresh() },
+    { label: msg("mobile.text.new_task"), ios: 'square.and.pencil', android: 'edit_square', onPress: () => router.push('/new-task') },
+    { label: msg("mobile.text.refresh"), ios: 'arrow.clockwise', android: 'refresh', onPress: () => void refresh() },
   ];
 
   return (
@@ -89,11 +95,11 @@ function Inbox() {
         headerLeft: Platform.OS === 'ios' ? undefined : () => <Brand />,
         // iOS: a native bar button item (below), which the iPhone Duo moves into its rail. The brand is list content there:
         // a custom header view can't be drawn in the rail and shows up as an empty black circle.
-        headerRight: Platform.OS === 'ios' ? undefined : () => <Menu ios="ellipsis" android="more_vert" color={colors.text} items={menu} label="More">{icon => <View style={styles.more}>{icon}</View>}</Menu>,
+        headerRight: Platform.OS === 'ios' ? undefined : () => <Menu ios="ellipsis" android="more_vert" color={colors.text} items={menu} label={msg("mobile.text.more")}>{icon => <View style={styles.more}>{icon}</View>}</Menu>,
       }} />
       {Platform.OS === 'ios' && (
         <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button icon="square.and.pencil" accessibilityLabel="New task" onPress={() => router.push('/new-task')} />
+          <Stack.Toolbar.Button icon="square.and.pencil" accessibilityLabel={msg("mobile.text.new_task")} onPress={() => router.push('/new-task')} />
         </Stack.Toolbar>
       )}
       <FlatList
@@ -119,6 +125,7 @@ function Inbox() {
 }
 
 function Brand() {
+  useLocale();
   const colors = useColors();
   return (
     <View style={styles.brand} accessibilityRole="header" accessible accessibilityLabel="PandaCode">

@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // Downloads attachments and workspace images (task.attachment / task.workspaceImage) in chunks,
 // one at a time for the whole app: each chunk waits for the thread's own message calls, and
 // background prefetch holds while any download waits. Bytes go to the disk cache
@@ -45,7 +46,7 @@ export function fetchAttachment(deps: AttachmentDeps, deviceId: string, sessionI
   if (running) return running;
   const demo = deps.demo(id);
   const run = demo
-    ? demo.then(uri => uri ?? Promise.reject(new Error('Not in the demo.')))
+    ? demo.then(uri => uri ?? Promise.reject(new Error(msg("mobile.text.not_in_the_demo"))))
     // A cached file doesn't wait in line behind other downloads.
     : loadBlobs().then(() => cachedBlob(key) ?? enqueue(deps, () => download(deps, deviceId, sessionId, source, variant, key)));
   inflight.set(key, run);
@@ -93,5 +94,5 @@ async function download(deps: AttachmentDeps, deviceId: string, sessionId: strin
     if (next.done) return finishBlob(key, next.mime!, next.offset);
   }
   file.reset();
-  throw new Error('That attachment is too large to show here.');
+  throw new Error(msg("mobile.text.that_attachment_is_too_large_to_show_here"));
 }

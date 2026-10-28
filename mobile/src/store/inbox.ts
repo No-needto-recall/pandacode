@@ -1,3 +1,4 @@
+import { t as msg } from '../i18n.ts';
 // The inbox: every computer's tasks in one list, grouped by what they need from you.
 // Pure (tested in node): screens pass store slices in and render the result.
 import type { Bot, TaskSummary, TasksList } from '../connect/types.ts';
@@ -77,8 +78,10 @@ export function glanceOf(live: Live | undefined, task?: TaskSummary, team: TeamR
     return traceText(describeTool(t)).slice(0, CURRENT_TOOL_MAX);
   };
   const activity = tool?.kind === 'tool' ? sentence(tool.tool)
-    : live?.thinking ? 'Thinking'
+    : live?.thinking ? msg("mobile.text.thinking")
     : childTool ? sentence(childTool)
+    : live?.held && teamBusy(team) ? waitingOn(team!.activeWorkers)
+    : live?.activityKey ? msg(live.activityKey)
     : live?.activity && live.activity !== 'Working…' ? live.activity
     : teamBusy(team) && (!live || live.status === 'idle' || live.held) ? waitingOn(team!.activeWorkers) : '';
   const limitedUntil = live?.limited ? live.limited.resetsAt : undefined;
@@ -157,18 +160,18 @@ export function tomorrowMorning(now: number): number {
 /** How long a row has been working or waiting, for the Duo sidebar: `<1m`, `6m`, `1h 5m`, `3d`. */
 export function elapsedLabel(ms: number): string {
   const minutes = Math.floor(Math.max(0, ms) / 60_000);
-  if (minutes < 1) return '<1m';
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1) return msg('mobile.time.less_minute');
+  if (minutes < 60) return msg('mobile.time.minutes', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return minutes % 60 ? `${hours}h ${minutes % 60}m` : `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
+  if (hours < 24) return minutes % 60 ? msg('mobile.time.hours_minutes', { hours, minutes: minutes % 60 }) : msg('mobile.time.hours', { count: hours });
+  return msg('mobile.time.days', { count: Math.floor(hours / 24) });
 }
 
 /** Rows whose title, project, branch or computer contains `query` (case-insensitive). */
 export function filterRows(rows: readonly InboxRow[], query: string): InboxRow[] {
   const q = query.trim().toLowerCase();
   if (!q) return [...rows];
-  return rows.filter(r => [r.task.title, r.task.chat ? 'Chat' : r.task.projectName, r.task.branch, r.computer].some(v => v?.toLowerCase().includes(q)));
+  return rows.filter(r => [r.task.title, r.task.chat ? msg("mobile.text.chat") : r.task.projectName, r.task.branch, r.computer].some(v => v?.toLowerCase().includes(q)));
 }
 
 /** A bot in the inbox's Bots section: `at` is its conversations' latest activity (0 if none listed). */

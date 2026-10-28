@@ -1,4 +1,6 @@
 /// <reference types="node" />
+import { setRuntimeLocale } from '../src/i18n.ts';
+setRuntimeLocale('en'); // Existing fixtures assert the English product copy explicitly.
 // A team (architect) task or subagents keep a task working after the main agent's turn ends.
 import assert from 'node:assert/strict';
 import test from 'node:test';
