@@ -1,0 +1,154 @@
+{
+  "finish.trace.hours": {
+    "en": "{count}h",
+    "zh-CN": "{count}小时"
+  },
+  "finish.trace.minutes": {
+    "en": "{count}m",
+    "zh-CN": "{count}分"
+  },
+  "finish.trace.seconds": {
+    "en": "{count}s",
+    "zh-CN": "{count}秒"
+  },
+  "finish.trace.worked": {
+    "en": "Worked for {duration}",
+    "zh-CN": "处理用时 {duration}"
+  },
+  "finish.trace.workedEstimate": {
+    "en": "Worked for about {duration}",
+    "zh-CN": "处理用时约 {duration}"
+  },
+  "finish.trace.activity": {
+    "en": "Tool activity",
+    "zh-CN": "工具活动"
+  },
+  "finish.trace.truncated": {
+    "en": "[Display truncated]",
+    "zh-CN": "[显示内容已截断]"
+  },
+  "finish.trace.input": {
+    "en": "Input",
+    "zh-CN": "输入"
+  },
+  "finish.trace.output": {
+    "en": "Output",
+    "zh-CN": "输出"
+  },
+  "finish.trace.inputLabel": {
+    "en": "Tool input",
+    "zh-CN": "工具输入"
+  },
+  "finish.trace.outputLabel": {
+    "en": "Tool output",
+    "zh-CN": "工具输出"
+  },
+  "finish.trace.waitingOutput": {
+    "en": "Waiting for output…",
+    "zh-CN": "正在等待输出…"
+  },
+  "finish.trace.waitingDetails": {
+    "en": "Waiting for tool details…",
+    "zh-CN": "正在等待工具详情…"
+  },
+  "finish.trace.noOutput": {
+    "en": "No output was returned.",
+    "zh-CN": "未返回输出。"
+  },
+  "finish.trace.noRecordedOutput": {
+    "en": "No output was recorded.",
+    "zh-CN": "未记录输出。"
+  },
+  "finish.trace.raw": {
+    "en": "Raw input and output",
+    "zh-CN": "原始输入与输出"
+  },
+  "finish.trace.tool": {
+    "en": "Tool",
+    "zh-CN": "工具"
+  },
+  "finish.changes.shared": {
+    "en": "Shared checkout: only files reported by this task are listed; detected conflicts were omitted.",
+    "zh-CN": "共用工作副本：仅列出此任务报告的文件；已省略检测到的冲突。"
+  },
+  "finish.changes.limited": {
+    "en": "Change tracking is limited; some files or details were not captured.",
+    "zh-CN": "变更跟踪受限，部分文件或详情未被记录。"
+  },
+  "finish.changes.viewFile": {
+    "en": "View diff for {path}",
+    "zh-CN": "查看 {path} 的差异"
+  },
+  "finish.changes.one": {
+    "en": "{count} changed file",
+    "zh-CN": "{count} 个已更改文件"
+  },
+  "finish.changes.many": {
+    "en": "{count} changed files",
+    "zh-CN": "{count} 个已更改文件"
+  },
+  "finish.changes.open": {
+    "en": "Open diff",
+    "zh-CN": "查看差异"
+  },
+  "finish.changes.added": {
+    "en": "added",
+    "zh-CN": "新增"
+  },
+  "finish.changes.modified": {
+    "en": "modified",
+    "zh-CN": "修改"
+  },
+  "finish.changes.renamed": {
+    "en": "renamed",
+    "zh-CN": "重命名"
+  },
+  "finish.changes.deleted": {
+    "en": "deleted",
+    "zh-CN": "删除"
+  },
+  "finish.jj.noDescription": {
+    "en": "(no description)",
+    "zh-CN": "（无描述）"
+  },
+  "finish.jj.conflict": {
+    "en": " · conflict",
+    "zh-CN": " · 冲突"
+  },
+  "finish.jj.root": {
+    "en": "root",
+    "zh-CN": "根目录"
+  },
+  "finish.jj.unknown": {
+    "en": "unknown",
+    "zh-CN": "未知"
+  },
+  "finish.jj.noWorkingCopy": {
+    "en": "No working-copy change",
+    "zh-CN": "没有工作副本变更"
+  },
+  "finish.jj.resolve": {
+    "en": "This change has conflicts. Resolve them with {command}.",
+    "zh-CN": "此变更存在冲突。请使用 {command} 解决。"
+  },
+  "finish.jj.changedFiles": {
+    "en": "{count} changed files",
+    "zh-CN": "{count} 个已更改文件"
+  },
+  "finish.jj.empty": {
+    "en": "No changes in this change",
+    "zh-CN": "此变更中没有文件改动"
+  },
+  "finish.jj.new": {
+    "en": "New",
+    "zh-CN": "新建"
+  },
+  "finish.jj.commit": {
+    "en": "Commit",
+    "zh-CN": "提交"
+  },
+  "finish.jj.log": {
+    "en": "Log",
+    "zh-CN": "历史记录"
+  }
+}

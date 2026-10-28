@@ -1,0 +1,31 @@
+import { messages } from './messages.ts';
+
+export type Locale = 'zh-CN' | 'en';
+export type MessageKey = keyof typeof messages;
+export type Parameters = Readonly<Record<string, string | number>>;
+export const DEFAULT_LOCALE: Locale = 'zh-CN';
+
+export function isLocale(value: unknown): value is Locale {
+  return value === 'zh-CN' || value === 'en';
+}
+
+export function translate(locale: Locale, key: MessageKey, params: Parameters = {}): string {
+  const entry = messages[key];
+  const text = entry?.[locale] || entry?.en || key;
+  return text.replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g, (placeholder, name: string) =>
+    Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : placeholder);
+}
+
+export function formatDate(locale: Locale, value: Date | number, options: Intl.DateTimeFormatOptions = {}): string {
+  const timestamp = value instanceof Date ? value.getTime() : new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return translate(locale, 'common.date.invalid');
+  return new Intl.DateTimeFormat(locale, options).format(timestamp);
+}
+
+export function formatNumber(locale: Locale, value: number, options: Intl.NumberFormatOptions = {}): string {
+  return new Intl.NumberFormat(locale, options).format(value);
+}
+
+export function formatRelativeTime(locale: Locale, value: number, unit: Intl.RelativeTimeFormatUnit): string {
+  return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(value, unit);
+}

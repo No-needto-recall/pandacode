@@ -1,0 +1,15 @@
+{
+  "common.forkLabel": { "en": "Localization fork", "zh-CN": "本地化分支" },
+  "common.forkSource": { "en": "Fork source", "zh-CN": "分支源码" },
+  "common.date.invalid": { "en": "Invalid Date", "zh-CN": "无效日期" },
+  "common.language": { "en": "Language", "zh-CN": "语言" },
+  "common.language.description": { "en": "Choose the language used by PandaCode.", "zh-CN": "选择 PandaCode 的界面语言。" },
+  "common.language.chinese": { "en": "简体中文", "zh-CN": "简体中文" },
+  "common.language.english": { "en": "English", "zh-CN": "English" },
+  "common.cancel": { "en": "Cancel", "zh-CN": "取消" },
+  "common.save": { "en": "Save", "zh-CN": "保存" },
+  "common.close": { "en": "Close", "zh-CN": "关闭" },
+  "common.retry": { "en": "Retry", "zh-CN": "重试" },
+  "common.loading": { "en": "Loading…", "zh-CN": "正在加载…" },
+  "common.app.description": { "en": "PandaCode — a local workspace for coding agents.", "zh-CN": "PandaCode — 本地 AI 编程智能体工作台。" }
+}

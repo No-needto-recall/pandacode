@@ -1,0 +1,1338 @@
+{
+  "bots.connect.blurb_web": {
+    "en": "A private chat page on this computer",
+    "zh-CN": "此电脑上的私密聊天页面"
+  },
+  "bots.connect.blurb_telegram": {
+    "en": "Message it from your phone",
+    "zh-CN": "用手机给机器人发消息"
+  },
+  "bots.connect.blurb_slack": {
+    "en": "DM it or @mention it in channels",
+    "zh-CN": "私信机器人，或在频道中 @提及它"
+  },
+  "bots.connect.blurb_discord": {
+    "en": "DM it or @mention it in a server",
+    "zh-CN": "私信机器人，或在服务器中 @提及它"
+  },
+  "bots.connect.blurb_whatsapp": {
+    "en": "Via Meta’s Cloud API and a tunnel",
+    "zh-CN": "通过 Meta 云 API 和隧道连接"
+  },
+  "bots.connect.time_Instant": {
+    "en": "Instant",
+    "zh-CN": "即刻可用"
+  },
+  "bots.connect.time_2_min": {
+    "en": "2 min",
+    "zh-CN": "2 分钟"
+  },
+  "bots.connect.time_4_min": {
+    "en": "4 min",
+    "zh-CN": "4 分钟"
+  },
+  "bots.connect.time_15_min": {
+    "en": "15 min",
+    "zh-CN": "15 分钟"
+  },
+  "bots.connect.channel": {
+    "en": "Channel",
+    "zh-CN": "频道"
+  },
+  "bots.connect.copy": {
+    "en": "Copy",
+    "zh-CN": "复制"
+  },
+  "bots.connect.botfather": {
+    "en": "BotFather is Telegram’s official bot for creating bots.",
+    "zh-CN": "BotFather 是 Telegram 官方提供的机器人创建工具。"
+  },
+  "bots.connect.open_botfather": {
+    "en": "Open BotFather",
+    "zh-CN": "打开 BotFather"
+  },
+  "bots.connect.newbot": {
+    "en": "Send this to BotFather, then answer its two questions: a display name (for example “{name}”) and a username ending in “bot”.",
+    "zh-CN": "将此命令发给 BotFather，然后回答两个问题：显示名称（例如“{name}”），以及以“bot”结尾的用户名。"
+  },
+  "bots.connect.send": {
+    "en": "Send",
+    "zh-CN": "发送"
+  },
+  "bots.connect.username": {
+    "en": "Username idea",
+    "zh-CN": "用户名示例"
+  },
+  "bots.connect.token_warning": {
+    "en": "It looks like 123456789:AAE…. Anyone with it can control the bot, so keep it private.",
+    "zh-CN": "令牌形如 123456789:AAE…。持有令牌的任何人都能控制机器人，请妥善保密。"
+  },
+  "bots.connect.slack_create": {
+    "en": "This opens Slack with the name, permissions, events and Socket Mode filled in. Pick your workspace, review, then press Create.",
+    "zh-CN": "打开 Slack 后，名称、权限、事件和 Socket Mode 均已填好。选择工作区，检查配置，然后点击创建（Create）。"
+  },
+  "bots.connect.slack_button": {
+    "en": "Create Slack app",
+    "zh-CN": "创建 Slack 应用"
+  },
+  "bots.connect.slack_install": {
+    "en": "In the app’s page, open Install App → Install to Workspace → Allow. Copy the Bot User OAuth Token.",
+    "zh-CN": "在应用页面依次点击安装应用（Install App）→ 安装到工作区（Install to Workspace）→ 允许（Allow），然后复制机器人用户 OAuth 令牌（Bot User OAuth Token）。"
+  },
+  "bots.connect.slack_app_token": {
+    "en": "Open Basic Information → App-Level Tokens → Generate Token and Scopes. Name it anything, add the scope connections:write, generate, and copy it.",
+    "zh-CN": "依次打开基本信息（Basic Information）→ 应用级令牌（App-Level Tokens）→ 生成令牌及权限范围（Generate Token and Scopes）。名称可任意填写，添加 connections:write 权限范围，生成并复制令牌。"
+  },
+  "bots.connect.discord_create": {
+    "en": "Press New Application, name it “{name}”, and accept the terms.",
+    "zh-CN": "点击新建应用（New Application），将其命名为“{name}”，并接受条款。"
+  },
+  "bots.connect.discord_portal": {
+    "en": "Open Developer Portal",
+    "zh-CN": "打开开发者门户（Developer Portal）"
+  },
+  "bots.connect.discord_read": {
+    "en": "Open the Bot tab, turn on Message Content Intent under Privileged Gateway Intents, and press Save Changes.",
+    "zh-CN": "打开机器人（Bot）选项卡，在特权网关意图（Privileged Gateway Intents）下启用消息内容意图（Message Content Intent），然后点击保存更改（Save Changes）。"
+  },
+  "bots.connect.discord_token": {
+    "en": "Still on the Bot tab, press Reset Token, confirm, and copy it. (The Client Secret and Public Key are different values.)",
+    "zh-CN": "仍在机器人（Bot）选项卡中，点击重置令牌（Reset Token），确认后复制令牌。注意：客户端密钥（Client Secret）和公钥（Public Key）是不同的值。"
+  },
+  "bots.connect.discord_invite": {
+    "en": "After you connect, an Add to server button appears here with the right permissions already chosen.",
+    "zh-CN": "连接成功后，这里会出现“添加到服务器”按钮，并已选好所需权限。"
+  },
+  "bots.connect.meta_create": {
+    "en": "Choose Other → Business, then add the WhatsApp product. Meta gives you a free test number.",
+    "zh-CN": "选择其他（Other）→ 商业（Business），然后添加 WhatsApp 产品。Meta 会提供一个免费测试号码。"
+  },
+  "bots.connect.meta_portal": {
+    "en": "Open Meta for Developers",
+    "zh-CN": "打开 Meta 开发者平台"
+  },
+  "bots.connect.meta_phone": {
+    "en": "In WhatsApp → API Setup, copy the Phone number ID (a long number, not the phone number itself). Add your own phone under To so the test number may message you.",
+    "zh-CN": "在 WhatsApp → API 设置（API Setup）中，复制电话号码 ID（Phone number ID；一串长数字，并非电话号码本身）。在收件人（To）下添加您的手机号码，以便测试号码向您发消息。"
+  },
+  "bots.connect.phone_id": {
+    "en": "Phone number ID",
+    "zh-CN": "电话号码 ID（Phone number ID）"
+  },
+  "bots.connect.meta_access": {
+    "en": "The temporary token on API Setup works for 24 hours. For one that lasts, create a system user with WhatsApp permissions and generate its token.",
+    "zh-CN": "API 设置（API Setup）中的临时令牌有效期为 24 小时。如需长期使用，请创建具有 WhatsApp 权限的系统用户，并生成其令牌。"
+  },
+  "bots.connect.system_users": {
+    "en": "System users",
+    "zh-CN": "系统用户（System users）"
+  },
+  "bots.connect.meta_secret": {
+    "en": "Open App settings → Basic → App secret → Show. PandaCode uses it to check that messages really come from Meta.",
+    "zh-CN": "依次打开应用设置（App settings）→ 基本（Basic）→ 应用密钥（App secret）→ 显示（Show）。PandaCode 使用它验证消息确实来自 Meta。"
+  },
+  "bots.connect.meta_next": {
+    "en": "After you connect, the steps for the webhook (with everything to copy) appear on the channel.",
+    "zh-CN": "连接成功后，频道中会显示 Webhook 配置步骤和需要复制的全部内容。"
+  },
+  "bots.connect.works": {
+    "en": "Works — connects as {name}",
+    "zh-CN": "验证成功，以 {name} 身份连接"
+  },
+  "bots.connect.storage": {
+    "en": "Tokens are stored securely on this computer. The agent never sees them.",
+    "zh-CN": "令牌安全地保存在此电脑上，智能体无法看到它们。"
+  },
+  "bots.connect.connect": {
+    "en": "Connect {channel}",
+    "zh-CN": "连接 {channel}"
+  },
+  "bots.connect.pair": {
+    "en": "Send it any message. It replies with a four-digit code, which also appears under People below. Press Approve and you’re talking.",
+    "zh-CN": "向机器人发送任意消息，它会回复一个四位数配对码，配对码也会显示在下方“联系人”中。点击“批准”后即可开始对话。"
+  },
+  "bots.connect.open_telegram": {
+    "en": "Open {name} in Telegram",
+    "zh-CN": "在 Telegram 中打开 {name}"
+  },
+  "bots.connect.open_slack": {
+    "en": "Open Slack",
+    "zh-CN": "打开 Slack"
+  },
+  "bots.connect.slack_chat": {
+    "en": "Find the bot under Apps in the sidebar and message it, or /invite it to a channel and @mention it.",
+    "zh-CN": "在侧栏的应用（Apps）中找到机器人并给它发消息，或使用 /invite 将它邀请到频道后 @提及它。"
+  },
+  "bots.connect.add_server": {
+    "en": "Add to a server",
+    "zh-CN": "添加到服务器"
+  },
+  "bots.connect.authorize": {
+    "en": "Choose a server you manage and press Authorize.",
+    "zh-CN": "选择您管理的服务器，然后点击授权（Authorize）。"
+  },
+  "bots.connect.tunnel": {
+    "en": "Meta delivers messages over HTTPS, so this computer needs a public address. The quickest is a free Cloudflare tunnel; run these in Terminal and keep the second one open:",
+    "zh-CN": "Meta 通过 HTTPS 推送消息，因此此电脑需要一个公网地址。最快的方式是使用免费的 Cloudflare 隧道；在终端运行以下命令，并保持第二条命令运行："
+  },
+  "bots.connect.tunnel_address": {
+    "en": "It prints an address ending in trycloudflare.com. That address changes each time the tunnel starts; for a fixed one, use Tailscale Funnel instead:",
+    "zh-CN": "命令会输出一个以 trycloudflare.com 结尾的地址。每次启动隧道时地址都会变化；如需固定地址，可改用 Tailscale Funnel："
+  },
+  "bots.connect.webhook_paste": {
+    "en": "In Meta, open WhatsApp → Configuration → Webhook → Edit and paste:",
+    "zh-CN": "在 Meta 中依次打开 WhatsApp → 配置（Configuration）→ Webhook → 编辑（Edit），然后粘贴以下内容："
+  },
+  "bots.connect.webhook_verify": {
+    "en": "Press Verify and save, then under Webhook fields press Manage and subscribe to messages. The status above turns to “Webhook verified”.",
+    "zh-CN": "点击验证并保存（Verify and save），然后在 Webhook 字段（Webhook fields）下点击管理（Manage），订阅 messages。上方状态将变为“Webhook 已验证”。"
+  },
+  "bots.connect.message_whatsapp": {
+    "en": "Message your WhatsApp number",
+    "zh-CN": "给您的 WhatsApp 号码发消息"
+  },
+  "bots.connect.message_phone": {
+    "en": "Message your WhatsApp business number from your phone.",
+    "zh-CN": "用手机向您的 WhatsApp 商业号码发消息。"
+  },
+  "bots.connect.how": {
+    "en": "How to use",
+    "zh-CN": "使用方法"
+  },
+  "bots.connect.finish": {
+    "en": "Finish setting up",
+    "zh-CN": "完成设置"
+  },
+  "bots.connect.rotate_title": {
+    "en": "Create a new web chat link?",
+    "zh-CN": "创建新的网页聊天链接？"
+  },
+  "bots.connect.rotate_body": {
+    "en": "Pages opened with the current link stop working right away. Use this if the link was shared by mistake.",
+    "zh-CN": "使用当前链接打开的页面会立即失效。如果链接被误分享，请使用此操作。"
+  },
+  "bots.connect.new_link": {
+    "en": "New link",
+    "zh-CN": "新链接"
+  },
+  "bots.connect.rotated": {
+    "en": "New link copied",
+    "zh-CN": "已复制新链接"
+  },
+  "bots.connect.address_saved": {
+    "en": "Address saved",
+    "zh-CN": "地址已保存"
+  },
+  "bots.connect.tailscale": {
+    "en": "Install Tailscale on this computer and your phone and sign in to both. Then run this in Terminal:",
+    "zh-CN": "在此电脑和手机上安装 Tailscale，并在两端登录同一账户。然后在终端运行此命令："
+  },
+  "bots.connect.tailscale_address": {
+    "en": "It shows an address like https://your-mac.tailnet.ts.net.",
+    "zh-CN": "命令会显示形如 https://your-mac.tailnet.ts.net 的地址。"
+  },
+  "bots.connect.caption_install": {
+    "en": "Install",
+    "zh-CN": "安装"
+  },
+  "bots.connect.caption_start": {
+    "en": "Start",
+    "zh-CN": "启动"
+  },
+  "bots.connect.caption_or": {
+    "en": "Or",
+    "zh-CN": "或"
+  },
+  "bots.connect.caption_callback_url": {
+    "en": "Callback URL",
+    "zh-CN": "回调 URL"
+  },
+  "bots.connect.caption_verify_token": {
+    "en": "Verify token",
+    "zh-CN": "验证令牌"
+  },
+  "bots.connect.caption_run": {
+    "en": "Run",
+    "zh-CN": "运行"
+  },
+  "bots.connect.connected": {
+    "en": "{channel} connected",
+    "zh-CN": "已连接 {channel}"
+  },
+  "bots.panels.soon": {
+    "en": "in a moment",
+    "zh-CN": "即将"
+  },
+  "bots.panels.now": {
+    "en": "just now",
+    "zh-CN": "刚刚"
+  },
+  "bots.panels.app": {
+    "en": "This app",
+    "zh-CN": "此应用"
+  },
+  "bots.panels.scheduled": {
+    "en": "Scheduled work",
+    "zh-CN": "定时工作"
+  },
+  "bots.panels.removed": {
+    "en": "Removed channel",
+    "zh-CN": "已移除的频道"
+  },
+  "bots.panels.working": {
+    "en": "Working…",
+    "zh-CN": "正在工作…"
+  },
+  "bots.panels.learned": {
+    "en": "Learned",
+    "zh-CN": "自行学到"
+  },
+  "bots.panels.added": {
+    "en": "Added by you",
+    "zh-CN": "由您添加"
+  },
+  "bots.panels.once": {
+    "en": "Once",
+    "zh-CN": "仅一次"
+  },
+  "bots.panels.every_day": {
+    "en": "Every day",
+    "zh-CN": "每天"
+  },
+  "bots.panels.weekdays": {
+    "en": "Weekdays",
+    "zh-CN": "工作日"
+  },
+  "bots.panels.interval": {
+    "en": "Every few minutes or hours",
+    "zh-CN": "每隔几分钟或几小时"
+  },
+  "bots.panels.off": {
+    "en": "Off",
+    "zh-CN": "已关闭"
+  },
+  "bots.panels.starting": {
+    "en": "Starting…",
+    "zh-CN": "正在启动…"
+  },
+  "bots.panels.unblock": {
+    "en": "Unblock",
+    "zh-CN": "解除屏蔽"
+  },
+  "bots.panels.remove": {
+    "en": "Remove",
+    "zh-CN": "移除"
+  },
+  "bots.panels.add_another": {
+    "en": "Add another channel",
+    "zh-CN": "添加其他频道"
+  },
+  "bots.panels.add_channel": {
+    "en": "Add a channel",
+    "zh-CN": "添加频道"
+  },
+  "bots.panels.missing_skill": {
+    "en": "Not in the library",
+    "zh-CN": "不在技能库中"
+  },
+  "bots.panels.forgotten": {
+    "en": "Forgotten",
+    "zh-CN": "已遗忘"
+  },
+  "bots.panels.started": {
+    "en": "Started",
+    "zh-CN": "已启动"
+  },
+  "bots.panels.schedule_deleted": {
+    "en": "Schedule deleted",
+    "zh-CN": "定时任务已删除"
+  },
+  "bots.panels.rule_deleted": {
+    "en": "Rule deleted",
+    "zh-CN": "规则已删除"
+  },
+  "bots.panels.remove_title": {
+    "en": "Remove this channel?",
+    "zh-CN": "移除此频道？"
+  },
+  "bots.panels.channel_removed": {
+    "en": "Channel removed",
+    "zh-CN": "频道已移除"
+  },
+  "bots.panels.paired": {
+    "en": "Paired",
+    "zh-CN": "已配对"
+  },
+  "bots.panels.blocked": {
+    "en": "Blocked",
+    "zh-CN": "已屏蔽"
+  },
+  "bots.panels.removed_done": {
+    "en": "Removed",
+    "zh-CN": "已移除"
+  },
+  "bots.panels.remembered": {
+    "en": "Remembered",
+    "zh-CN": "已记住"
+  },
+  "bots.panels.rule_added": {
+    "en": "Rule added",
+    "zh-CN": "规则已添加"
+  },
+  "bots.panels.schedule_added": {
+    "en": "Schedule added",
+    "zh-CN": "定时任务已添加"
+  },
+  "bots.panels.every_hours": {
+    "en": "Every {count} hours",
+    "zh-CN": "每 {count} 小时"
+  },
+  "bots.panels.every_minutes": {
+    "en": "Every {count} minutes",
+    "zh-CN": "每 {count} 分钟"
+  },
+  "bots.panels.daily_at": {
+    "en": "Daily at {time}",
+    "zh-CN": "每天 {time}"
+  },
+  "bots.panels.weekdays_at": {
+    "en": "Weekdays at {time}",
+    "zh-CN": "工作日 {time}"
+  },
+  "bots.panels.once_at": {
+    "en": "Once, {time}",
+    "zh-CN": "仅一次，{time}"
+  },
+  "bots.panels.forget_memory": {
+    "en": "Forget this memory",
+    "zh-CN": "遗忘此记忆"
+  },
+  "bots.panels.forget": {
+    "en": "Forget",
+    "zh-CN": "遗忘"
+  },
+  "bots.panels.schedule_prompt": {
+    "en": "Check my GitHub notifications and summarize anything that needs me",
+    "zh-CN": "检查我的 GitHub 通知，汇总需要我处理的事项"
+  },
+  "bots.panels.schedule_name": {
+    "en": "Morning digest",
+    "zh-CN": "晨间摘要"
+  },
+  "bots.panels.run_now": {
+    "en": "Run now",
+    "zh-CN": "立即运行"
+  },
+  "bots.panels.delete": {
+    "en": "Delete",
+    "zh-CN": "删除"
+  },
+  "bots.panels.new_link": {
+    "en": "New link",
+    "zh-CN": "新链接"
+  },
+  "bots.panels.new_link_warning": {
+    "en": "New link: pages opened with the old link stop working",
+    "zh-CN": "新链接：使用旧链接打开的页面会立即失效"
+  },
+  "bots.panels.add_schedule": {
+    "en": "Add schedule",
+    "zh-CN": "添加定时任务"
+  },
+  "bots.panels.next_run": {
+    "en": "next {time}",
+    "zh-CN": "下次：{time}"
+  },
+  "bots.panels.schedule_on": {
+    "en": "{name} on",
+    "zh-CN": "启用 {name}"
+  },
+  "bots.panels.run_schedule": {
+    "en": "Run {name} now",
+    "zh-CN": "立即运行 {name}"
+  },
+  "bots.panels.delete_schedule": {
+    "en": "Delete {name}",
+    "zh-CN": "删除 {name}"
+  },
+  "bots.panels.channel_on": {
+    "en": "{name} on",
+    "zh-CN": "启用 {name}"
+  },
+  "bots.panels.remove_channel": {
+    "en": "Remove {name}",
+    "zh-CN": "移除 {name}"
+  },
+  "bots.panels.delete_rule": {
+    "en": "Delete rule {pattern}",
+    "zh-CN": "删除规则 {pattern}"
+  },
+  "bots.panels.use_skill": {
+    "en": "Use {name}",
+    "zh-CN": "使用 {name}"
+  },
+  "bots.panels.use_mcp": {
+    "en": "Use MCP server {name}",
+    "zh-CN": "使用 MCP 服务器 {name}"
+  },
+  "bots.panels.people": {
+    "en": "People",
+    "zh-CN": "联系人"
+  },
+  "bots.panels.pair_code": {
+    "en": "code {code}",
+    "zh-CN": "配对码 {code}"
+  },
+  "bots.panels.approved": {
+    "en": "approved",
+    "zh-CN": "已批准"
+  },
+  "bots.panels.allow": {
+    "en": "Allow",
+    "zh-CN": "允许"
+  },
+  "bots.panels.skill_files": {
+    "en": "Files in the bot's workspace",
+    "zh-CN": "机器人工作区中的文件"
+  },
+  "bots.panels.skill_brief": {
+    "en": "In the bot's brief",
+    "zh-CN": "机器人任务说明中"
+  },
+  "bots.panels.mcp_source": {
+    "en": "From {source}",
+    "zh-CN": "来自 {source}"
+  },
+  "bots.panels.mcp_unsupported": {
+    "en": "Unsupported for this bot's harness",
+    "zh-CN": "此机器人的运行器不支持"
+  },
+  "bots.panels.skills": {
+    "en": "Skills",
+    "zh-CN": "技能"
+  },
+  "bots.panels.mcp_servers": {
+    "en": "MCP servers",
+    "zh-CN": "MCP 服务器"
+  },
+  "bots.panels.remove_body": {
+    "en": "{name} stops listening on {channel}, and its saved tokens are deleted.",
+    "zh-CN": "{name} 将停止监听 {channel}，保存的令牌也会被删除。"
+  },
+  "bots.shared.name_example": {
+    "en": "e.g. launch",
+    "zh-CN": "例如：发布"
+  },
+  "bots.shared.new": {
+    "en": "New channel",
+    "zh-CN": "新建频道"
+  },
+  "bots.shared.you": {
+    "en": "You",
+    "zh-CN": "您"
+  },
+  "bots.shared.bot": {
+    "en": "Bot",
+    "zh-CN": "机器人"
+  },
+  "bots.shared.assigned": {
+    "en": "Assigned to {name}",
+    "zh-CN": "已分配给 {name}"
+  },
+  "bots.shared.working": {
+    "en": "{names} are working",
+    "zh-CN": "{names} 正在工作"
+  },
+  "bots.shared.no_members": {
+    "en": "No members",
+    "zh-CN": "没有成员"
+  },
+  "bots.shared.archived": {
+    "en": "Deleted channel. Preview only.",
+    "zh-CN": "已归档频道，仅供预览"
+  },
+  "bots.shared.empty": {
+    "en": "No messages yet. @mention a bot or write to the lead.",
+    "zh-CN": "暂无消息。@提及一个机器人，或给负责人发送消息。"
+  },
+  "bots.shared.add_members": {
+    "en": "Add bots in channel settings to start work.",
+    "zh-CN": "在频道设置中添加机器人，即可开始工作。"
+  },
+  "bots.shared.stop": {
+    "en": "Stop {names}",
+    "zh-CN": "停止 {names}"
+  },
+  "bots.shared.failed_message": {
+    "en": "This message failed.",
+    "zh-CN": "此消息执行失败。"
+  },
+  "bots.shared.stopped_message": {
+    "en": "This message stopped.",
+    "zh-CN": "此消息已停止。"
+  },
+  "bots.shared.reassign": {
+    "en": "Reassign",
+    "zh-CN": "重新分配"
+  },
+  "bots.shared.keyboard": {
+    "en": "Enter to send. Shift Enter for a new line.",
+    "zh-CN": "按 Enter 发送，按 Shift+Enter 换行。"
+  },
+  "bots.shared.prompt": {
+    "en": "Message {name}… @mention up to two bots",
+    "zh-CN": "向 {name} 发消息…最多可 @提及两个机器人"
+  },
+  "bots.shared.status_queued": {
+    "en": "Queued",
+    "zh-CN": "已排队"
+  },
+  "bots.shared.status_in_progress": {
+    "en": "In progress",
+    "zh-CN": "进行中"
+  },
+  "bots.shared.status_completed": {
+    "en": "Completed",
+    "zh-CN": "已完成"
+  },
+  "bots.shared.status_failed": {
+    "en": "Failed",
+    "zh-CN": "失败"
+  },
+  "bots.shared.status_stopped": {
+    "en": "Stopped",
+    "zh-CN": "已停止"
+  },
+  "bots.thread.working_0": {
+    "en": "Working on it…",
+    "zh-CN": "正在处理…"
+  },
+  "bots.thread.working_1": {
+    "en": "Thinking it through…",
+    "zh-CN": "正在仔细思考…"
+  },
+  "bots.thread.working_2": {
+    "en": "Connecting the dots…",
+    "zh-CN": "正在梳理关联…"
+  },
+  "bots.thread.working_3": {
+    "en": "Checking the details…",
+    "zh-CN": "正在核对细节…"
+  },
+  "bots.thread.working_4": {
+    "en": "Putting the answer together…",
+    "zh-CN": "正在整理答案…"
+  },
+  "bots.thread.working_5": {
+    "en": "Making sense of it…",
+    "zh-CN": "正在理清思路…"
+  },
+  "bots.thread.working_6": {
+    "en": "One step at a time…",
+    "zh-CN": "正在逐步推进…"
+  },
+  "bots.thread.working_7": {
+    "en": "Tiny gears are turning…",
+    "zh-CN": "小齿轮正在转动…"
+  },
+  "bots.thread.working_8": {
+    "en": "Consulting the inner council…",
+    "zh-CN": "正在内部讨论…"
+  },
+  "bots.thread.working_9": {
+    "en": "Cooking up something useful…",
+    "zh-CN": "正在准备有用的内容…"
+  },
+  "bots.thread.next_model": {
+    "en": "{running} finishes this turn. {next} starts with the next one.",
+    "zh-CN": "本轮由 {running} 完成，下一轮开始使用 {next}。"
+  },
+  "bots.thread.view_settings": {
+    "en": "View bot settings",
+    "zh-CN": "查看机器人设置"
+  },
+  "bots.thread.settings_hint": {
+    "en": "Profile, memory, schedules, channels and rules",
+    "zh-CN": "资料、记忆、定时任务、频道和规则"
+  },
+  "bots.thread.settings": {
+    "en": "Settings",
+    "zh-CN": "设置"
+  },
+  "bots.thread.after_turn": {
+    "en": "After this turn",
+    "zh-CN": "本轮结束后"
+  },
+  "bots.thread.toggle_name": {
+    "en": "{action} {name}",
+    "zh-CN": "{action} {name}"
+  },
+  "bots.thread.resume_hint": {
+    "en": "Resume: schedules, check-ins and channels continue",
+    "zh-CN": "恢复：继续定时任务、定期检查和频道消息"
+  },
+  "bots.thread.pause_hint": {
+    "en": "Pause: stop work and hold schedules and messages",
+    "zh-CN": "暂停：停止工作，暂缓定时任务和消息"
+  },
+  "bots.thread.named_settings": {
+    "en": "{name} settings",
+    "zh-CN": "{name} 的设置"
+  },
+  "bots.thread.suggest_0": {
+    "en": "Research the latest news on a topic I care about.",
+    "zh-CN": "研究我关心的话题的最新动态。"
+  },
+  "bots.thread.suggest_1": {
+    "en": "Compare three options and recommend one.",
+    "zh-CN": "比较三个方案，并推荐其中一个。"
+  },
+  "bots.thread.suggest_2": {
+    "en": "Draft a short post about what I shipped this week.",
+    "zh-CN": "根据我本周发布的内容起草一篇短文。"
+  },
+  "bots.thread.suggest_3": {
+    "en": "Tighten this paragraph for me.",
+    "zh-CN": "帮我精简这段文字。"
+  },
+  "bots.thread.suggest_4": {
+    "en": "Summarize my spending categories this month.",
+    "zh-CN": "汇总我本月的支出分类。"
+  },
+  "bots.thread.suggest_5": {
+    "en": "Remind me of bills due this week.",
+    "zh-CN": "提醒我本周到期的账单。"
+  },
+  "bots.thread.suggest_6": {
+    "en": "Review the latest changes for bugs.",
+    "zh-CN": "检查最新改动中是否存在缺陷。"
+  },
+  "bots.thread.suggest_7": {
+    "en": "Explain how this project is structured.",
+    "zh-CN": "解释这个项目的结构。"
+  },
+  "bots.thread.suggest_8": {
+    "en": "Draft a friendly reply to a customer question.",
+    "zh-CN": "针对客户的问题起草一份友好的回复。"
+  },
+  "bots.thread.suggest_9": {
+    "en": "Sort these messages by urgency.",
+    "zh-CN": "按紧急程度整理这些消息。"
+  },
+  "bots.thread.suggest_10": {
+    "en": "Remember that I prefer short, direct answers.",
+    "zh-CN": "记住我更喜欢简短直接的回答。"
+  },
+  "bots.thread.suggest_11": {
+    "en": "Every weekday at 9, send me a summary of what changed.",
+    "zh-CN": "每个工作日早上 9 点，向我发送变更摘要。"
+  },
+  "bots.thread.suggest_12": {
+    "en": "What can you help me with?",
+    "zh-CN": "您能帮我做些什么？"
+  },
+  "bots.thread.instructions": {
+    "en": "Instructions",
+    "zh-CN": "指令"
+  },
+  "bots.thread.memory": {
+    "en": "Memory",
+    "zh-CN": "记忆"
+  },
+  "bots.thread.schedules": {
+    "en": "Schedules",
+    "zh-CN": "定时任务"
+  },
+  "bots.thread.connections": {
+    "en": "Connections",
+    "zh-CN": "连接"
+  },
+  "bots.thread.ready": {
+    "en": "{name} is ready.",
+    "zh-CN": "{name} 已准备就绪。"
+  },
+  "bots.thread.setup": {
+    "en": "Set up {name}",
+    "zh-CN": "设置 {name}"
+  },
+  "bots.thread.today": {
+    "en": "Today {time}",
+    "zh-CN": "今天 {time}"
+  },
+  "bots.thread.yesterday": {
+    "en": "Yesterday {time}",
+    "zh-CN": "昨天 {time}"
+  },
+  "bots.thread.remove_reaction": {
+    "en": "Remove your {emoji} reaction",
+    "zh-CN": "移除您的 {emoji} 表情回应"
+  },
+  "bots.thread.react": {
+    "en": "React with {emoji}",
+    "zh-CN": "用 {emoji} 回应"
+  },
+  "bots.thread.collaboration": {
+    "en": "{count} messages with {names}",
+    "zh-CN": "与 {names} 的 {count} 条消息"
+  },
+  "bots.thread.sent": {
+    "en": "Messaged {name}",
+    "zh-CN": "已向 {name} 发消息"
+  },
+  "bots.thread.received": {
+    "en": "Message from {name}",
+    "zh-CN": "来自 {name} 的消息"
+  },
+  "bots.thread.update": {
+    "en": "Update from {name}",
+    "zh-CN": "来自 {name} 的进展"
+  },
+  "bots.thread.steps": {
+    "en": "{count} steps",
+    "zh-CN": "{count} 个步骤"
+  },
+  "bots.thread.failed": {
+    "en": "{count} failed",
+    "zh-CN": "{count} 项失败"
+  },
+  "bots.thread.new_messages": {
+    "en": "{count} new messages",
+    "zh-CN": "{count} 条新消息"
+  },
+  "bots.thread.replying": {
+    "en": "Replying to {name}",
+    "zh-CN": "正在回复 {name}"
+  },
+  "bots.thread.you": {
+    "en": "You",
+    "zh-CN": "您"
+  },
+  "bots.thread.bot": {
+    "en": "Bot",
+    "zh-CN": "机器人"
+  },
+  "bots.thread.waiting": {
+    "en": "Waiting for {provider}…",
+    "zh-CN": "正在等待 {provider}…"
+  },
+  "bots.thread.working_status": {
+    "en": "{name} is working: {status}",
+    "zh-CN": "{name} 正在工作：{status}"
+  },
+  "bots.thread.status_queued": {
+    "en": "Queued",
+    "zh-CN": "已排队"
+  },
+  "bots.thread.status_in_progress": {
+    "en": "In progress",
+    "zh-CN": "进行中"
+  },
+  "bots.thread.status_completed": {
+    "en": "Completed",
+    "zh-CN": "已完成"
+  },
+  "bots.thread.status_failed": {
+    "en": "Failed",
+    "zh-CN": "失败"
+  },
+  "bots.thread.status_stopped": {
+    "en": "Stopped",
+    "zh-CN": "已停止"
+  },
+  "bots.settings.limit": {
+    "en": "{harness} usage limit reached",
+    "zh-CN": "{harness} 已达到用量上限"
+  },
+  "bots.settings.provider_error": {
+    "en": "{harness} provider error",
+    "zh-CN": "{harness} 服务商出错"
+  },
+  "bots.settings.hold_until": {
+    "en": "Your message has not started. Send it to another model now, or wait until {time}.",
+    "zh-CN": "您的消息尚未开始处理。可立即发送给其他模型，或等待至 {time}。"
+  },
+  "bots.settings.limit_back": {
+    "en": "Usage limit ended. Switched back to {model}.",
+    "zh-CN": "用量限制已解除，已切回 {model}。"
+  },
+  "bots.settings.limit_switch": {
+    "en": "Usage limit reached. Switched to {model}.",
+    "zh-CN": "已达到用量上限，已切换至 {model}。"
+  },
+  "bots.settings.error_back": {
+    "en": "Switched back to {model} after the provider error.",
+    "zh-CN": "服务商错误恢复后，已切回 {model}。"
+  },
+  "bots.settings.error_switch": {
+    "en": "Provider error. Switched to {model}.",
+    "zh-CN": "服务商出错，已切换至 {model}。"
+  },
+  "bots.settings.hold_manual": {
+    "en": "Your message has not started. Send it to another model now, or dismiss this hold and retry manually.",
+    "zh-CN": "您的消息尚未开始处理。可立即发送给其他模型，或取消此次等待并手动重试。"
+  },
+  "bots.settings.send_to": {
+    "en": "Send to {model}",
+    "zh-CN": "发送给 {model}"
+  },
+  "bots.settings.wait_reset": {
+    "en": "Wait for the reset",
+    "zh-CN": "等待额度重置"
+  },
+  "bots.settings.dismiss": {
+    "en": "Dismiss",
+    "zh-CN": "取消等待"
+  },
+  "bots.settings.section_profile": {
+    "en": "Who the bot is, how it works and what runs it.",
+    "zh-CN": "机器人的身份、工作方式和运行配置。"
+  },
+  "bots.settings.section_channels": {
+    "en": "Talk to it from a browser, Telegram, Slack, Discord or WhatsApp.",
+    "zh-CN": "通过浏览器、Telegram、Slack、Discord 或 WhatsApp 与机器人交流。"
+  },
+  "bots.settings.section_schedules": {
+    "en": "Recurring or one-off work the bot starts on its own.",
+    "zh-CN": "由机器人自行启动的周期性或一次性工作。"
+  },
+  "bots.settings.section_memory": {
+    "en": "Kept across conversations. The bot adds its own as it learns.",
+    "zh-CN": "在不同对话间保留。机器人也会在学习时添加记忆。"
+  },
+  "bots.settings.section_skills": {
+    "en": "Library skills and MCP servers this bot uses, by reference. Nothing is copied.",
+    "zh-CN": "机器人通过引用使用的技能库技能和 MCP 服务器，不会复制内容。"
+  },
+  "bots.settings.section_activity": {
+    "en": "Conversations, approval rules and everything the bot did.",
+    "zh-CN": "对话、审批规则，以及机器人的所有活动。"
+  },
+  "bots.settings.permission_auto": {
+    "en": "Edits files in its workspace without asking",
+    "zh-CN": "修改工作区内文件时无需询问"
+  },
+  "bots.settings.permission_ask": {
+    "en": "Asks before edits and commands",
+    "zh-CN": "编辑文件和执行命令前先询问"
+  },
+  "bots.settings.permission_review": {
+    "en": "A reviewer model approves safe steps and asks you about the rest",
+    "zh-CN": "由审查模型批准安全步骤，其余步骤向您询问"
+  },
+  "bots.settings.permission_full": {
+    "en": "Runs anything without asking",
+    "zh-CN": "无需询问即可执行任何操作"
+  },
+  "bots.settings.permission_plan": {
+    "en": "Reads and plans, never changes anything",
+    "zh-CN": "只读取和规划，不做任何修改"
+  },
+  "bots.settings.saving": {
+    "en": "Saving…",
+    "zh-CN": "正在保存…"
+  },
+  "bots.settings.not_saved": {
+    "en": "Not saved",
+    "zh-CN": "未保存"
+  },
+  "bots.settings.suggest_research_name": {
+    "en": "Researcher",
+    "zh-CN": "研究员"
+  },
+  "bots.settings.suggest_research_role": {
+    "en": "Digs into questions and reports back",
+    "zh-CN": "深入研究问题并汇报结果"
+  },
+  "bots.settings.suggest_research_purpose": {
+    "en": "Research the questions I bring you using the web and files on this computer. Lead with the answer, then the evidence, and cite sources with links.",
+    "zh-CN": "利用网络和此电脑上的文件研究我提出的问题。先给出答案，再列出证据，并通过链接注明来源。"
+  },
+  "bots.settings.suggest_inbox_name": {
+    "en": "Inbox Triage",
+    "zh-CN": "收件箱整理助手"
+  },
+  "bots.settings.suggest_inbox_role": {
+    "en": "Sorts what needs me from what can wait",
+    "zh-CN": "区分需要我处理和可以等待的事项"
+  },
+  "bots.settings.suggest_inbox_purpose": {
+    "en": "When I forward messages or notifications, sort them into needs me today, can wait, and ignore. Draft short replies for the first group, but never send anything yourself.",
+    "zh-CN": "当我转发消息或通知时，将它们分为今天需要我处理、可以等待和可以忽略三类。为第一类起草简短回复，但绝不要自行发送。"
+  },
+  "bots.settings.suggest_chief_name": {
+    "en": "Chief of Staff",
+    "zh-CN": "事务助理"
+  },
+  "bots.settings.suggest_chief_role": {
+    "en": "Keeps my week on track",
+    "zh-CN": "帮我有序安排每周事务"
+  },
+  "bots.settings.suggest_chief_purpose": {
+    "en": "Track my commitments, follow-ups and deadlines. Each morning, tell me my top three priorities and anything about to slip. Ask before acting on my behalf.",
+    "zh-CN": "跟踪我的承诺、待跟进事项和截止日期。每天早晨告诉我最重要的三件事，以及可能延误的事项。代我采取行动前先征求同意。"
+  },
+  "bots.settings.suggest_review_name": {
+    "en": "Code Reviewer",
+    "zh-CN": "代码审查员"
+  },
+  "bots.settings.suggest_review_role": {
+    "en": "Reviews changes before they ship",
+    "zh-CN": "在发布前审查代码改动"
+  },
+  "bots.settings.suggest_review_purpose": {
+    "en": "Review the diffs and pull requests I point you to. Flag bugs, risky changes and missing tests first, style last. Suggest concrete fixes, and run the tests before saying something works.",
+    "zh-CN": "审查我指定的差异和拉取请求。优先指出缺陷、高风险改动和缺少的测试，最后再考虑代码风格。给出具体修复建议，确认功能有效前先运行测试。"
+  },
+  "bots.settings.suggest_release_name": {
+    "en": "Release Notes",
+    "zh-CN": "发布说明助手"
+  },
+  "bots.settings.suggest_release_role": {
+    "en": "Turns merged work into release notes",
+    "zh-CN": "将已合并的工作整理成发布说明"
+  },
+  "bots.settings.suggest_release_purpose": {
+    "en": "When I ask, read the commits and merged pull requests since the last release tag and write release notes grouped into New, Improved and Fixed, in plain language for users.",
+    "zh-CN": "在我提出要求时，阅读自上次发布标签以来的提交和已合并的拉取请求，用面向用户的通俗语言，按新增、改进和修复分类撰写发布说明。"
+  },
+  "bots.settings.suggest_standup_name": {
+    "en": "Standup",
+    "zh-CN": "晨会助手"
+  },
+  "bots.settings.suggest_standup_role": {
+    "en": "Drafts my daily standup",
+    "zh-CN": "起草每日晨会汇报"
+  },
+  "bots.settings.suggest_standup_purpose": {
+    "en": "Each weekday morning, look at what changed in my projects since yesterday and draft a short standup: done, next, and anything blocking. Keep it under 120 words.",
+    "zh-CN": "每个工作日早晨，查看我的项目自昨天以来的变化，起草简短的晨会汇报：已完成、下一步和阻碍事项。控制在 120 字以内。"
+  },
+  "bots.settings.suggest_monitor_name": {
+    "en": "Monitor",
+    "zh-CN": "监测助手"
+  },
+  "bots.settings.suggest_monitor_role": {
+    "en": "Watches things and tells me when they change",
+    "zh-CN": "监测变化并及时通知我"
+  },
+  "bots.settings.suggest_monitor_purpose": {
+    "en": "Check the pages, feeds or commands I give you. Only message me when something meaningfully changed, with the before, the after and a link.",
+    "zh-CN": "检查我提供的页面、订阅源或命令。仅在发生有意义的变化时向我发送消息，说明变化前后的情况并附上链接。"
+  },
+  "bots.settings.suggest_writer_name": {
+    "en": "Writer",
+    "zh-CN": "写作助手"
+  },
+  "bots.settings.suggest_writer_role": {
+    "en": "Drafts and edits in my voice",
+    "zh-CN": "用我的风格起草和编辑文字"
+  },
+  "bots.settings.suggest_writer_purpose": {
+    "en": "Help me draft and edit posts, emails and docs. Match my tone, keep it tight, and offer one alternative for any line you change a lot.",
+    "zh-CN": "帮我起草和编辑文章、邮件及文档。保持我的语气，文字简洁；对于大幅改写的句子，再提供一个备选版本。"
+  },
+  "bots.settings.soul_size": {
+    "en": "{name} is larger than 64 KB. Shorten it and try again.",
+    "zh-CN": "{name} 超过 64 KB，请缩短内容后重试。"
+  },
+  "bots.settings.soul_encoding": {
+    "en": "{name} is not UTF-8 text. Save it as UTF-8 Markdown and try again.",
+    "zh-CN": "{name} 不是 UTF-8 文本，请保存为 UTF-8 编码的 Markdown 后重试。"
+  },
+  "bots.settings.paused": {
+    "en": "Paused",
+    "zh-CN": "已暂停"
+  },
+  "bots.settings.working": {
+    "en": "Working…",
+    "zh-CN": "正在工作…"
+  },
+  "bots.settings.ready": {
+    "en": "Ready",
+    "zh-CN": "就绪"
+  },
+  "bots.settings.harness": {
+    "en": "Harness",
+    "zh-CN": "运行器"
+  },
+  "bots.settings.model": {
+    "en": "Model",
+    "zh-CN": "模型"
+  },
+  "bots.settings.bot": {
+    "en": "Bot",
+    "zh-CN": "机器人"
+  },
+  "bots.settings.backup_full": {
+    "en": "Up to four backups",
+    "zh-CN": "最多四个备用模型"
+  },
+  "bots.settings.backup_add": {
+    "en": "Add a backup model…",
+    "zh-CN": "添加备用模型…"
+  },
+  "bots.settings.instructions": {
+    "en": "Instructions",
+    "zh-CN": "指令"
+  },
+  "bots.settings.instructions_hint": {
+    "en": "How it should work, what to always or never do",
+    "zh-CN": "说明工作方式、必须遵循和禁止执行的事项"
+  },
+  "bots.settings.personality": {
+    "en": "Personality",
+    "zh-CN": "个性"
+  },
+  "bots.settings.brain": {
+    "en": "Brain",
+    "zh-CN": "模型配置"
+  },
+  "bots.settings.reasoning": {
+    "en": "Reasoning",
+    "zh-CN": "推理强度"
+  },
+  "bots.settings.rules": {
+    "en": "Rules",
+    "zh-CN": "规则"
+  },
+  "bots.settings.notifications": {
+    "en": "Notifications",
+    "zh-CN": "通知"
+  },
+  "bots.settings.notifications_hint": {
+    "en": "Message you when it finishes work you were not watching",
+    "zh-CN": "完成您未在查看的工作时向您发送消息"
+  },
+  "bots.settings.while_working": {
+    "en": "While working",
+    "zh-CN": "工作期间"
+  },
+  "bots.settings.while_working_hint": {
+    "en": "What a new message does while the bot is busy",
+    "zh-CN": "机器人忙碌时如何处理新消息"
+  },
+  "bots.settings.show_plan": {
+    "en": "Show the plan before long tasks",
+    "zh-CN": "长任务开始前显示计划"
+  },
+  "bots.settings.check_ins": {
+    "en": "Check-ins",
+    "zh-CN": "定期检查"
+  },
+  "bots.settings.check_in": {
+    "en": "Check in",
+    "zh-CN": "检查频率"
+  },
+  "bots.settings.goals": {
+    "en": "Standing goals",
+    "zh-CN": "长期目标"
+  },
+  "bots.settings.goals_hint": {
+    "en": "One per line. Check-ins work toward these.",
+    "zh-CN": "每行一个目标，定期检查时会推进这些目标。"
+  },
+  "bots.settings.resume": {
+    "en": "Resume",
+    "zh-CN": "恢复"
+  },
+  "bots.settings.pause": {
+    "en": "Pause",
+    "zh-CN": "暂停"
+  },
+  "bots.settings.resume_hint": {
+    "en": "Resume: schedules, check-ins and channels continue",
+    "zh-CN": "恢复：继续定时任务、定期检查和频道消息"
+  },
+  "bots.settings.pause_hint": {
+    "en": "Pause: stop work and hold schedules and messages",
+    "zh-CN": "暂停：停止工作，暂缓定时任务和消息"
+  },
+  "bots.settings.conversations": {
+    "en": "Conversations",
+    "zh-CN": "对话"
+  },
+  "bots.settings.activity_log": {
+    "en": "Activity log",
+    "zh-CN": "活动日志"
+  },
+  "bots.settings.name_error": {
+    "en": "Give the bot a name.",
+    "zh-CN": "请为机器人命名。"
+  },
+  "bots.settings.full_body": {
+    "en": "It can run any command and change any file this computer allows, without asking first.",
+    "zh-CN": "机器人将无需事先询问，即可执行任何命令，并修改此电脑允许访问的任何文件。"
+  },
+  "bots.settings.full_allow": {
+    "en": "Allow full access",
+    "zh-CN": "允许完全访问"
+  },
+  "bots.settings.reset_body": {
+    "en": "This deletes its conversations, memories, schedules and activity. Its instructions, channels and rules stay.",
+    "zh-CN": "此操作会删除机器人的对话、记忆、定时任务和活动记录。指令、频道和规则将保留。"
+  },
+  "bots.settings.reset": {
+    "en": "Reset",
+    "zh-CN": "重置"
+  },
+  "bots.settings.delete_body": {
+    "en": "This removes the bot, its conversations and its channel connections. Its workspace folder stays on disk.",
+    "zh-CN": "此操作会删除机器人、它的对话和频道连接。工作区文件夹将保留在磁盘上。"
+  },
+  "bots.settings.delete": {
+    "en": "Delete",
+    "zh-CN": "删除"
+  },
+  "bots.settings.not_installed": {
+    "en": "Not installed",
+    "zh-CN": "未安装"
+  },
+  "bots.settings.name_example": {
+    "en": "Scout",
+    "zh-CN": "探索助手"
+  },
+  "bots.settings.purpose_example": {
+    "en": "Describe its job, what to always do, and what to never do",
+    "zh-CN": "描述它的职责、必须做的事和绝不能做的事"
+  },
+  "bots.settings.move_up": {
+    "en": "Move up",
+    "zh-CN": "上移"
+  },
+  "bots.settings.move_down": {
+    "en": "Move down",
+    "zh-CN": "下移"
+  },
+  "bots.settings.remove": {
+    "en": "Remove",
+    "zh-CN": "移除"
+  },
+  "bots.settings.change_icon": {
+    "en": "Change icon",
+    "zh-CN": "更改图标"
+  },
+  "bots.settings.soul_example": {
+    "en": "# Leo\nDry wit, fiercely loyal, blunt under pressure.",
+    "zh-CN": "# Leo\n幽默冷峻、忠诚可靠，在压力下也直言不讳。"
+  },
+  "bots.settings.creating": {
+    "en": "Creating bot…",
+    "zh-CN": "正在创建机器人…"
+  },
+  "bots.settings.create": {
+    "en": "Create bot",
+    "zh-CN": "创建机器人"
+  },
+  "bots.settings.move_named_up": {
+    "en": "Move {name} up",
+    "zh-CN": "上移 {name}"
+  },
+  "bots.settings.move_named_down": {
+    "en": "Move {name} down",
+    "zh-CN": "下移 {name}"
+  },
+  "bots.settings.remove_named": {
+    "en": "Remove {name}",
+    "zh-CN": "移除 {name}"
+  },
+  "bots.settings.waiting_count": {
+    "en": "{count} waiting",
+    "zh-CN": "{count} 项待处理"
+  },
+  "bots.settings.upload": {
+    "en": "Upload image",
+    "zh-CN": "上传图片"
+  },
+  "bots.settings.delete_menu": {
+    "en": "Delete…",
+    "zh-CN": "删除…"
+  },
+  "bots.settings.next_check": {
+    "en": "check-in {time}",
+    "zh-CN": "检查时间：{time}"
+  },
+  "bots.settings.full_title": {
+    "en": "Give {name} full access?",
+    "zh-CN": "授予 {name} 完全访问权限？"
+  },
+  "bots.settings.resumed": {
+    "en": "{name} resumed",
+    "zh-CN": "已恢复 {name}"
+  },
+  "bots.settings.paused_notice": {
+    "en": "{name} paused",
+    "zh-CN": "已暂停 {name}"
+  },
+  "bots.settings.reset_title": {
+    "en": "Reset {name}?",
+    "zh-CN": "重置 {name}？"
+  },
+  "bots.settings.reset_done": {
+    "en": "{name} was reset",
+    "zh-CN": "已重置 {name}"
+  },
+  "bots.settings.delete_title": {
+    "en": "Delete {name}?",
+    "zh-CN": "删除 {name}？"
+  },
+  "bots.settings.delete_done": {
+    "en": "{name} was deleted",
+    "zh-CN": "已删除 {name}"
+  },
+  "bots.thread.step": {
+    "en": "{count} step",
+    "zh-CN": "{count} 个步骤"
+  },
+  "bots.thread.new_message": {
+    "en": "{count} new message",
+    "zh-CN": "{count} 条新消息"
+  },
+  "bots.shared.working_one": {
+    "en": "{names} is working",
+    "zh-CN": "{names} 正在工作"
+  },
+  "bots.panels.every_hour": {
+    "en": "Every hour",
+    "zh-CN": "每小时"
+  },
+  "bots.channel_status.off": {
+    "en": "Off",
+    "zh-CN": "已关闭"
+  },
+  "bots.channel_status.starting": {
+    "en": "Starting…",
+    "zh-CN": "正在启动…"
+  },
+  "bots.channel_status.ready_local": {
+    "en": "Ready on this computer",
+    "zh-CN": "已在此电脑就绪"
+  },
+  "bots.channel_status.waiting_webhook": {
+    "en": "Waiting for webhook calls",
+    "zh-CN": "正在等待 Webhook 请求"
+  },
+  "bots.channel_status.webhook_verified": {
+    "en": "Webhook verified",
+    "zh-CN": "Webhook 已验证"
+  },
+  "bots.channel_status.receiving": {
+    "en": "Receiving messages",
+    "zh-CN": "正在接收消息"
+  },
+  "bots.channel_status.reconnecting": {
+    "en": "Reconnecting",
+    "zh-CN": "正在重新连接"
+  },
+  "bots.channel_status.as": {
+    "en": "Connected as {name}",
+    "zh-CN": "已以 {name} 身份连接"
+  },
+  "bots.channel_status.to": {
+    "en": "Connected to {name}",
+    "zh-CN": "已连接到 {name}"
+  },
+  "bots.channel_status.retry": {
+    "en": "Reconnecting: {error}",
+    "zh-CN": "正在重新连接：{error}"
+  }
+}

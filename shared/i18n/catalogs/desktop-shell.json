@@ -1,0 +1,3114 @@
+{
+  "shell.approval.label.standard": {
+    "en": "Standard",
+    "zh-CN": "标准"
+  },
+  "shell.approval.label.full": {
+    "en": "Full access",
+    "zh-CN": "完全访问"
+  },
+  "shell.approval.label.review": {
+    "en": "Approve for me",
+    "zh-CN": "代我审批"
+  },
+  "shell.approval.label.plan": {
+    "en": "Plan mode",
+    "zh-CN": "规划模式"
+  },
+  "shell.approval.label.edits": {
+    "en": "Accept edits",
+    "zh-CN": "接受编辑"
+  },
+  "shell.approval.label.needed": {
+    "en": "Ask when needed",
+    "zh-CN": "按需询问"
+  },
+  "shell.approval.label.readonly": {
+    "en": "Read only",
+    "zh-CN": "只读"
+  },
+  "shell.approval.plan.default": {
+    "en": "Explore and plan changes before implementation.",
+    "zh-CN": "在实施前探索并规划改动。"
+  },
+  "shell.approval.plan.opencode": {
+    "en": "Explore and plan: reads and web lookups run; reading outside this project asks you; edits and commands are declined.",
+    "zh-CN": "探索与规划：允许读取和网络查询；读取项目外内容会询问您；拒绝编辑和命令。"
+  },
+  "shell.approval.plan.claude": {
+    "en": "Explore and plan: reads and web lookups run, even outside this project; edits wait for implementation and commands ask you.",
+    "zh-CN": "探索与规划：允许读取和网络查询，包括项目外的读取；编辑等待实施阶段，命令会询问您。"
+  },
+  "shell.approval.plan.hermes": {
+    "en": "Read-only: Hermes researches and proposes a plan; edits and commands are declined.",
+    "zh-CN": "只读：Hermes 研究并提出计划；拒绝编辑和命令。"
+  },
+  "shell.approval.plan.zcode": {
+    "en": "ZCode’s plan mode: it investigates and proposes a plan; implementation waits for your approval.",
+    "zh-CN": "ZCode 的 plan 模式：调查并提出计划；实施需等待您的批准。"
+  },
+  "shell.approval.plan.commandcode": {
+    "en": "Read-only: Command Code researches and plans; edits and commands are declined.",
+    "zh-CN": "只读：Command Code 研究并规划；拒绝编辑和命令。"
+  },
+  "shell.approval.plan.muse": {
+    "en": "Read-only: Muse cannot write files or run shell commands, and proposes a plan.",
+    "zh-CN": "只读：Muse 无法写入文件或运行 shell 命令，只提出计划。"
+  },
+  "shell.approval.plan.kilo": {
+    "en": "Read-only: Kilo investigates and plans; edits, commands and other state-changing tools are declined.",
+    "zh-CN": "只读：Kilo 调查并规划；拒绝编辑、命令及其他改变状态的工具。"
+  },
+  "shell.approval.plan.cline": {
+    "en": "Cline’s Plan mode: it explores, fetches and proposes a plan; file edits are declined, commands still ask.",
+    "zh-CN": "Cline 的 Plan 模式：探索、获取信息并提出计划；拒绝文件编辑，命令仍会询问。"
+  },
+  "shell.approval.plan.deepseek": {
+    "en": "Read-only sandbox: DeepSeek cannot write files and proposes a plan; requests to escalate are declined.",
+    "zh-CN": "只读沙箱：DeepSeek 无法写入文件，只提出计划；拒绝权限提升请求。"
+  },
+  "shell.approval.plan.pi": {
+    "en": "Read-only: {name} may use read-only tools; everything else is declined.",
+    "zh-CN": "只读：{name} 可使用只读工具；拒绝其他所有操作。"
+  },
+  "shell.approval.plan.grok": {
+    "en": "Read-only: Grok investigates and proposes a plan; edits and commands are declined.",
+    "zh-CN": "只读：Grok 调查并提出计划；拒绝编辑和命令。"
+  },
+  "shell.approval.plan.codex": {
+    "en": "Inspect the project. Block writes and permission escalation.",
+    "zh-CN": "检查项目。禁止写入和权限提升。"
+  },
+  "shell.approval.auto.default": {
+    "en": "Automatically approve edit requests offered by the server.",
+    "zh-CN": "自动批准服务器提供的编辑请求。"
+  },
+  "shell.approval.auto.codex": {
+    "en": "Let Codex review approval requests. Keep the workspace sandbox.",
+    "zh-CN": "由 Codex 审核权限请求。保留工作区沙箱。"
+  },
+  "shell.approval.auto.kimi": {
+    "en": "Allow routine tools automatically. Ask you about sensitive actions.",
+    "zh-CN": "自动允许常规工具。敏感操作会询问您。"
+  },
+  "shell.approval.auto.edits": {
+    "en": "Allow file edits automatically. Other actions may still ask you.",
+    "zh-CN": "自动允许文件编辑。其他操作仍可能询问您。"
+  },
+  "shell.approval.auto.deepseek": {
+    "en": "Like Standard, and edits outside this project are approved too. Other actions still ask.",
+    "zh-CN": "与标准模式相同，但也批准项目外的编辑。其他操作仍会询问。"
+  },
+  "shell.approval.auto.muse": {
+    "en": "Work freely inside the sandbox. Muse asks only to leave it.",
+    "zh-CN": "在沙箱内自由工作。Muse 仅在离开沙箱时询问您。"
+  },
+  "shell.approval.plan.devin": {
+    "en": "Devin’s Plan mode: it investigates and writes a plan; commands ask you, and edits wait until you approve the plan.",
+    "zh-CN": "Devin 的 Plan 模式：调查并编写计划；执行命令时询问您，编辑需等待您批准计划。"
+  },
+  "shell.approval.plan.copilot": {
+    "en": "Use Copilot Plan mode. Read, search, fetch, and think requests are allowed; other permission requests are declined.",
+    "zh-CN": "使用 Copilot Plan 模式。允许读取、搜索、获取和思考请求；拒绝其他权限请求。"
+  },
+  "shell.approval.review.unsupported": {
+    "en": "This harness has no agent-reviewed approvals. Choose another mode, or use Claude Code (or Codex’s Approve for me).",
+    "zh-CN": "此运行器不支持智能体审批。请选择其他模式，或使用 Claude Code（也可使用 Codex 的「代我审批」）。"
+  },
+  "shell.approval.review.claude": {
+    "en": "Claude Code’s auto mode: its safety reviewer approves routine actions and blocks risky ones. Needs a recent Claude Code.",
+    "zh-CN": "Claude Code 的 auto 模式：其安全审核器批准常规操作并阻止高风险操作。需要较新版本的 Claude Code。"
+  },
+  "shell.approval.full.default": {
+    "en": "Run tools without approval prompts, including outside this project.",
+    "zh-CN": "无需审批提示即可运行工具，包括此项目之外的操作。"
+  },
+  "shell.approval.full.zcode": {
+    "en": "Always approve: ZCode runs every tool without asking (its yolo mode).",
+    "zh-CN": "始终批准：ZCode 运行所有工具而不询问（使用其 yolo 模式）。"
+  },
+  "shell.approval.full.copilot": {
+    "en": "Use Copilot Agent mode with Allow All on. Copilot automatically approves tool, path, and URL requests.",
+    "zh-CN": "使用 Copilot Agent 模式，开启 Allow All。Copilot 自动批准工具、路径和 URL 请求。"
+  },
+  "shell.approval.full.hermes": {
+    "en": "Skip approval prompts: Hermes runs every tool without asking (equivalent to its --yolo).",
+    "zh-CN": "跳过审批提示：Hermes 运行所有工具而不询问（等同于其 --yolo）。"
+  },
+  "shell.approval.full.devin": {
+    "en": "Devin’s Bypass Permissions mode: every tool runs without asking, unless your organization requires approval.",
+    "zh-CN": "Devin 的 Bypass Permissions 模式：除非您的组织要求审批，否则所有工具均无需询问即可运行。"
+  },
+  "shell.approval.full.muse": {
+    "en": "No approvals and no sandbox: Muse runs every tool without asking.",
+    "zh-CN": "无审批、无沙箱：Muse 运行所有工具而不询问。"
+  },
+  "shell.approval.full.cline": {
+    "en": "Cline acts with its auto-approve on: every tool runs without asking.",
+    "zh-CN": "Cline 开启自动批准：所有工具均无需询问即可运行。"
+  },
+  "shell.approval.full.deepseek": {
+    "en": "No sandbox: DeepSeek runs every tool without asking.",
+    "zh-CN": "无沙箱：DeepSeek 运行所有工具而不询问。"
+  },
+  "shell.approval.full.pi": {
+    "en": "{name} runs every tool without asking.",
+    "zh-CN": "{name} 运行所有工具而不询问。"
+  },
+  "shell.approval.full.grok": {
+    "en": "Always approve: Grok runs every tool without asking (its --always-approve).",
+    "zh-CN": "始终批准：Grok 运行所有工具而不询问（使用其 --always-approve）。"
+  },
+  "shell.approval.full.codex": {
+    "en": "Skip approval prompts and sandbox limits. Allow file and network access.",
+    "zh-CN": "跳过审批提示和沙箱限制。允许访问文件和网络。"
+  },
+  "shell.approval.full.antigravity": {
+    "en": "Automatically approve permission requests. Server restrictions still apply.",
+    "zh-CN": "自动批准权限请求。服务器限制仍然有效。"
+  },
+  "shell.approval.standard.default": {
+    "en": "Use the harness’s normal rules. Ask you when approval is needed.",
+    "zh-CN": "使用运行器的常规规则。需要审批时询问您。"
+  },
+  "shell.approval.standard.hermes": {
+    "en": "Hermes works in this project. Asks you before terminal commands or dangerous actions.",
+    "zh-CN": "Hermes 在此项目中工作。执行终端命令或危险操作前会询问您。"
+  },
+  "shell.approval.standard.zcode": {
+    "en": "ZCode’s build mode: it works in this project and asks you when an action needs permission.",
+    "zh-CN": "ZCode 的 build 模式：在此项目中工作，操作需要权限时询问您。"
+  },
+  "shell.approval.standard.muse": {
+    "en": "Muse asks before actions its rules do not allow. Its own reviewer may approve low-risk ones.",
+    "zh-CN": "Muse 会在规则不允许的操作前询问您。其自身的审核器可能批准低风险操作。"
+  },
+  "shell.approval.standard.kilo": {
+    "en": "Kilo runs read-only tools; PandaCode asks before edits, commands and other tools.",
+    "zh-CN": "Kilo 可运行只读工具；PandaCode 会在编辑、执行命令和使用其他工具前询问您。"
+  },
+  "shell.approval.standard.cline": {
+    "en": "Cline acts; reads and searches run, PandaCode asks before edits, commands and other tools.",
+    "zh-CN": "Cline 执行操作：允许读取和搜索，PandaCode 会在编辑、执行命令和使用其他工具前询问您。"
+  },
+  "shell.approval.standard.deepseek": {
+    "en": "DeepSeek edits and runs commands inside this project freely; it asks you before going outside it.",
+    "zh-CN": "DeepSeek 可自由编辑此项目并执行命令；超出项目范围前会询问您。"
+  },
+  "shell.approval.standard.pi": {
+    "en": "{name} runs without its own approvals; PandaCode asks before edits, commands and other non-read tools.",
+    "zh-CN": "{name} 没有自身的审批流程；PandaCode 会在编辑、执行命令和使用其他非只读工具前询问您。"
+  },
+  "shell.approval.standard.devin": {
+    "en": "Devin’s Code mode: edits inside this project apply; commands it does not judge safe ask you.",
+    "zh-CN": "Devin 的 Code 模式：直接应用项目内的编辑；对其认为不安全的命令征求您的同意。"
+  },
+  "shell.approval.standard.grok": {
+    "en": "Grok asks before edits and commands, whatever its own config says.",
+    "zh-CN": "Grok 会在编辑和执行命令前询问您，无论其自身配置如何。"
+  },
+  "shell.approval.standard.copilot": {
+    "en": "Use Copilot Agent mode with Allow All off. PandaCode asks before permission requests.",
+    "zh-CN": "使用 Copilot Agent 模式，关闭 Allow All。PandaCode 会在权限请求前询问您。"
+  },
+  "shell.approval.standard.codex": {
+    "en": "Work in this project. Ask you when an action needs extra permission.",
+    "zh-CN": "在此项目中工作。操作需要额外权限时征求您的同意。"
+  },
+  "shell.tray.open": {
+    "en": "Open PandaCode",
+    "zh-CN": "打开 PandaCode"
+  },
+  "shell.tray.quit": {
+    "en": "Quit",
+    "zh-CN": "退出"
+  },
+  "shell.tray.now": {
+    "en": "now",
+    "zh-CN": "现在"
+  },
+  "shell.tray.minutes": {
+    "en": "{count}m",
+    "zh-CN": "{count}分钟"
+  },
+  "shell.tray.hours": {
+    "en": "{count}h",
+    "zh-CN": "{count}小时"
+  },
+  "shell.tray.days": {
+    "en": "{count}d",
+    "zh-CN": "{count}天"
+  },
+  "shell.tray.resetDue": {
+    "en": "reset due",
+    "zh-CN": "即将重置"
+  },
+  "shell.tray.resetIn": {
+    "en": "resets in {time}",
+    "zh-CN": "{time}后重置"
+  },
+  "shell.tray.resetAt": {
+    "en": "resets {date}",
+    "zh-CN": "于{date}重置"
+  },
+  "shell.tray.justNow": {
+    "en": "just now",
+    "zh-CN": "刚刚"
+  },
+  "shell.tray.ago": {
+    "en": "{time} ago",
+    "zh-CN": "{time}前"
+  },
+  "shell.tray.running": {
+    "en": "Running",
+    "zh-CN": "运行中"
+  },
+  "shell.tray.respond": {
+    "en": "Respond",
+    "zh-CN": "待回应"
+  },
+  "shell.tray.failed": {
+    "en": "Failed",
+    "zh-CN": "失败"
+  },
+  "shell.tray.done": {
+    "en": "Done",
+    "zh-CN": "已完成"
+  },
+  "shell.tray.untitled": {
+    "en": "Untitled task",
+    "zh-CN": "未命名任务"
+  },
+  "shell.tray.stale": {
+    "en": "stale",
+    "zh-CN": "已过期"
+  },
+  "shell.tray.runningCount": {
+    "en": "{count} running",
+    "zh-CN": "{count} 个运行中"
+  },
+  "shell.tray.reviewCount": {
+    "en": "{count} to review",
+    "zh-CN": "{count} 个待查看"
+  },
+  "shell.tray.quiet": {
+    "en": "All quiet",
+    "zh-CN": "暂无活动"
+  },
+  "shell.tray.needsYou": {
+    "en": "Needs you",
+    "zh-CN": "需要您处理"
+  },
+  "shell.tray.finished": {
+    "en": "Finished",
+    "zh-CN": "已结束"
+  },
+  "shell.tray.checking": {
+    "en": "Checking plan limits…",
+    "zh-CN": "正在检查套餐限额…"
+  },
+  "shell.tray.noLimits": {
+    "en": "No plan limits reported.",
+    "zh-CN": "未报告套餐限额。"
+  },
+  "shell.tray.noAgents": {
+    "en": "No agents running.",
+    "zh-CN": "没有运行中的智能体。"
+  },
+  "shell.tray.planUsage": {
+    "en": "Plan usage",
+    "zh-CN": "套餐用量"
+  },
+  "shell.tray.refresh": {
+    "en": "Refresh usage",
+    "zh-CN": "刷新用量"
+  },
+  "shell.settings.general": {
+    "en": "General",
+    "zh-CN": "通用"
+  },
+  "shell.settings.generalDescription": {
+    "en": "Text size, conversation density and the quick launcher.",
+    "zh-CN": "文字大小、对话密度和快捷启动器。"
+  },
+  "shell.settings.appearance": {
+    "en": "Appearance",
+    "zh-CN": "外观"
+  },
+  "shell.settings.appearanceDescription": {
+    "en": "Theme, accent colors and wallpapers.",
+    "zh-CN": "主题、强调色和壁纸。"
+  },
+  "shell.settings.agents": {
+    "en": "Agents",
+    "zh-CN": "智能体"
+  },
+  "shell.settings.agentsDescription": {
+    "en": "Your default agent and the agent harnesses installed on this computer.",
+    "zh-CN": "默认智能体以及此电脑上已安装的智能体运行器。"
+  },
+  "shell.settings.providers": {
+    "en": "Providers",
+    "zh-CN": "服务提供方"
+  },
+  "shell.settings.providersDescription": {
+    "en": "Sign-ins, API keys and plans such as GLM Coding Plan and MiMo Token Plan, each for the agent it belongs to.",
+    "zh-CN": "为各智能体配置登录、API 密钥及 GLM Coding Plan、MiMo Token Plan 等套餐。"
+  },
+  "shell.settings.teams": {
+    "en": "Agent teams",
+    "zh-CN": "智能体团队"
+  },
+  "shell.settings.teamsDescription": {
+    "en": "Named teams of models, and the classic team setup.",
+    "zh-CN": "命名模型团队与经典团队配置。"
+  },
+  "shell.settings.tools": {
+    "en": "Tools & add-ons",
+    "zh-CN": "工具与扩展"
+  },
+  "shell.settings.toolsDescription": {
+    "en": "App tools, MCP servers, skills and Jev.",
+    "zh-CN": "应用工具、MCP 服务器、技能和 Jev。"
+  },
+  "shell.settings.skills": {
+    "en": "Skills & rules",
+    "zh-CN": "技能与规则"
+  },
+  "shell.settings.skillsDescription": {
+    "en": "Import skills and rules once, turn them on per harness, and check for drift.",
+    "zh-CN": "统一导入技能和规则，按运行器启用并检查差异。"
+  },
+  "shell.settings.cloud": {
+    "en": "Cloud sandboxes",
+    "zh-CN": "云沙箱"
+  },
+  "shell.settings.cloudDescription": {
+    "en": "Daytona, Cloudflare and AWS machines for your agents.",
+    "zh-CN": "供智能体使用的 Daytona、Cloudflare 和 AWS 机器。"
+  },
+  "shell.settings.remote": {
+    "en": "Remote access",
+    "zh-CN": "远程访问"
+  },
+  "shell.settings.remoteDescription": {
+    "en": "Reach your other computers with PandaCode Connect, end-to-end encrypted.",
+    "zh-CN": "通过端到端加密的 PandaCode Connect 访问其他电脑。"
+  },
+  "shell.settings.githubDescription": {
+    "en": "Issues, pull requests and repositories through the GitHub CLI.",
+    "zh-CN": "通过 GitHub CLI 处理议题、拉取请求和仓库。"
+  },
+  "shell.settings.about": {
+    "en": "About & updates",
+    "zh-CN": "关于与更新"
+  },
+  "shell.settings.aboutDescription": {
+    "en": "Version, updates, resource usage, license and support.",
+    "zh-CN": "版本、更新、资源用量、许可证和支持。"
+  },
+  "shell.settings.widget": {
+    "en": "Running agents widget",
+    "zh-CN": "运行中智能体组件"
+  },
+  "shell.settings.widgetDescription": {
+    "en": "Show the live header widget. Turning this off also closes the pinned window.",
+    "zh-CN": "显示实时顶部组件。关闭此项也会关闭固定窗口。"
+  },
+  "shell.settings.keepWidget": {
+    "en": "Keep pinned widget on screen",
+    "zh-CN": "将固定组件保持在屏幕内"
+  },
+  "shell.settings.keepWidgetDescription": {
+    "en": "Keep the floating widget inside the current display when it expands.",
+    "zh-CN": "浮动组件展开时保持在当前显示器范围内。"
+  },
+  "shell.settings.compact": {
+    "en": "Compact conversation",
+    "zh-CN": "紧凑对话"
+  },
+  "shell.settings.compactDescription": {
+    "en": "Less space between messages.",
+    "zh-CN": "缩小消息之间的间距。"
+  },
+  "shell.settings.expandActivity": {
+    "en": "Expand tool activity",
+    "zh-CN": "展开工具活动"
+  },
+  "shell.settings.expandActivityDescription": {
+    "en": "Show grouped activity expanded by default.",
+    "zh-CN": "默认展开分组活动。"
+  },
+  "shell.settings.launcher": {
+    "en": "Quick launcher",
+    "zh-CN": "快捷启动器"
+  },
+  "shell.settings.projects": {
+    "en": "Projects",
+    "zh-CN": "项目"
+  },
+  "shell.settings.theme": {
+    "en": "Theme",
+    "zh-CN": "主题"
+  },
+  "shell.settings.dark": {
+    "en": "Dark",
+    "zh-CN": "深色"
+  },
+  "shell.settings.light": {
+    "en": "Light",
+    "zh-CN": "浅色"
+  },
+  "shell.settings.wallpapersDaily": {
+    "en": "Daily wallpapers",
+    "zh-CN": "每日壁纸"
+  },
+  "shell.settings.wallpapersDescription": {
+    "en": "A new scene for each part of the day.",
+    "zh-CN": "每天不同时段显示不同景色。"
+  },
+  "shell.settings.colors": {
+    "en": "Colors",
+    "zh-CN": "颜色"
+  },
+  "shell.settings.wallpapers": {
+    "en": "Wallpapers",
+    "zh-CN": "壁纸"
+  },
+  "shell.settings.defaultAgent": {
+    "en": "Default agent",
+    "zh-CN": "默认智能体"
+  },
+  "shell.settings.usedForNewTasks": {
+    "en": "Used for new tasks.",
+    "zh-CN": "用于新建任务。"
+  },
+  "shell.settings.defaultAgentLabel": {
+    "en": "Default agent for new tasks",
+    "zh-CN": "新任务的默认智能体"
+  },
+  "shell.settings.defaultModel": {
+    "en": "Default model",
+    "zh-CN": "默认模型"
+  },
+  "shell.settings.defaultModelLabel": {
+    "en": "Default model for new tasks",
+    "zh-CN": "新任务的默认模型"
+  },
+  "shell.settings.agentUpdates": {
+    "en": "Agent updates",
+    "zh-CN": "智能体更新"
+  },
+  "shell.settings.agentUpdatesDescription": {
+    "en": "Keep installed agents up to date.",
+    "zh-CN": "保持已安装的智能体为最新版本。"
+  },
+  "shell.settings.checkUpdates": {
+    "en": "Check updates",
+    "zh-CN": "检查更新"
+  },
+  "shell.settings.turnChecks": {
+    "en": "Project checks after turns",
+    "zh-CN": "回合结束后检查项目"
+  },
+  "shell.settings.turnChecksDescription": {
+    "en": "When a turn ends, runs the project’s own test or check command with your environment (your shell, PATH and credentials); a failure queues one fix.",
+    "zh-CN": "回合结束后，使用您的环境（shell、PATH 和凭据）运行项目自身的测试或检查命令；失败时排入一次修复。"
+  },
+  "shell.settings.installedAgents": {
+    "en": "Installed agents",
+    "zh-CN": "已安装的智能体"
+  },
+  "shell.settings.refreshAgents": {
+    "en": "Refresh agents",
+    "zh-CN": "刷新智能体"
+  },
+  "shell.settings.preview": {
+    "en": "Browser preview · sample agent availability.",
+    "zh-CN": "浏览器预览 · 示例智能体可用状态。"
+  },
+  "shell.settings.openCodeModels": {
+    "en": "OpenCode models",
+    "zh-CN": "OpenCode 模型"
+  },
+  "shell.settings.integrations": {
+    "en": "Tools & integrations",
+    "zh-CN": "工具与集成"
+  },
+  "shell.settings.integrationsDescription": {
+    "en": "App tools, MCP servers, and skills.",
+    "zh-CN": "应用工具、MCP 服务器和技能。"
+  },
+  "shell.settings.manage": {
+    "en": "Manage",
+    "zh-CN": "管理"
+  },
+  "shell.settings.jev": {
+    "en": "Jev · Optional add-on",
+    "zh-CN": "Jev · 可选扩展"
+  },
+  "shell.settings.jevDescription": {
+    "en": "Browser tests and decision assistance. Your agents work without it.",
+    "zh-CN": "浏览器测试与决策辅助。没有它，智能体仍可正常工作。"
+  },
+  "shell.settings.jevSetup": {
+    "en": "Set up Jev",
+    "zh-CN": "配置 Jev"
+  },
+  "shell.settings.support": {
+    "en": "Help & support",
+    "zh-CN": "帮助与支持"
+  },
+  "shell.settings.supportDescription": {
+    "en": "Open an issue on GitHub.",
+    "zh-CN": "在 GitHub 上提交议题。"
+  },
+  "shell.settings.openIssues": {
+    "en": "Open issues",
+    "zh-CN": "查看议题"
+  },
+  "shell.settings.appDetails": {
+    "en": "App details for support",
+    "zh-CN": "支持所需的应用信息"
+  },
+  "shell.settings.appDetailsDescription": {
+    "en": "Only the app version, platform, and architecture. Nothing is sent automatically.",
+    "zh-CN": "仅包含应用版本、平台和架构。不会自动发送任何信息。"
+  },
+  "shell.settings.copyDetails": {
+    "en": "Copy app details",
+    "zh-CN": "复制应用信息"
+  },
+  "shell.settings.retry": {
+    "en": "Try again",
+    "zh-CN": "重试"
+  },
+  "shell.settings.sections": {
+    "en": "Settings sections",
+    "zh-CN": "设置分类"
+  },
+  "shell.settings.backWorkspace": {
+    "en": "Back to the workspace",
+    "zh-CN": "返回工作区"
+  },
+  "shell.settings.backShortcut": {
+    "en": "Back (Esc)",
+    "zh-CN": "返回（Esc）"
+  },
+  "shell.settings.back": {
+    "en": "Back",
+    "zh-CN": "返回"
+  },
+  "shell.settings.title": {
+    "en": "Settings",
+    "zh-CN": "设置"
+  },
+  "shell.settings.version": {
+    "en": "Version",
+    "zh-CN": "版本"
+  },
+  "shell.settings.location": {
+    "en": "Location",
+    "zh-CN": "位置"
+  },
+  "shell.settings.installed": {
+    "en": "Installed",
+    "zh-CN": "已安装"
+  },
+  "shell.settings.notInstalled": {
+    "en": "Not installed",
+    "zh-CN": "未安装"
+  },
+  "shell.settings.acpInstalled": {
+    "en": "ACP installed",
+    "zh-CN": "ACP 已安装"
+  },
+  "shell.settings.notReported": {
+    "en": "Not reported",
+    "zh-CN": "未报告"
+  },
+  "shell.settings.installThenRefresh": {
+    "en": "Install the agent, then refresh.",
+    "zh-CN": "安装智能体后刷新。"
+  },
+  "shell.settings.checking": {
+    "en": "Checking agents…",
+    "zh-CN": "正在检查智能体…"
+  },
+  "shell.settings.checkFailed": {
+    "en": "Couldn’t check agents. Try refreshing again.",
+    "zh-CN": "无法检查智能体。请再次刷新。"
+  },
+  "shell.settings.removeProjectDescription": {
+    "en": "Its tasks are removed from PandaCode. The folder stays on disk.",
+    "zh-CN": "其任务将从 PandaCode 中移除。磁盘上的文件夹会保留。"
+  },
+  "shell.settings.cancel": {
+    "en": "Cancel",
+    "zh-CN": "取消"
+  },
+  "shell.settings.removeProject": {
+    "en": "Remove project",
+    "zh-CN": "移除项目"
+  },
+  "shell.settings.remove": {
+    "en": "Remove",
+    "zh-CN": "移除"
+  },
+  "shell.settings.noProjects": {
+    "en": "No projects yet.",
+    "zh-CN": "暂无项目。"
+  },
+  "shell.settings.loading": {
+    "en": "Loading…",
+    "zh-CN": "正在加载…"
+  },
+  "shell.settings.loadFailed": {
+    "en": "This section couldn’t load. Close Settings and try again.",
+    "zh-CN": "无法加载此分类。请关闭设置后重试。"
+  },
+  "shell.launcher.title": {
+    "en": "PandaCode quick launcher",
+    "zh-CN": "PandaCode 快捷启动器"
+  },
+  "shell.launcher.close": {
+    "en": "Close launcher",
+    "zh-CN": "关闭启动器"
+  },
+  "shell.launcher.newTask": {
+    "en": "New task",
+    "zh-CN": "新建任务"
+  },
+  "shell.launcher.prompt": {
+    "en": "What should we work on?",
+    "zh-CN": "我们要做些什么？"
+  },
+  "shell.launcher.project": {
+    "en": "Task project",
+    "zh-CN": "任务项目"
+  },
+  "shell.launcher.model": {
+    "en": "Choose harness and model",
+    "zh-CN": "选择运行器和模型"
+  },
+  "shell.launcher.start": {
+    "en": "Start task",
+    "zh-CN": "开始任务"
+  },
+  "shell.launcher.active": {
+    "en": "Active agents",
+    "zh-CN": "活动智能体"
+  },
+  "shell.launcher.search": {
+    "en": "Search tasks",
+    "zh-CN": "搜索任务"
+  },
+  "shell.launcher.find": {
+    "en": "Find a task",
+    "zh-CN": "查找任务"
+  },
+  "shell.launcher.loadingTasks": {
+    "en": "Loading tasks…",
+    "zh-CN": "正在加载任务…"
+  },
+  "shell.launcher.startHint": {
+    "en": "start task",
+    "zh-CN": "开始任务"
+  },
+  "shell.launcher.newLine": {
+    "en": "new line",
+    "zh-CN": "换行"
+  },
+  "shell.launcher.live": {
+    "en": "Live status",
+    "zh-CN": "实时状态"
+  },
+  "shell.launcher.loadingHarnesses": {
+    "en": "Loading harnesses…",
+    "zh-CN": "正在加载运行器…"
+  },
+  "shell.launcher.working": {
+    "en": "Working",
+    "zh-CN": "工作中"
+  },
+  "shell.launcher.coordinating": {
+    "en": "Coordinating",
+    "zh-CN": "协调中"
+  },
+  "shell.launcher.attention": {
+    "en": "Needs attention",
+    "zh-CN": "需要处理"
+  },
+  "shell.launcher.paused": {
+    "en": "Paused",
+    "zh-CN": "已暂停"
+  },
+  "shell.launcher.failed": {
+    "en": "Failed",
+    "zh-CN": "失败"
+  },
+  "shell.launcher.ready": {
+    "en": "Ready",
+    "zh-CN": "就绪"
+  },
+  "shell.launcher.stopped": {
+    "en": "Stopped",
+    "zh-CN": "已停止"
+  },
+  "shell.launcher.completed": {
+    "en": "Completed",
+    "zh-CN": "已完成"
+  },
+  "shell.launcher.worker": {
+    "en": "Worker",
+    "zh-CN": "工作智能体"
+  },
+  "shell.launcher.subagent": {
+    "en": "Subagent",
+    "zh-CN": "子智能体"
+  },
+  "shell.launcher.noMatch": {
+    "en": "No matching active agents.",
+    "zh-CN": "没有匹配的活动智能体。"
+  },
+  "shell.launcher.noActive": {
+    "en": "No agents working right now.",
+    "zh-CN": "当前没有工作中的智能体。"
+  },
+  "shell.launcher.openProject": {
+    "en": "Open a project in PandaCode to get started.",
+    "zh-CN": "在 PandaCode 中打开项目以开始。"
+  },
+  "shell.launcher.starting": {
+    "en": "Starting task…",
+    "zh-CN": "正在启动任务…"
+  },
+  "shell.launcher.started": {
+    "en": "Task started. You can keep working.",
+    "zh-CN": "任务已启动。您可以继续工作。"
+  },
+  "shell.dockWindow.running": {
+    "en": "Running agents",
+    "zh-CN": "运行中的智能体"
+  },
+  "shell.dockWindow.collapse": {
+    "en": "Collapse widget",
+    "zh-CN": "收起组件"
+  },
+  "shell.dockWindow.collapseHint": {
+    "en": "Collapse (Esc)",
+    "zh-CN": "收起（Esc）"
+  },
+  "shell.dockWindow.unpin": {
+    "en": "Unpin widget",
+    "zh-CN": "取消固定组件"
+  },
+  "shell.dockWindow.expand": {
+    "en": "Running agents. Press to expand.",
+    "zh-CN": "运行中的智能体。按下以展开。"
+  },
+  "shell.jevLive.starting": {
+    "en": "Starting browser",
+    "zh-CN": "正在启动浏览器"
+  },
+  "shell.jevLive.testing": {
+    "en": "Testing",
+    "zh-CN": "测试中"
+  },
+  "shell.jevLive.finished": {
+    "en": "Finished",
+    "zh-CN": "已结束"
+  },
+  "shell.jevLive.blocked": {
+    "en": "Blocked",
+    "zh-CN": "已阻止"
+  },
+  "shell.jevLive.failed": {
+    "en": "Test failed",
+    "zh-CN": "测试失败"
+  },
+  "shell.jevLive.cancelled": {
+    "en": "Cancelled",
+    "zh-CN": "已取消"
+  },
+  "shell.jevLive.limit": {
+    "en": "Limit reached",
+    "zh-CN": "已达限额"
+  },
+  "shell.jevLive.title": {
+    "en": "Jev live browser",
+    "zh-CN": "Jev 实时浏览器"
+  },
+  "shell.jevLive.stop": {
+    "en": "Stop test",
+    "zh-CN": "停止测试"
+  },
+  "shell.jevLive.return": {
+    "en": "Return to browser",
+    "zh-CN": "返回浏览器"
+  },
+  "shell.jevLive.run": {
+    "en": "Jev run",
+    "zh-CN": "Jev 运行记录"
+  },
+  "shell.jevLive.image": {
+    "en": "Jev browser live view",
+    "zh-CN": "Jev 浏览器实时画面"
+  },
+  "shell.jevLive.waiting": {
+    "en": "Waiting for the browser…",
+    "zh-CN": "正在等待浏览器…"
+  },
+  "shell.jevLive.readonly": {
+    "en": "Live browser · read only",
+    "zh-CN": "实时浏览器 · 只读"
+  },
+  "shell.jevLive.actions": {
+    "en": "Browser actions",
+    "zh-CN": "浏览器操作"
+  },
+  "shell.jevLive.noActions": {
+    "en": "Actions will appear as Jev works.",
+    "zh-CN": "Jev 工作时，操作将显示在此处。"
+  },
+  "shell.jevLive.ready": {
+    "en": "Getting ready",
+    "zh-CN": "正在准备"
+  },
+  "shell.jevLive.final": {
+    "en": "Final browser view · read only",
+    "zh-CN": "最终浏览器画面 · 只读"
+  },
+  "shell.jevLive.noImage": {
+    "en": "No browser image available",
+    "zh-CN": "没有可用的浏览器图像"
+  },
+  "shell.jevLive.stopping": {
+    "en": "Stopping the browser test…",
+    "zh-CN": "正在停止浏览器测试…"
+  },
+  "shell.jevLive.chooseTask": {
+    "en": "Choose a task to watch its browser tests.",
+    "zh-CN": "选择任务以查看其浏览器测试。"
+  },
+  "shell.jevLive.otherTask": {
+    "en": "This browser test belongs to another task.",
+    "zh-CN": "此浏览器测试属于其他任务。"
+  },
+  "shell.settings.language": {
+    "en": "Language",
+    "zh-CN": "语言"
+  },
+  "shell.settings.languageDescription": {
+    "en": "Choose the language used by PandaCode.",
+    "zh-CN": "选择 PandaCode 的显示语言。"
+  },
+  "shell.settings.themeDescription": {
+    "en": "{theme}. Imported VS Code themes keep their own.",
+    "zh-CN": "{theme}。导入的 VS Code 主题保持其自身设置。"
+  },
+  "shell.settings.useLight": {
+    "en": "Use light",
+    "zh-CN": "使用浅色"
+  },
+  "shell.settings.useDark": {
+    "en": "Use dark",
+    "zh-CN": "使用深色"
+  },
+  "shell.settings.providerDetails": {
+    "en": "{name} details, {status}",
+    "zh-CN": "{name} 详情，{status}"
+  },
+  "shell.settings.removeNamed": {
+    "en": "Remove {name}",
+    "zh-CN": "移除 {name}"
+  },
+  "shell.settings.removeNamedConfirm": {
+    "en": "Remove {name}?",
+    "zh-CN": "移除 {name}？"
+  },
+  "shell.launcher.models": {
+    "en": "+{count} models",
+    "zh-CN": "+{count} 个模型"
+  },
+  "shell.launcher.oneModel": {
+    "en": "+{count} model",
+    "zh-CN": "+{count} 个模型"
+  },
+  "shell.launcher.defaultModel": {
+    "en": "{name} · Default",
+    "zh-CN": "{name} · 默认"
+  },
+  "shell.launcher.activeCount": {
+    "en": "{count} active",
+    "zh-CN": "{count} 个活动中"
+  },
+  "shell.dockWindow.expandCount": {
+    "en": "Running agents, {count} active. Press to expand.",
+    "zh-CN": "运行中的智能体，{count} 个活动中。按下以展开。"
+  },
+  "shell.dockWindow.heading": {
+    "en": "Running agents · {count}",
+    "zh-CN": "运行中的智能体 · {count}"
+  },
+  "shell.jevLive.step": {
+    "en": "Step {count}",
+    "zh-CN": "第 {count} 步"
+  },
+  "shell.jevLive.seconds": {
+    "en": "{count}s",
+    "zh-CN": "{count}秒"
+  },
+  "shell.jevLive.minutesSeconds": {
+    "en": "{minutes}m {seconds}s",
+    "zh-CN": "{minutes}分{seconds}秒"
+  },
+  "shell.main.files": {
+    "en": "Files",
+    "zh-CN": "文件"
+  },
+  "shell.main.search": {
+    "en": "Search",
+    "zh-CN": "搜索"
+  },
+  "shell.main.changes": {
+    "en": "Changes",
+    "zh-CN": "更改"
+  },
+  "shell.main.browser": {
+    "en": "Browser",
+    "zh-CN": "浏览器"
+  },
+  "shell.main.pull": {
+    "en": "Pull request",
+    "zh-CN": "拉取请求"
+  },
+  "shell.main.simulators": {
+    "en": "Simulators",
+    "zh-CN": "模拟器"
+  },
+  "shell.main.vms": {
+    "en": "Virtual machines",
+    "zh-CN": "虚拟机"
+  },
+  "shell.main.design": {
+    "en": "Design",
+    "zh-CN": "设计"
+  },
+  "shell.main.simulatorsTip": {
+    "en": "iOS & Android simulators",
+    "zh-CN": "iOS 与 Android 模拟器"
+  },
+  "shell.main.designTip": {
+    "en": "Design canvas",
+    "zh-CN": "设计画布"
+  },
+  "shell.main.selectTeam": {
+    "en": "Select this task again to change its team.",
+    "zh-CN": "请重新选择此任务以更改团队。"
+  },
+  "shell.main.teamQueued": {
+    "en": "Team switch queued for the next architect turn. Existing workers keep their models.",
+    "zh-CN": "团队切换已排入下一个架构师回合。现有工作智能体保留其模型。"
+  },
+  "shell.main.teamSaved": {
+    "en": "Team setup saved for this and new tasks.",
+    "zh-CN": "团队配置已保存，适用于此任务和新任务。"
+  },
+  "shell.main.teamRemoved": {
+    "en": "New tasks will use a single agent. Saved profiles are kept.",
+    "zh-CN": "新任务将使用单个智能体。已保存的配置会保留。"
+  },
+  "shell.main.teamRemembered": {
+    "en": "Worker models for every team · remembered",
+    "zh-CN": "所有团队的工作智能体模型 · 已记住"
+  },
+  "shell.main.teamRoutingOn": {
+    "en": "Worker models for every team · turns routing on",
+    "zh-CN": "所有团队的工作智能体模型 · 启用路由"
+  },
+  "shell.main.teamCheap": {
+    "en": "Cheap team",
+    "zh-CN": "经济团队"
+  },
+  "shell.main.teamCheapDescription": {
+    "en": "Cheapest model likely to pass",
+    "zh-CN": "可能胜任的最便宜模型"
+  },
+  "shell.main.teamBalanced": {
+    "en": "Balanced team",
+    "zh-CN": "均衡团队"
+  },
+  "shell.main.teamBalancedDescription": {
+    "en": "Best value for the cost",
+    "zh-CN": "最佳性价比"
+  },
+  "shell.main.teamBest": {
+    "en": "Best team",
+    "zh-CN": "最强团队"
+  },
+  "shell.main.teamBestDescription": {
+    "en": "Strongest model for each worker",
+    "zh-CN": "为每个工作智能体使用最强模型"
+  },
+  "shell.main.team": {
+    "en": "Team",
+    "zh-CN": "团队"
+  },
+  "shell.main.noTeam": {
+    "en": "No team",
+    "zh-CN": "无团队"
+  },
+  "shell.main.singleAgent": {
+    "en": "A single agent",
+    "zh-CN": "单个智能体"
+  },
+  "shell.main.agentTeam": {
+    "en": "Agent team",
+    "zh-CN": "智能体团队"
+  },
+  "shell.main.leadPicks": {
+    "en": "The lead picks models",
+    "zh-CN": "由负责人选择模型"
+  },
+  "shell.main.conversationView": {
+    "en": "Workspace view: Conversation",
+    "zh-CN": "工作区视图：对话"
+  },
+  "shell.main.importConversations": {
+    "en": "Import conversations",
+    "zh-CN": "导入对话"
+  },
+  "shell.main.openProject": {
+    "en": "Open project",
+    "zh-CN": "打开项目"
+  },
+  "shell.main.support": {
+    "en": "Help & support",
+    "zh-CN": "帮助与支持"
+  },
+  "shell.main.usage": {
+    "en": "Agent usage",
+    "zh-CN": "智能体用量"
+  },
+  "shell.main.hideSidebar": {
+    "en": "Hide sidebar",
+    "zh-CN": "隐藏侧栏"
+  },
+  "shell.main.showSidebar": {
+    "en": "Show sidebar",
+    "zh-CN": "显示侧栏"
+  },
+  "shell.main.openBrowser": {
+    "en": "Open browser",
+    "zh-CN": "打开浏览器"
+  },
+  "shell.main.projectMoodboards": {
+    "en": "Project moodboards",
+    "zh-CN": "项目灵感板"
+  },
+  "shell.main.deploy": {
+    "en": "Deploy",
+    "zh-CN": "部署"
+  },
+  "shell.main.taskActions": {
+    "en": "Task actions",
+    "zh-CN": "任务操作"
+  },
+  "shell.main.closeOpenFiles": {
+    "en": "Close open files",
+    "zh-CN": "关闭已打开文件"
+  },
+  "shell.main.openView": {
+    "en": "Open a view",
+    "zh-CN": "打开视图"
+  },
+  "shell.main.refreshProject": {
+    "en": "Refresh project",
+    "zh-CN": "刷新项目"
+  },
+  "shell.main.hideInspector": {
+    "en": "Hide inspector",
+    "zh-CN": "隐藏检查器"
+  },
+  "shell.main.checkAgents": {
+    "en": "Open Settings to check your installed agents.",
+    "zh-CN": "打开设置以检查已安装的智能体。"
+  },
+  "shell.main.attachNeedsTask": {
+    "en": "Start a task before attaching anything.",
+    "zh-CN": "请先开始任务，再添加附件。"
+  },
+  "shell.main.attachSettled": {
+    "en": "Reopen this settled task before attaching anything.",
+    "zh-CN": "请先重新打开此已结项任务，再添加附件。"
+  },
+  "shell.main.grokImages": {
+    "en": "Grok Build does not accept images yet. Describe them, or attach documents and folders instead.",
+    "zh-CN": "Grok Build 尚不支持图片。请描述图片，或改为附加文档和文件夹。"
+  },
+  "shell.main.zcodeImages": {
+    "en": "ZCode does not accept images yet. Describe them, or attach documents and folders instead.",
+    "zh-CN": "ZCode 尚不支持图片。请描述图片，或改为附加文档和文件夹。"
+  },
+  "shell.main.attach": {
+    "en": "Attach",
+    "zh-CN": "添加附件"
+  },
+  "shell.main.recipesMenu": {
+    "en": "Workflow recipes…",
+    "zh-CN": "工作流配方…"
+  },
+  "shell.main.queueSteps": {
+    "en": "Queue saved steps",
+    "zh-CN": "将已保存步骤加入队列"
+  },
+  "shell.main.recipes": {
+    "en": "Workflow recipes",
+    "zh-CN": "工作流配方"
+  },
+  "shell.main.sketchTask": {
+    "en": "Select the task again to sketch a mockup.",
+    "zh-CN": "请重新选择任务以绘制草图。"
+  },
+  "shell.main.sketchUpdated": {
+    "en": "Mockup updated",
+    "zh-CN": "草图已更新"
+  },
+  "shell.main.sketchAttached": {
+    "en": "Mockup attached",
+    "zh-CN": "草图已附加"
+  },
+  "shell.main.usageSyntax": {
+    "en": "Use /usage, /usage daily, /usage weekly, or /usage cumulative.",
+    "zh-CN": "请使用 /usage、/usage daily、/usage weekly 或 /usage cumulative。"
+  },
+  "shell.main.codexUsage": {
+    "en": "Codex usage",
+    "zh-CN": "Codex 用量"
+  },
+  "shell.main.hooks": {
+    "en": "Lifecycle hooks",
+    "zh-CN": "生命周期钩子"
+  },
+  "shell.main.codexPreferences": {
+    "en": "Codex preferences",
+    "zh-CN": "Codex 偏好设置"
+  },
+  "shell.main.importSetup": {
+    "en": "Import agent setup",
+    "zh-CN": "导入智能体配置"
+  },
+  "shell.main.resumeCodex": {
+    "en": "Resume a Codex task",
+    "zh-CN": "恢复 Codex 任务"
+  },
+  "shell.main.plugins": {
+    "en": "Installed plugins",
+    "zh-CN": "已安装插件"
+  },
+  "shell.main.backgroundCommands": {
+    "en": "Background commands",
+    "zh-CN": "后台命令"
+  },
+  "shell.main.consoleStop": {
+    "en": "Stop this task before opening its harness console.",
+    "zh-CN": "请先停止此任务，再打开运行器控制台。"
+  },
+  "shell.main.exportTask": {
+    "en": "Export task",
+    "zh-CN": "导出任务"
+  },
+  "shell.main.exported": {
+    "en": "Task exported",
+    "zh-CN": "任务已导出"
+  },
+  "shell.main.useLight": {
+    "en": "Switch to light mode",
+    "zh-CN": "切换到浅色模式"
+  },
+  "shell.main.useDark": {
+    "en": "Switch to dark mode",
+    "zh-CN": "切换到深色模式"
+  },
+  "shell.main.stoppingAgent": {
+    "en": "Stopping agent",
+    "zh-CN": "正在停止智能体"
+  },
+  "shell.main.defaultModel": {
+    "en": "Default model",
+    "zh-CN": "默认模型"
+  },
+  "shell.main.undo": {
+    "en": "Undo",
+    "zh-CN": "撤销"
+  },
+  "shell.main.error": {
+    "en": "Something went wrong. Please try again.",
+    "zh-CN": "出错了。请重试。"
+  },
+  "shell.main.openingSupport": {
+    "en": "Opening support…",
+    "zh-CN": "正在打开支持页面…"
+  },
+  "shell.main.allProjects": {
+    "en": "All projects",
+    "zh-CN": "所有项目"
+  },
+  "shell.main.needsAnswer": {
+    "en": "Needs your answer",
+    "zh-CN": "需要您回答"
+  },
+  "shell.main.needsApproval": {
+    "en": "Needs approval",
+    "zh-CN": "需要审批"
+  },
+  "shell.main.interrupted": {
+    "en": "Interrupted",
+    "zh-CN": "已中断"
+  },
+  "shell.main.failed": {
+    "en": "Failed",
+    "zh-CN": "失败"
+  },
+  "shell.main.running": {
+    "en": "Running",
+    "zh-CN": "运行中"
+  },
+  "shell.main.answer": {
+    "en": "Answer",
+    "zh-CN": "回答"
+  },
+  "shell.main.approval": {
+    "en": "Approval",
+    "zh-CN": "审批"
+  },
+  "shell.main.limited": {
+    "en": "Limited",
+    "zh-CN": "已达限额"
+  },
+  "shell.main.project": {
+    "en": "Project",
+    "zh-CN": "项目"
+  },
+  "shell.main.issue": {
+    "en": "Issue",
+    "zh-CN": "议题"
+  },
+  "shell.main.chat": {
+    "en": "Chat",
+    "zh-CN": "聊天"
+  },
+  "shell.main.reopen": {
+    "en": "Reopen",
+    "zh-CN": "重新打开"
+  },
+  "shell.main.settle": {
+    "en": "Settle",
+    "zh-CN": "结项"
+  },
+  "shell.main.reopenTask": {
+    "en": "Reopen task",
+    "zh-CN": "重新打开任务"
+  },
+  "shell.main.settleTask": {
+    "en": "Settle task",
+    "zh-CN": "结项任务"
+  },
+  "shell.main.showLess": {
+    "en": "Show less",
+    "zh-CN": "收起"
+  },
+  "shell.main.chats": {
+    "en": "Chats",
+    "zh-CN": "聊天"
+  },
+  "shell.main.tasks": {
+    "en": "Tasks",
+    "zh-CN": "任务"
+  },
+  "shell.main.pinned": {
+    "en": "Pinned",
+    "zh-CN": "已固定"
+  },
+  "shell.main.active": {
+    "en": "Active",
+    "zh-CN": "活动中"
+  },
+  "shell.main.activeTasks": {
+    "en": "Active tasks",
+    "zh-CN": "活动任务"
+  },
+  "shell.main.finished": {
+    "en": "Finished",
+    "zh-CN": "已结束"
+  },
+  "shell.main.finishedTasks": {
+    "en": "Finished tasks",
+    "zh-CN": "已结束任务"
+  },
+  "shell.main.sharedChannel": {
+    "en": "Shared channel",
+    "zh-CN": "共享频道"
+  },
+  "shell.main.askAnything": {
+    "en": "Ask anything…",
+    "zh-CN": "问点什么…"
+  },
+  "shell.main.describeTask": {
+    "en": "Describe a task…",
+    "zh-CN": "描述任务…"
+  },
+  "shell.main.paused": {
+    "en": "Paused",
+    "zh-CN": "已暂停"
+  },
+  "shell.main.working": {
+    "en": "Working",
+    "zh-CN": "工作中"
+  },
+  "shell.main.ready": {
+    "en": "Ready",
+    "zh-CN": "就绪"
+  },
+  "shell.main.noTask": {
+    "en": "No task selected",
+    "zh-CN": "未选择任务"
+  },
+  "shell.main.chooseProject": {
+    "en": "Choose a project",
+    "zh-CN": "选择项目"
+  },
+  "shell.main.startTask": {
+    "en": "Start a task",
+    "zh-CN": "开始任务"
+  },
+  "shell.main.openAProject": {
+    "en": "Open a project",
+    "zh-CN": "打开项目"
+  },
+  "shell.main.taskLoadFailed": {
+    "en": "Unable to load this task. Select it again to retry.",
+    "zh-CN": "无法加载此任务。请重新选择以重试。"
+  },
+  "shell.main.loadingConversation": {
+    "en": "Loading conversation…",
+    "zh-CN": "正在加载对话…"
+  },
+  "shell.main.you": {
+    "en": "You",
+    "zh-CN": "您"
+  },
+  "shell.main.agent": {
+    "en": "Agent",
+    "zh-CN": "智能体"
+  },
+  "shell.main.workingEllipsis": {
+    "en": "Working…",
+    "zh-CN": "正在工作…"
+  },
+  "shell.main.earlierActivity": {
+    "en": "Earlier activity will be available in saved history.",
+    "zh-CN": "更早的活动可在已保存的历史记录中查看。"
+  },
+  "shell.main.startingAgent": {
+    "en": "Starting agent",
+    "zh-CN": "正在启动智能体"
+  },
+  "shell.main.waitingResponse": {
+    "en": "Waiting for response",
+    "zh-CN": "正在等待响应"
+  },
+  "shell.main.waitingAnswer": {
+    "en": "Waiting for your answer",
+    "zh-CN": "正在等待您的回答"
+  },
+  "shell.main.waitingApproval": {
+    "en": "Waiting for approval",
+    "zh-CN": "正在等待审批"
+  },
+  "shell.main.workingOnIt": {
+    "en": "Working on it…",
+    "zh-CN": "正在处理…"
+  },
+  "shell.main.continuingTask": {
+    "en": "Continuing task",
+    "zh-CN": "正在继续任务"
+  },
+  "shell.main.reopenAbove": {
+    "en": " Reopen it above to continue.",
+    "zh-CN": " 在上方重新打开以继续。"
+  },
+  "shell.main.stopping": {
+    "en": "Stopping…",
+    "zh-CN": "正在停止…"
+  },
+  "shell.main.stopTask": {
+    "en": "Stop task",
+    "zh-CN": "停止任务"
+  },
+  "shell.main.reconnecting": {
+    "en": "Reconnecting…",
+    "zh-CN": "正在重新连接…"
+  },
+  "shell.main.retryConnection": {
+    "en": "Retry connection",
+    "zh-CN": "重试连接"
+  },
+  "shell.main.retry": {
+    "en": "Retry",
+    "zh-CN": "重试"
+  },
+  "shell.main.queueFollowup": {
+    "en": "Queue a follow-up…",
+    "zh-CN": "将后续消息加入队列…"
+  },
+  "shell.main.queueSteer": {
+    "en": "Queue a follow-up · ⌘↩ steers now",
+    "zh-CN": "将后续消息加入队列 · ⌘↩ 立即引导"
+  },
+  "shell.main.steerShortcut": {
+    "en": " Command Enter to steer the running turn.",
+    "zh-CN": " 按 Command Enter 引导当前回合。"
+  },
+  "shell.main.sendHint": {
+    "en": "Enter to send. Shift Enter for a new line.",
+    "zh-CN": "按 Enter 发送，Shift Enter 换行。"
+  },
+  "shell.main.attachContext": {
+    "en": "Attach files for context",
+    "zh-CN": "附加文件作为上下文"
+  },
+  "shell.main.chooseTeamModels": {
+    "en": "Choose team profile and models",
+    "zh-CN": "选择团队配置与模型"
+  },
+  "shell.main.chooseModel": {
+    "en": "Choose harness and model",
+    "zh-CN": "选择运行器与模型"
+  },
+  "shell.main.queue": {
+    "en": "Queue",
+    "zh-CN": "加入队列"
+  },
+  "shell.main.steer": {
+    "en": "Steer",
+    "zh-CN": "引导"
+  },
+  "shell.main.sendEnter": {
+    "en": "Enter to send.",
+    "zh-CN": "按 Enter 发送。"
+  },
+  "shell.main.screenshot": {
+    "en": "Screenshot",
+    "zh-CN": "截图"
+  },
+  "shell.main.browserItemsLimit": {
+    "en": "Attach up to eight browser items per message.",
+    "zh-CN": "每条消息最多附加八个浏览器项目。"
+  },
+  "shell.main.screenshotsLimit": {
+    "en": "Attach up to four screenshots per message.",
+    "zh-CN": "每条消息最多附加四张截图。"
+  },
+  "shell.main.screenshotRemove": {
+    "en": "Remove a screenshot from your drafts before attaching another.",
+    "zh-CN": "请先从草稿中移除一张截图，再添加新的截图。"
+  },
+  "shell.main.taskDetails": {
+    "en": "Task details",
+    "zh-CN": "任务详情"
+  },
+  "shell.main.conversation": {
+    "en": "Conversation",
+    "zh-CN": "对话"
+  },
+  "shell.main.board": {
+    "en": "Board",
+    "zh-CN": "看板"
+  },
+  "shell.main.workspaceView": {
+    "en": "Workspace view",
+    "zh-CN": "工作区视图"
+  },
+  "shell.main.addNeedsProject": {
+    "en": "Open a project to add a task.",
+    "zh-CN": "打开项目以添加任务。"
+  },
+  "shell.main.addTask": {
+    "en": "Add task",
+    "zh-CN": "添加任务"
+  },
+  "shell.main.saveDetails": {
+    "en": "Save details",
+    "zh-CN": "保存详情"
+  },
+  "shell.main.addPending": {
+    "en": "Add to pending",
+    "zh-CN": "添加到待处理"
+  },
+  "shell.main.mentionHint": {
+    "en": "Type @ to mention a project file.",
+    "zh-CN": "输入 @ 引用项目文件。"
+  },
+  "shell.main.taskPending": {
+    "en": "Task added to Pending.",
+    "zh-CN": "任务已添加到待处理。"
+  },
+  "shell.main.earlierMessagesFailed": {
+    "en": "Could not load earlier messages. Scroll up to retry.",
+    "zh-CN": "无法加载更早的消息。向上滚动以重试。"
+  },
+  "shell.main.rewound": {
+    "en": "Rewound to before your message. Edit it and send.",
+    "zh-CN": "已回退至您的消息之前。请编辑并发送。"
+  },
+  "shell.main.forkedSameCheckout": {
+    "en": "Conversation forked. Both tasks use the same checkout.",
+    "zh-CN": "对话已分叉。两个任务使用同一检出目录。"
+  },
+  "shell.main.forked": {
+    "en": "Conversation forked. Your new task is in the task list.",
+    "zh-CN": "对话已分叉。新任务已在任务列表中。"
+  },
+  "shell.main.editNeedsStop": {
+    "en": "Stop the agent before editing a message.",
+    "zh-CN": "编辑消息前请先停止智能体。"
+  },
+  "shell.main.subagents": {
+    "en": "Subagents",
+    "zh-CN": "子智能体"
+  },
+  "shell.main.fastSyntax": {
+    "en": "Use /fast, /fast on, or /fast off.",
+    "zh-CN": "请使用 /fast、/fast on 或 /fast off。"
+  },
+  "shell.main.planMode": {
+    "en": "Plan mode",
+    "zh-CN": "规划模式"
+  },
+  "shell.main.fastTier": {
+    "en": "Fast service tier",
+    "zh-CN": "快速服务层级"
+  },
+  "shell.main.taskStatus": {
+    "en": "Task status",
+    "zh-CN": "任务状态"
+  },
+  "shell.main.noContextUsage": {
+    "en": "This harness has not reported context usage yet.",
+    "zh-CN": "此运行器尚未报告上下文用量。"
+  },
+  "shell.main.integrations": {
+    "en": "Integrations",
+    "zh-CN": "集成"
+  },
+  "shell.main.noResponse": {
+    "en": "There is no agent response to copy yet.",
+    "zh-CN": "暂无可复制的智能体回复。"
+  },
+  "shell.main.responseCopied": {
+    "en": "Response copied",
+    "zh-CN": "回复已复制"
+  },
+  "shell.main.workingDirectory": {
+    "en": "Working directory",
+    "zh-CN": "工作目录"
+  },
+  "shell.main.commandUnavailable": {
+    "en": "This command is not available in PandaCode yet.",
+    "zh-CN": "PandaCode 尚不支持此命令。"
+  },
+  "shell.main.steerRefused": {
+    "en": "The agent could not take it during this turn.",
+    "zh-CN": "智能体无法在此回合接收这条消息。"
+  },
+  "shell.main.steerQueued": {
+    "en": "The agent could not take that message, so it was queued.",
+    "zh-CN": "智能体无法接收该消息，已将其加入队列。"
+  },
+  "shell.main.steerRestored": {
+    "en": "The agent could not take that message; it is back in the prompt.",
+    "zh-CN": "智能体无法接收该消息；消息已放回输入框。"
+  },
+  "shell.main.sendAfterTurn": {
+    "en": "Sends when this turn ends",
+    "zh-CN": "此回合结束后发送"
+  },
+  "shell.main.steering": {
+    "en": "Steering…",
+    "zh-CN": "正在引导…"
+  },
+  "shell.main.attachmentQueued": {
+    "en": "Attachments travel with queued messages, so this one was queued.",
+    "zh-CN": "附件随排队消息发送，因此此消息已加入队列。"
+  },
+  "shell.main.attachmentAfterRun": {
+    "en": "Queued messages with attachments are sent after the run.",
+    "zh-CN": "带附件的排队消息将在运行结束后发送。"
+  },
+  "shell.main.stopToSend": {
+    "en": "Stopping the run to send this message…",
+    "zh-CN": "正在停止运行以发送此消息…"
+  },
+  "shell.main.checksFailed": {
+    "en": "Project checks failed to run",
+    "zh-CN": "项目检查未能运行"
+  },
+  "shell.main.messageChangedCommands": {
+    "en": "Your task or message changed while commands were loading. Send it again.",
+    "zh-CN": "命令加载期间，任务或消息已更改。请重新发送。"
+  },
+  "shell.main.commandNoAttachments": {
+    "en": "This command does not accept attachments. Remove them before running it.",
+    "zh-CN": "此命令不接受附件。请先移除附件再运行。"
+  },
+  "shell.main.returnToCommand": {
+    "en": "Return to the task to run this command.",
+    "zh-CN": "返回任务以运行此命令。"
+  },
+  "shell.main.promptChangedCommands": {
+    "en": "Your message changed while commands were loading. Send it again.",
+    "zh-CN": "命令加载期间，消息已更改。请重新发送。"
+  },
+  "shell.main.workerNeedsInput": {
+    "en": "A worker needs your input. Open Architect & workers.",
+    "zh-CN": "工作智能体需要您的输入。请打开「架构师与工作智能体」。"
+  },
+  "shell.main.task": {
+    "en": "Task",
+    "zh-CN": "任务"
+  },
+  "shell.main.generating": {
+    "en": "Generating response",
+    "zh-CN": "正在生成回复"
+  },
+  "shell.main.gitLoadFailed": {
+    "en": "Git status could not be loaded.",
+    "zh-CN": "无法加载 Git 状态。"
+  },
+  "shell.main.folderReadFailed": {
+    "en": "The folder could not be read.",
+    "zh-CN": "无法读取文件夹。"
+  },
+  "shell.main.actionInactive": {
+    "en": "App action is no longer active for the visible task.",
+    "zh-CN": "此应用操作已不再适用于当前显示的任务。"
+  },
+  "shell.main.browserOpenFailed": {
+    "en": "Browser could not be opened.",
+    "zh-CN": "无法打开浏览器。"
+  },
+  "shell.main.openBrowserFirst": {
+    "en": "Open the browser in this task first.",
+    "zh-CN": "请先在此任务中打开浏览器。"
+  },
+  "shell.main.unknownAction": {
+    "en": "Unknown app action.",
+    "zh-CN": "未知的应用操作。"
+  },
+  "shell.main.openViewTitle": {
+    "en": "Open view",
+    "zh-CN": "打开视图"
+  },
+  "shell.main.committed": {
+    "en": "Changes committed",
+    "zh-CN": "更改已提交"
+  },
+  "shell.main.openFiles": {
+    "en": "Open files",
+    "zh-CN": "已打开文件"
+  },
+  "shell.main.loadingChanges": {
+    "en": "Loading changes…",
+    "zh-CN": "正在加载更改…"
+  },
+  "shell.main.loadingFiles": {
+    "en": "Loading files…",
+    "zh-CN": "正在加载文件…"
+  },
+  "shell.main.changesLoadFailed": {
+    "en": "Unable to load changes",
+    "zh-CN": "无法加载更改"
+  },
+  "shell.main.folderLoadFailed": {
+    "en": "Unable to read folder",
+    "zh-CN": "无法读取文件夹"
+  },
+  "shell.main.previewBrowser": {
+    "en": "Preview in browser",
+    "zh-CN": "在浏览器中预览"
+  },
+  "shell.main.copyFile": {
+    "en": "Copy file",
+    "zh-CN": "复制文件"
+  },
+  "shell.main.unstage": {
+    "en": "Unstage file",
+    "zh-CN": "取消暂存文件"
+  },
+  "shell.main.stage": {
+    "en": "Stage file",
+    "zh-CN": "暂存文件"
+  },
+  "shell.main.collapseFolders": {
+    "en": "Collapse folders",
+    "zh-CN": "收起文件夹"
+  },
+  "shell.main.attachFilesNeedsTask": {
+    "en": "Start a task before attaching files.",
+    "zh-CN": "请先开始任务，再附加文件。"
+  },
+  "shell.main.fileAttached": {
+    "en": "File already attached.",
+    "zh-CN": "文件已附加。"
+  },
+  "shell.main.filesLimit": {
+    "en": "Attach up to 5 files per message.",
+    "zh-CN": "每条消息最多附加 5 个文件。"
+  },
+  "shell.main.closeDialog": {
+    "en": "Close dialog",
+    "zh-CN": "关闭对话框"
+  },
+  "shell.main.aboutDialog": {
+    "en": "About this dialog",
+    "zh-CN": "关于此对话框"
+  },
+  "shell.main.changedFiles": {
+    "en": "Changed files",
+    "zh-CN": "已更改文件"
+  },
+  "shell.main.worktreeOriginalProject": {
+    "en": "A worktree task stays with its original project. Start a new task to use another project.",
+    "zh-CN": "工作树任务保留在原项目中。请新建任务以使用其他项目。"
+  },
+  "shell.main.attachmentsCleared": {
+    "en": "Attachments cleared for the new project.",
+    "zh-CN": "已为新项目清空附件。"
+  },
+  "shell.main.noProject": {
+    "en": "No project",
+    "zh-CN": "无项目"
+  },
+  "shell.main.chatFolder": {
+    "en": "Chat in its own folder",
+    "zh-CN": "在独立文件夹中聊天"
+  },
+  "shell.main.selectProject": {
+    "en": "Select the task again to change its project.",
+    "zh-CN": "请重新选择任务以更改项目。"
+  },
+  "shell.main.teamMissing": {
+    "en": "This agent team no longer exists.",
+    "zh-CN": "此智能体团队已不存在。"
+  },
+  "shell.main.selectModel": {
+    "en": "Select the task again to change its model.",
+    "zh-CN": "请重新选择任务以更改模型。"
+  },
+  "shell.main.selectEffort": {
+    "en": "Select the task again to change its reasoning effort.",
+    "zh-CN": "请重新选择任务以更改推理强度。"
+  },
+  "shell.main.harnessChanged": {
+    "en": "Harness changed. Reopen this task to refresh its conversation.",
+    "zh-CN": "运行器已更改。请重新打开此任务以刷新对话。"
+  },
+  "shell.main.deployNeedsProject": {
+    "en": "Open a project to deploy it.",
+    "zh-CN": "请打开项目以部署。"
+  },
+  "shell.main.startNeedsProject": {
+    "en": "Open a project to start a task.",
+    "zh-CN": "请打开项目以开始任务。"
+  },
+  "shell.main.permissions": {
+    "en": "Permissions",
+    "zh-CN": "权限"
+  },
+  "shell.main.selectPermissions": {
+    "en": "Select the task again to change its permissions.",
+    "zh-CN": "请重新选择任务以更改权限。"
+  },
+  "shell.main.availableApproval": {
+    "en": "Choose an available approval behavior.",
+    "zh-CN": "请选择可用的审批行为。"
+  },
+  "shell.main.unpinTask": {
+    "en": "Unpin task",
+    "zh-CN": "取消固定任务"
+  },
+  "shell.main.pinTask": {
+    "en": "Pin task",
+    "zh-CN": "固定任务"
+  },
+  "shell.main.renameTask": {
+    "en": "Rename task",
+    "zh-CN": "重命名任务"
+  },
+  "shell.main.jevTests": {
+    "en": "Browser tests with Jev",
+    "zh-CN": "使用 Jev 进行浏览器测试"
+  },
+  "shell.main.jevAssistance": {
+    "en": "Jev assistance",
+    "zh-CN": "Jev 辅助"
+  },
+  "shell.main.manageGoal": {
+    "en": "Manage goal",
+    "zh-CN": "管理目标"
+  },
+  "shell.main.harnessConsole": {
+    "en": "Open harness console",
+    "zh-CN": "打开运行器控制台"
+  },
+  "shell.main.copyWorktree": {
+    "en": "Copy worktree path",
+    "zh-CN": "复制工作树路径"
+  },
+  "shell.main.copyProject": {
+    "en": "Copy project path",
+    "zh-CN": "复制项目路径"
+  },
+  "shell.main.workNewWorktree": {
+    "en": "Work in a new worktree…",
+    "zh-CN": "在新工作树中工作…"
+  },
+  "shell.main.newWorktreeTask": {
+    "en": "New task in a worktree…",
+    "zh-CN": "在工作树中新建任务…"
+  },
+  "shell.main.deleteTaskMenu": {
+    "en": "Delete task…",
+    "zh-CN": "删除任务…"
+  },
+  "shell.main.deleteNeedsStop": {
+    "en": "Stop the agent before deleting this task.",
+    "zh-CN": "删除此任务前请先停止智能体。"
+  },
+  "shell.main.taskPinned": {
+    "en": "Task pinned",
+    "zh-CN": "任务已固定"
+  },
+  "shell.main.taskUnpinned": {
+    "en": "Task unpinned",
+    "zh-CN": "任务已取消固定"
+  },
+  "shell.main.taskSettled": {
+    "en": "Task settled",
+    "zh-CN": "任务已结项"
+  },
+  "shell.main.moveUp": {
+    "en": "Move up",
+    "zh-CN": "上移"
+  },
+  "shell.main.moveDown": {
+    "en": "Move down",
+    "zh-CN": "下移"
+  },
+  "shell.main.rename": {
+    "en": "Rename…",
+    "zh-CN": "重命名…"
+  },
+  "shell.main.markRead": {
+    "en": "Mark as read",
+    "zh-CN": "标为已读"
+  },
+  "shell.main.markUnread": {
+    "en": "Mark as unread",
+    "zh-CN": "标为未读"
+  },
+  "shell.main.copyBranch": {
+    "en": "Copy branch name",
+    "zh-CN": "复制分支名"
+  },
+  "shell.main.copyTaskId": {
+    "en": "Copy task ID",
+    "zh-CN": "复制任务 ID"
+  },
+  "shell.main.branchCopied": {
+    "en": "Branch name copied",
+    "zh-CN": "分支名已复制"
+  },
+  "shell.main.pathCopied": {
+    "en": "Path copied",
+    "zh-CN": "路径已复制"
+  },
+  "shell.main.taskIdCopied": {
+    "en": "Task ID copied",
+    "zh-CN": "任务 ID 已复制"
+  },
+  "shell.main.projectActions": {
+    "en": "Project actions",
+    "zh-CN": "项目操作"
+  },
+  "shell.main.newTask": {
+    "en": "New task",
+    "zh-CN": "新建任务"
+  },
+  "shell.main.collapseOtherProjects": {
+    "en": "Collapse other projects",
+    "zh-CN": "收起其他项目"
+  },
+  "shell.main.revealFinder": {
+    "en": "Reveal in Finder",
+    "zh-CN": "在访达中显示"
+  },
+  "shell.main.showExplorer": {
+    "en": "Show in Explorer",
+    "zh-CN": "在资源管理器中显示"
+  },
+  "shell.main.openFolder": {
+    "en": "Open folder",
+    "zh-CN": "打开文件夹"
+  },
+  "shell.main.removeProject": {
+    "en": "Remove project…",
+    "zh-CN": "移除项目…"
+  },
+  "shell.main.sortView": {
+    "en": "Sort and view",
+    "zh-CN": "排序与视图"
+  },
+  "shell.main.manual": {
+    "en": "Manual",
+    "zh-CN": "手动"
+  },
+  "shell.main.sortTasks": {
+    "en": "Sort tasks",
+    "zh-CN": "任务排序"
+  },
+  "shell.main.recentActivity": {
+    "en": "Recent activity",
+    "zh-CN": "最近活动"
+  },
+  "shell.main.created": {
+    "en": "Created",
+    "zh-CN": "创建时间"
+  },
+  "shell.main.perSection": {
+    "en": "Show per section",
+    "zh-CN": "每个分类显示数量"
+  },
+  "shell.main.filterProjects": {
+    "en": "Filter projects",
+    "zh-CN": "筛选项目"
+  },
+  "shell.main.searchProjects": {
+    "en": "Search projects…",
+    "zh-CN": "搜索项目…"
+  },
+  "shell.main.defaultAgent": {
+    "en": "Default agent",
+    "zh-CN": "默认智能体"
+  },
+  "shell.main.deleteTask": {
+    "en": "Delete task?",
+    "zh-CN": "删除任务？"
+  },
+  "shell.main.taskDeleted": {
+    "en": "Task deleted",
+    "zh-CN": "任务已删除"
+  },
+  "shell.main.colors": {
+    "en": "Colors",
+    "zh-CN": "颜色"
+  },
+  "shell.main.wallpapers": {
+    "en": "Wallpapers",
+    "zh-CN": "壁纸"
+  },
+  "shell.main.providerConnections": {
+    "en": "Provider connections",
+    "zh-CN": "服务提供方连接"
+  },
+  "shell.main.openCodeModels": {
+    "en": "OpenCode models",
+    "zh-CN": "OpenCode 模型"
+  },
+  "shell.main.moodboardNeedsProject": {
+    "en": "Open a project to create a moodboard.",
+    "zh-CN": "打开项目以创建灵感板。"
+  },
+  "shell.main.moodboards": {
+    "en": "Moodboards",
+    "zh-CN": "灵感板"
+  },
+  "shell.main.moodboardNeedsIdle": {
+    "en": "Open an idle task in this project to attach a moodboard.",
+    "zh-CN": "打开此项目中的空闲任务以附加灵感板。"
+  },
+  "shell.main.moodboardAttached": {
+    "en": "Moodboard already attached.",
+    "zh-CN": "灵感板已附加。"
+  },
+  "shell.main.moodboardsLimit": {
+    "en": "Attach up to eight moodboards per message.",
+    "zh-CN": "每条消息最多附加八个灵感板。"
+  },
+  "shell.main.toolsIntegrations": {
+    "en": "Tools & integrations",
+    "zh-CN": "工具与集成"
+  },
+  "shell.main.jevAddon": {
+    "en": "Jev add-on",
+    "zh-CN": "Jev 扩展"
+  },
+  "shell.main.reportNeedsIdle": {
+    "en": "Open this task while it is idle to add the report.",
+    "zh-CN": "任务空闲时打开它以添加报告。"
+  },
+  "shell.main.testNeedsTask": {
+    "en": "Open a task to save browser test results.",
+    "zh-CN": "打开任务以保存浏览器测试结果。"
+  },
+  "shell.main.testReportNeedsIdle": {
+    "en": "Open this task while it is idle to add its test report.",
+    "zh-CN": "任务空闲时打开它以添加测试报告。"
+  },
+  "shell.main.browserTests": {
+    "en": "Browser tests",
+    "zh-CN": "浏览器测试"
+  },
+  "shell.main.newBot": {
+    "en": "New bot",
+    "zh-CN": "新建机器人"
+  },
+  "shell.main.bots": {
+    "en": "Bots",
+    "zh-CN": "机器人"
+  },
+  "shell.main.botSettings": {
+    "en": "Bot settings",
+    "zh-CN": "机器人设置"
+  },
+  "shell.main.noBot": {
+    "en": "No bot",
+    "zh-CN": "无机器人"
+  },
+  "shell.main.bot": {
+    "en": "Bot",
+    "zh-CN": "机器人"
+  },
+  "shell.main.chooseBotBeforeMessage": {
+    "en": "Choose a bot before the task's first message.",
+    "zh-CN": "请在任务的第一条消息之前选择机器人。"
+  },
+  "shell.main.thatComputer": {
+    "en": "That computer",
+    "zh-CN": "那台电脑"
+  },
+  "shell.main.pairingFailed": {
+    "en": "Could not load the pairing prompt",
+    "zh-CN": "无法加载配对提示"
+  },
+  "shell.main.cloudMachine": {
+    "en": "Cloud machine",
+    "zh-CN": "云机器"
+  },
+  "shell.main.cloudDeleted": {
+    "en": "Deleted the cloud machine. Your next message creates a new one.",
+    "zh-CN": "云机器已删除。发送下一条消息时会创建新机器。"
+  },
+  "shell.main.deleteCloud": {
+    "en": "Delete cloud machine?",
+    "zh-CN": "删除云机器？"
+  },
+  "shell.main.cloudNoImages": {
+    "en": "Images and browser captures can’t be sent to a cloud machine yet. Remove them, or run on this computer.",
+    "zh-CN": "尚无法将图片和浏览器截图发送到云机器。请移除它们，或在此电脑上运行。"
+  },
+  "shell.main.messageChanged": {
+    "en": "Your task or message changed. Send it again.",
+    "zh-CN": "任务或消息已更改。请重新发送。"
+  },
+  "shell.main.runOn": {
+    "en": "Run on",
+    "zh-CN": "运行位置"
+  },
+  "shell.main.githubBehind": {
+    "en": "GitHub is behind this computer",
+    "zh-CN": "GitHub 落后于此电脑"
+  },
+  "shell.main.thisProject": {
+    "en": "This project",
+    "zh-CN": "此项目"
+  },
+  "shell.main.unpin": {
+    "en": "Unpin",
+    "zh-CN": "取消固定"
+  },
+  "shell.main.pin": {
+    "en": "Pin",
+    "zh-CN": "固定"
+  },
+  "shell.main.editBot": {
+    "en": "Edit bot",
+    "zh-CN": "编辑机器人"
+  },
+  "shell.main.duplicateBot": {
+    "en": "Duplicate bot",
+    "zh-CN": "复制机器人"
+  },
+  "shell.main.restore": {
+    "en": "Restore",
+    "zh-CN": "恢复"
+  },
+  "shell.main.hidePause": {
+    "en": "Hide (pause)",
+    "zh-CN": "隐藏（暂停）"
+  },
+  "shell.main.deleteBot": {
+    "en": "Delete bot…",
+    "zh-CN": "删除机器人…"
+  },
+  "shell.main.edit": {
+    "en": "Edit",
+    "zh-CN": "编辑"
+  },
+  "shell.main.delete": {
+    "en": "Delete",
+    "zh-CN": "删除"
+  },
+  "shell.main.goAnything": {
+    "en": "Go to anything",
+    "zh-CN": "快速跳转"
+  },
+  "shell.main.newChatNoProject": {
+    "en": "New chat (no project)",
+    "zh-CN": "新建聊天（无项目）"
+  },
+  "shell.main.toggleTerminal": {
+    "en": "Toggle terminal",
+    "zh-CN": "切换终端"
+  },
+  "shell.main.settings": {
+    "en": "Settings",
+    "zh-CN": "设置"
+  },
+  "shell.main.createWorktree": {
+    "en": "Create worktree",
+    "zh-CN": "创建工作树"
+  },
+  "shell.main.terminalNeedsProject": {
+    "en": "Open a project before starting a terminal.",
+    "zh-CN": "启动终端前请先打开项目。"
+  },
+  "shell.main.fileCopied": {
+    "en": "File copied",
+    "zh-CN": "文件已复制"
+  },
+  "shell.main.worktreeCopied": {
+    "en": "Worktree path copied",
+    "zh-CN": "工作树路径已复制"
+  },
+  "shell.main.projectCopied": {
+    "en": "Project path copied",
+    "zh-CN": "项目路径已复制"
+  },
+  "shell.main.stoppingTask": {
+    "en": "Stopping task…",
+    "zh-CN": "正在停止任务…"
+  },
+  "shell.main.commitMessageRequired": {
+    "en": "Enter a commit message.",
+    "zh-CN": "请输入提交说明。"
+  },
+  "shell.main.someone": {
+    "en": "Someone",
+    "zh-CN": "某人"
+  },
+  "shell.main.checkClis": {
+    "en": "Open Settings to check your installed agent CLIs.",
+    "zh-CN": "打开设置以检查已安装的智能体 CLI。"
+  },
+  "shell.main.architectWorkers": {
+    "en": "Architect & workers",
+    "zh-CN": "架构师与工作智能体"
+  },
+  "shell.main.projectsTasks": {
+    "en": "Projects and tasks",
+    "zh-CN": "项目与任务"
+  },
+  "shell.main.newChat": {
+    "en": "New chat",
+    "zh-CN": "新建聊天"
+  },
+  "shell.main.filterTasks": {
+    "en": "Filter tasks",
+    "zh-CN": "筛选任务"
+  },
+  "shell.main.clearFilter": {
+    "en": "Clear filter",
+    "zh-CN": "清除筛选"
+  },
+  "shell.main.darkMode": {
+    "en": "Dark mode",
+    "zh-CN": "深色模式"
+  },
+  "shell.main.previewSample": {
+    "en": "Browser preview · sample data",
+    "zh-CN": "浏览器预览 · 示例数据"
+  },
+  "shell.main.workspaceActions": {
+    "en": "Workspace actions",
+    "zh-CN": "工作区操作"
+  },
+  "shell.main.agents": {
+    "en": "Agents",
+    "zh-CN": "智能体"
+  },
+  "shell.main.runProject": {
+    "en": "Run project",
+    "zh-CN": "运行项目"
+  },
+  "shell.main.runScript": {
+    "en": "Run pandacode-run.sh",
+    "zh-CN": "运行 pandacode-run.sh"
+  },
+  "shell.main.run": {
+    "en": "Run",
+    "zh-CN": "运行"
+  },
+  "shell.main.restartUpdate": {
+    "en": "Restart to update",
+    "zh-CN": "重启以更新"
+  },
+  "shell.main.projectBoard": {
+    "en": "Project board",
+    "zh-CN": "项目看板"
+  },
+  "shell.main.terminalTabs": {
+    "en": "Terminal tabs",
+    "zh-CN": "终端标签页"
+  },
+  "shell.main.newTerminal": {
+    "en": "New terminal",
+    "zh-CN": "新建终端"
+  },
+  "shell.main.minimizeTerminal": {
+    "en": "Minimize terminal",
+    "zh-CN": "最小化终端"
+  },
+  "shell.main.closeTerminal": {
+    "en": "Close terminal",
+    "zh-CN": "关闭终端"
+  },
+  "shell.main.inspector": {
+    "en": "Project inspector",
+    "zh-CN": "项目检查器"
+  },
+  "shell.main.panelViews": {
+    "en": "Panel views",
+    "zh-CN": "面板视图"
+  },
+  "shell.main.openFile": {
+    "en": "Open file",
+    "zh-CN": "打开文件"
+  },
+  "shell.main.opening": {
+    "en": "Opening…",
+    "zh-CN": "正在打开…"
+  },
+  "shell.main.worktree": {
+    "en": "Worktree",
+    "zh-CN": "工作树"
+  },
+  "shell.main.unread": {
+    "en": "Unread",
+    "zh-CN": "未读"
+  },
+  "shell.main.settledTasks": {
+    "en": "Settled tasks",
+    "zh-CN": "已结项任务"
+  },
+  "shell.main.noTasks": {
+    "en": "No tasks yet",
+    "zh-CN": "暂无任务"
+  },
+  "shell.main.pinnedTasks": {
+    "en": "Pinned tasks",
+    "zh-CN": "已固定任务"
+  },
+  "shell.main.noMatches": {
+    "en": "No tasks match",
+    "zh-CN": "没有匹配的任务"
+  },
+  "shell.main.openToStart": {
+    "en": "Open a project to get started.",
+    "zh-CN": "打开项目以开始。"
+  },
+  "shell.main.backConversation": {
+    "en": "Back to conversation",
+    "zh-CN": "返回对话"
+  },
+  "shell.main.loadingChannel": {
+    "en": "Loading channel…",
+    "zh-CN": "正在加载频道…"
+  },
+  "shell.main.startWhenReady": {
+    "en": "Start this task when you’re ready. Agent updates and your replies will appear here.",
+    "zh-CN": "准备好后即可开始任务。智能体动态和您的回复会显示在此处。"
+  },
+  "shell.main.chatPrompt": {
+    "en": "What’s on your mind?",
+    "zh-CN": "您在想什么？"
+  },
+  "shell.main.moveProject": {
+    "en": "Move to project…",
+    "zh-CN": "移至项目…"
+  },
+  "shell.main.whatBuild": {
+    "en": "What should we build in",
+    "zh-CN": "我们要在此项目中构建什么"
+  },
+  "shell.main.changeProject": {
+    "en": "Change task project",
+    "zh-CN": "更改任务项目"
+  },
+  "shell.main.whatDo": {
+    "en": "What would you like to do?",
+    "zh-CN": "您想做些什么？"
+  },
+  "shell.main.carriedForward": {
+    "en": "Conversation carried forward",
+    "zh-CN": "对话已延续"
+  },
+  "shell.main.imageExpired": {
+    "en": "This image is no longer stored. Here is what was sent with it.",
+    "zh-CN": "此图片已不再存储。以下是当时随图发送的内容。"
+  },
+  "shell.main.thinking": {
+    "en": "Thinking",
+    "zh-CN": "思考中"
+  },
+  "shell.main.generatingLabel": {
+    "en": "Generating",
+    "zh-CN": "生成中"
+  },
+  "shell.main.retryResponse": {
+    "en": "Retry loading response",
+    "zh-CN": "重新加载回复"
+  },
+  "shell.main.stopShortcut": {
+    "en": "Stop task (Esc)",
+    "zh-CN": "停止任务（Esc）"
+  },
+  "shell.main.checking": {
+    "en": "Checking…",
+    "zh-CN": "正在检查…"
+  },
+  "shell.main.sendMessage": {
+    "en": "Send message",
+    "zh-CN": "发送消息"
+  },
+  "shell.main.messageAgent": {
+    "en": "Message your coding agent",
+    "zh-CN": "向编程智能体发送消息"
+  },
+  "shell.main.steerTurn": {
+    "en": "Steer the running turn",
+    "zh-CN": "引导当前回合"
+  },
+  "shell.main.browserAttachments": {
+    "en": "Browser attachments",
+    "zh-CN": "浏览器附件"
+  },
+  "shell.main.screenshotPreview": {
+    "en": "Screenshot preview",
+    "zh-CN": "截图预览"
+  },
+  "shell.main.taskTitle": {
+    "en": "Task title",
+    "zh-CN": "任务标题"
+  },
+  "shell.main.whatNeedsDone": {
+    "en": "What needs to be done?",
+    "zh-CN": "需要完成什么？"
+  },
+  "shell.main.taskDescription": {
+    "en": "Task description",
+    "zh-CN": "任务描述"
+  },
+  "shell.main.describeOutcome": {
+    "en": "Describe the outcome, context, and anything the agent should know.",
+    "zh-CN": "描述目标、上下文以及智能体需要了解的信息。"
+  },
+  "shell.main.cancel": {
+    "en": "Cancel",
+    "zh-CN": "取消"
+  },
+  "shell.main.noSubagents": {
+    "en": "No subagents have been reported for this task yet.",
+    "zh-CN": "此任务尚未报告子智能体。"
+  },
+  "shell.main.mcpCommandsHint": {
+    "en": "Use the harness’s advertised MCP commands. Refresh the slash-command menu to sync the current list.",
+    "zh-CN": "使用运行器提供的 MCP 命令。刷新斜杠命令菜单以同步当前列表。"
+  },
+  "shell.main.notTakenQueued": {
+    "en": "Not taken by the agent · moved to the queue",
+    "zh-CN": "智能体未接收 · 已移入队列"
+  },
+  "shell.main.browseNeedsProject": {
+    "en": "Open a project to browse files and review changes.",
+    "zh-CN": "打开项目以浏览文件和查看更改。"
+  },
+  "shell.main.remoteFiles": {
+    "en": "Its changes and files are on that computer, so review and commit them there.",
+    "zh-CN": "更改和文件位于那台电脑上，请在那里查看并提交。"
+  },
+  "shell.main.loadingFile": {
+    "en": "Loading file…",
+    "zh-CN": "正在加载文件…"
+  },
+  "shell.main.loadingDiff": {
+    "en": "Loading diff…",
+    "zh-CN": "正在加载差异…"
+  },
+  "shell.main.emptyFolder": {
+    "en": "This folder is empty.",
+    "zh-CN": "此文件夹为空。"
+  },
+  "shell.main.noGit": {
+    "en": "No Git repository",
+    "zh-CN": "无 Git 仓库"
+  },
+  "shell.main.openGit": {
+    "en": "Open a Git repository to review changes.",
+    "zh-CN": "打开 Git 仓库以查看更改。"
+  },
+  "shell.main.loadingDiffViewer": {
+    "en": "Loading diff viewer…",
+    "zh-CN": "正在加载差异查看器…"
+  },
+  "shell.main.projectFolder": {
+    "en": "Project folder",
+    "zh-CN": "项目文件夹"
+  },
+  "shell.main.browsePath": {
+    "en": "Enter a full path or choose Browse.",
+    "zh-CN": "输入完整路径或选择「浏览」。"
+  },
+  "shell.main.projectRemoveDescription": {
+    "en": "Its tasks are removed from PandaCode. The folder stays on disk.",
+    "zh-CN": "其任务将从 PandaCode 中移除。磁盘上的文件夹会保留。"
+  },
+  "shell.main.removeProjectButton": {
+    "en": "Remove project",
+    "zh-CN": "移除项目"
+  },
+  "shell.main.deleteTaskDescription": {
+    "en": "Permanently delete this conversation and its worker history from PandaCode? This cannot be undone. Its terminal tabs close and running commands may stop. Project files and worktrees stay.",
+    "zh-CN": "要从 PandaCode 中永久删除此对话及其工作智能体历史记录吗？此操作无法撤销。其终端标签页将关闭，正在运行的命令可能停止。项目文件和工作树会保留。"
+  },
+  "shell.main.deleteTaskButton": {
+    "en": "Delete task",
+    "zh-CN": "删除任务"
+  },
+  "shell.main.taskName": {
+    "en": "Task name",
+    "zh-CN": "任务名称"
+  },
+  "shell.main.save": {
+    "en": "Save",
+    "zh-CN": "保存"
+  },
+  "shell.main.loadingThemes": {
+    "en": "Loading themes…",
+    "zh-CN": "正在加载主题…"
+  },
+  "shell.main.backSettings": {
+    "en": "Back to settings",
+    "zh-CN": "返回设置"
+  },
+  "shell.main.done": {
+    "en": "Done",
+    "zh-CN": "完成"
+  },
+  "shell.main.loadingScenes": {
+    "en": "Loading scenes…",
+    "zh-CN": "正在加载场景…"
+  },
+  "shell.main.loadingConnections": {
+    "en": "Loading connections…",
+    "zh-CN": "正在加载连接…"
+  },
+  "shell.main.loadingMoodboards": {
+    "en": "Loading moodboards…",
+    "zh-CN": "正在加载灵感板…"
+  },
+  "shell.main.loadingIntegrations": {
+    "en": "Loading integrations…",
+    "zh-CN": "正在加载集成…"
+  },
+  "shell.main.loadingJev": {
+    "en": "Loading Jev settings…",
+    "zh-CN": "正在加载 Jev 设置…"
+  },
+  "shell.main.preparingJev": {
+    "en": "Preparing Jev assistance…",
+    "zh-CN": "正在准备 Jev 辅助…"
+  },
+  "shell.main.loadingTests": {
+    "en": "Loading browser tests…",
+    "zh-CN": "正在加载浏览器测试…"
+  },
+  "shell.main.loading": {
+    "en": "Loading…",
+    "zh-CN": "正在加载…"
+  },
+  "shell.main.importerFailed": {
+    "en": "Unable to open the importer. Close this window and try again.",
+    "zh-CN": "无法打开导入工具。请关闭此窗口后重试。"
+  },
+  "shell.main.loadingBots": {
+    "en": "Loading bots…",
+    "zh-CN": "正在加载机器人…"
+  },
+  "shell.main.botsFailed": {
+    "en": "Unable to open bots. Close this window and try again.",
+    "zh-CN": "无法打开机器人。请关闭此窗口后重试。"
+  },
+  "shell.main.botSettingsFailed": {
+    "en": "Unable to open bot settings. Close this window and try again.",
+    "zh-CN": "无法打开机器人设置。请关闭此窗口后重试。"
+  },
+  "shell.main.startWithBot": {
+    "en": "Start this task with a bot",
+    "zh-CN": "使用机器人开始此任务"
+  },
+  "shell.main.chooseAnother": {
+    "en": "Choose another",
+    "zh-CN": "选择其他"
+  },
+  "shell.main.removeBotDescription": {
+    "en": "This removes the bot, its conversations and its channel connections. Its workspace folder stays on disk.",
+    "zh-CN": "这将移除机器人、其对话及频道连接。磁盘上的工作区文件夹会保留。"
+  },
+  "shell.main.deleteBotButton": {
+    "en": "Delete bot",
+    "zh-CN": "删除机器人"
+  },
+  "shell.main.loadingUsage": {
+    "en": "Loading usage panel…",
+    "zh-CN": "正在加载用量面板…"
+  },
+  "shell.main.usageFailed": {
+    "en": "Unable to load usage. Close this window and try again.",
+    "zh-CN": "无法加载用量。请关闭此窗口后重试。"
+  },
+  "shell.main.searchTasksCommands": {
+    "en": "Search tasks and commands",
+    "zh-CN": "搜索任务和命令"
+  },
+  "shell.main.searchTasksCommandsHint": {
+    "en": "Search tasks and commands…",
+    "zh-CN": "搜索任务和命令…"
+  },
+  "shell.main.navigateHint": {
+    "en": "↑ ↓ to navigate",
+    "zh-CN": "↑ ↓ 导航"
+  },
+  "shell.main.openHint": {
+    "en": "↵ to open",
+    "zh-CN": "↵ 打开"
+  },
+  "shell.main.closeHint": {
+    "en": "esc to close",
+    "zh-CN": "esc 关闭"
+  },
+  "shell.main.commands": {
+    "en": "Commands",
+    "zh-CN": "命令"
+  },
+  "shell.main.noCommandMatches": {
+    "en": "No matching tasks or commands.",
+    "zh-CN": "没有匹配的任务或命令。"
+  },
+  "shell.main.runningTool": {
+    "en": "Running {name}",
+    "zh-CN": "正在运行 {name}"
+  },
+  "shell.main.connectingTo": {
+    "en": "Connecting to {name}…",
+    "zh-CN": "正在连接 {name}…"
+  },
+  "shell.main.replaces": {
+    "en": "Replaces {name}",
+    "zh-CN": "替换 {name}"
+  },
+  "shell.main.remoteTeam": {
+    "en": "Teams for this task are set up on {name}.",
+    "zh-CN": "此任务的团队在 {name} 上配置。"
+  },
+  "shell.main.otherComputer": {
+    "en": "the other computer",
+    "zh-CN": "另一台电脑"
+  },
+  "shell.main.toggleInspectorShortcut": {
+    "en": "Toggle inspector ({shortcut})",
+    "zh-CN": "切换检查器（{shortcut}）"
+  },
+  "shell.main.toggleTerminalShortcut": {
+    "en": "Toggle terminal ({shortcut})",
+    "zh-CN": "切换终端（{shortcut}）"
+  },
+  "shell.main.closeView": {
+    "en": "Close {name}",
+    "zh-CN": "关闭{name}"
+  },
+  "shell.main.taskUsage": {
+    "en": "This task so far: {input} in, {output} out, {cache} cache reads.",
+    "zh-CN": "此任务累计：输入 {input}，输出 {output}，缓存读取 {cache}。"
+  },
+  "shell.main.pullUnlinked": {
+    "en": "Pull request #{number} unlinked",
+    "zh-CN": "已解除拉取请求 #{number} 的关联"
+  },
+  "shell.main.pullLinked": {
+    "en": "Linked pull request #{number}{task}",
+    "zh-CN": "已关联拉取请求 #{number}{task}"
+  },
+  "shell.main.linkedToTask": {
+    "en": " to {name}",
+    "zh-CN": " 至 {name}"
+  },
+  "shell.main.usageLimit": {
+    "en": "Usage limit · {reset}",
+    "zh-CN": "用量限制 · {reset}"
+  },
+  "shell.main.limitedReset": {
+    "en": "Limited · {reset}",
+    "zh-CN": "已达限额 · {reset}"
+  },
+  "shell.main.workingFor": {
+    "en": "Working for {time}",
+    "zh-CN": "已工作 {time}"
+  },
+  "shell.main.workedFor": {
+    "en": "Worked for {time}",
+    "zh-CN": "工作用时 {time}"
+  },
+  "shell.main.messageBot": {
+    "en": "Message {name}…",
+    "zh-CN": "向 {name} 发送消息…"
+  },
+  "shell.main.viewLabel": {
+    "en": "Workspace view: {name}",
+    "zh-CN": "工作区视图：{name}"
+  },
+  "shell.main.step": {
+    "en": "Step {count}",
+    "zh-CN": "第 {count} 步"
+  },
+  "shell.main.queueEnter": {
+    "en": "Enter to queue for when the agent finishes.",
+    "zh-CN": "按 Enter 加入队列，在智能体完成后发送。"
+  },
+  "shell.main.sendMessageShortcut": {
+    "en": "Send message ({shortcut})",
+    "zh-CN": "发送消息（{shortcut}）"
+  },
+  "shell.main.steerTurnShortcut": {
+    "en": "Send into the running turn ({shortcut})",
+    "zh-CN": "发送到当前回合（{shortcut}）"
+  },
+  "shell.main.settingsShortcut": {
+    "en": "Settings ({shortcut})",
+    "zh-CN": "设置（{shortcut}）"
+  },
+  "shell.main.buildIn": {
+    "en": "What should we build in {name}?",
+    "zh-CN": "我们要在 {name} 中构建什么？"
+  },
+  "shell.main.settledNote": {
+    "en": "This task is settled.",
+    "zh-CN": "此任务已结项。"
+  },
+  "shell.main.savedResponseFailed": {
+    "en": "Couldn't load the saved response. {error}",
+    "zh-CN": "无法加载已保存的回复。{error}"
+  },
+  "shell.main.newFromBranch": {
+    "en": "New task from {branch}…",
+    "zh-CN": "从 {branch} 新建任务…"
+  },
+  "shell.main.removeNamedProject": {
+    "en": "Remove {name}?",
+    "zh-CN": "移除 {name}？"
+  },
+  "shell.main.importedConversations": {
+    "en": "Imported {count} conversations",
+    "zh-CN": "已导入 {count} 个对话"
+  },
+  "shell.main.reconnectingTo": {
+    "en": "Reconnecting to {name}…",
+    "zh-CN": "正在重新连接 {name}…"
+  },
+  "shell.main.reconnectFailed": {
+    "en": "Couldn’t reconnect to {name}",
+    "zh-CN": "无法重新连接 {name}"
+  },
+  "shell.main.remoteMoodboards": {
+    "en": "Moodboards can’t be sent to {name} yet. Remove them, or run on this computer.",
+    "zh-CN": "尚无法将灵感板发送到 {name}。请移除它们，或在此电脑上运行。"
+  },
+  "shell.main.imagesLimit": {
+    "en": "Attach up to {count} images per message, including browser screenshots.",
+    "zh-CN": "每条消息最多附加 {count} 张图片（包括浏览器截图）。"
+  },
+  "shell.main.noGithubRemote": {
+    "en": "{name} has no GitHub remote, so it can’t run on another computer.",
+    "zh-CN": "{name} 没有 GitHub 远程仓库，因此无法在另一台电脑上运行。"
+  },
+  "shell.main.botSettingsTitle": {
+    "en": "{name} settings",
+    "zh-CN": "{name} 设置"
+  },
+  "shell.main.namedActions": {
+    "en": "{name} actions",
+    "zh-CN": "{name} 操作"
+  },
+  "shell.main.botPauseStatus": {
+    "en": "{name} {status}",
+    "zh-CN": "{name} {status}"
+  },
+  "shell.main.botPaused": {
+    "en": "paused",
+    "zh-CN": "已暂停"
+  },
+  "shell.main.botResumed": {
+    "en": "resumed",
+    "zh-CN": "已恢复"
+  },
+  "shell.main.botDeleted": {
+    "en": "{name} deleted",
+    "zh-CN": "已删除 {name}"
+  },
+  "shell.main.botCreated": {
+    "en": "{name} created",
+    "zh-CN": "已创建 {name}"
+  },
+  "shell.main.exploreProject": {
+    "en": "Explore this project",
+    "zh-CN": "探索此项目"
+  },
+  "shell.main.reviewChanges": {
+    "en": "Review my changes",
+    "zh-CN": "审查我的更改"
+  },
+  "shell.main.explorePrompt": {
+    "en": "Explore this project and explain its architecture.",
+    "zh-CN": "探索此项目并解释其架构。"
+  },
+  "shell.main.reviewPrompt": {
+    "en": "Review the current changes for bugs and suggest improvements.",
+    "zh-CN": "审查当前更改中的缺陷并提出改进建议。"
+  },
+  "shell.main.teamTip": {
+    "en": "Team mode: your selected model becomes the lead. It plans the work, starts other agents in parallel and reviews their results. Cheap, Balanced and Best set how Panda Router picks each worker's model; with routing off the lead picks a model for each worker on its own. To choose the workers yourself, just say so in your prompt, like \"use Sonnet 5.5 workers\" or \"have Codex review it\".",
+    "zh-CN": "团队模式：您选择的模型将成为负责人，规划工作、并行启动其他智能体并审查结果。经济、均衡和最强模式决定 Panda Router 如何选择工作智能体模型；关闭路由时由负责人自行选择。若要指定工作智能体，请直接在提示中说明，例如“使用 Sonnet 5.5 工作智能体”或“让 Codex 审查”。"
+  },
+  "shell.main.showMore": {
+    "en": "Show {count} more",
+    "zh-CN": "再显示 {count} 项"
+  },
+  "shell.main.lastMessage": {
+    "en": "Last message: {date}",
+    "zh-CN": "最后消息：{date}"
+  },
+  "shell.main.botEnter": {
+    "en": "Enter {primary} for {name} · ⌘↩ {secondary}",
+    "zh-CN": "Enter 为 {name} {primary} · ⌘↩ {secondary}"
+  },
+  "shell.main.steerAction": {
+    "en": "steers",
+    "zh-CN": "引导"
+  },
+  "shell.main.queueAction": {
+    "en": "queues",
+    "zh-CN": "排队"
+  },
+  "shell.main.botEnterDescription": {
+    "en": "Enter to {primary}. Command Enter to {secondary}.",
+    "zh-CN": "按 Enter {primary}。按 Command Enter {secondary}。"
+  },
+  "shell.main.steerCurrent": {
+    "en": "steer current work",
+    "zh-CN": "引导当前工作"
+  },
+  "shell.main.queueAfter": {
+    "en": "queue for after it finishes",
+    "zh-CN": "排队等待工作完成"
+  },
+  "shell.main.steerNow": {
+    "en": "steer now",
+    "zh-CN": "立即引导"
+  },
+  "shell.main.botWorkingAction": {
+    "en": "{action} while {name} is working",
+    "zh-CN": "在 {name} 工作时{action}"
+  },
+  "shell.main.composerDescription": {
+    "en": "{enter} Shift Enter for a new line. Type @ to mention {targets}.",
+    "zh-CN": "{enter} 按 Shift Enter 换行。输入 @ 引用{targets}。"
+  },
+  "shell.main.mentionTargetsGithub": {
+    "en": "a project file, issue, or pull request",
+    "zh-CN": "项目文件、议题或拉取请求"
+  },
+  "shell.main.mentionTargetsFiles": {
+    "en": "a project file",
+    "zh-CN": "项目文件"
+  },
+  "shell.main.openedProject": {
+    "en": "Opened {name}",
+    "zh-CN": "已打开 {name}"
+  },
+  "shell.main.pullNumber": {
+    "en": "Pull request #{number}",
+    "zh-CN": "拉取请求 #{number}"
+  },
+  "shell.main.changedCount": {
+    "en": "Changes, {count} changed files",
+    "zh-CN": "更改，{count} 个已更改文件"
+  },
+  "shell.main.reconnectError": {
+    "en": "Couldn’t reconnect to {name}: {error}",
+    "zh-CN": "无法重新连接 {name}：{error}"
+  },
+  "shell.main.botPauseError": {
+    "en": "Couldn’t {action} {name}: {error}",
+    "zh-CN": "无法{action} {name}：{error}"
+  },
+  "shell.main.pauseAction": {
+    "en": "pause",
+    "zh-CN": "暂停"
+  },
+  "shell.main.resumeAction": {
+    "en": "resume",
+    "zh-CN": "恢复"
+  },
+  "shell.main.botDuplicateError": {
+    "en": "Couldn’t duplicate {name}: {error}",
+    "zh-CN": "无法复制 {name}：{error}"
+  },
+  "shell.main.botDeleteError": {
+    "en": "Couldn’t delete {name}: {error}",
+    "zh-CN": "无法删除 {name}：{error}"
+  },
+  "shell.main.queueRestoreFailed": {
+    "en": "A queued message could not be put back; it was not sent.",
+    "zh-CN": "无法放回一条排队消息；该消息未发送。"
+  },
+  "shell.main.dragArrange": {
+    "en": "drag to arrange",
+    "zh-CN": "拖动以排列"
+  },
+  "shell.main.modelCount": {
+    "en": "{count} models",
+    "zh-CN": "{count} 个模型"
+  },
+  "shell.main.extraModels": {
+    "en": "+{count} models{queued}",
+    "zh-CN": "+{count} 个模型{queued}"
+  },
+  "shell.main.queuedSuffix": {
+    "en": " · queued",
+    "zh-CN": " · 已排队"
+  },
+  "shell.main.default": {
+    "en": "Default",
+    "zh-CN": "默认"
+  },
+  "shell.main.ageNow": {
+    "en": "now",
+    "zh-CN": "刚刚"
+  },
+  "shell.main.ageMinutes": {
+    "en": "{count}m",
+    "zh-CN": "{count}分钟"
+  },
+  "shell.main.ageHours": {
+    "en": "{count}h",
+    "zh-CN": "{count}小时"
+  },
+  "shell.main.ageDays": {
+    "en": "{count}d",
+    "zh-CN": "{count}天"
+  },
+  "shell.main.modelFallback": {
+    "en": "{name} doesn’t have {model}. Using {next}.",
+    "zh-CN": "{name} 没有 {model}。将使用 {next}。"
+  },
+  "shell.main.droppedUnknown": {
+    "en": "{name} was dropped from a browser, so its location is unknown.",
+    "zh-CN": "{name} 是从浏览器拖入的，因此无法确定其位置。"
+  },
+  "shell.main.theAgent": {
+    "en": "the agent",
+    "zh-CN": "智能体"
+  },
+  "shell.main.thisProjectLower": {
+    "en": "this project",
+    "zh-CN": "此项目"
+  },
+  "shell.main.teamMessageQueued": {
+    "en": "A team takes messages between runs, so this one was queued.",
+    "zh-CN": "团队在两次运行之间接收消息，因此此消息已加入队列。"
+  },
+  "shell.main.startingMessageQueued": {
+    "en": "{name} is still starting this task; your message is queued for after it.",
+    "zh-CN": "{name} 仍在启动此任务；您的消息已排队等待。"
+  },
+  "shell.main.startingMessageHeld": {
+    "en": "{name} is still starting this task; the message stays queued.",
+    "zh-CN": "{name} 仍在启动此任务；消息将继续排队等待。"
+  },
+  "shell.main.queuedInstead": {
+    "en": "{reason} Queued instead.",
+    "zh-CN": "{reason} 已改为加入队列。"
+  },
+  "shell.main.remoteUnreadable": {
+    "en": "{path} can’t be read on this computer, so it can’t go to {name}. Remove it, or paste the part you need.",
+    "zh-CN": "无法在此电脑上读取 {path}，因此无法发送至 {name}。请移除它，或粘贴所需内容。"
+  },
+  "shell.main.commandNeedsLocal": {
+    "en": "{command} needs a checkout on this computer. Run it in a local task, or ask the remote agent in plain text.",
+    "zh-CN": "{command} 需要此电脑上的检出目录。请在本地任务中运行，或用自然语言向远程智能体提出请求。"
+  },
+  "shell.main.namedNeedsApproval": {
+    "en": "{name} needs approval",
+    "zh-CN": "{name} 需要审批"
+  },
+  "shell.main.namedNeedsAnswer": {
+    "en": "{name} needs your answer",
+    "zh-CN": "{name} 需要您的回答"
+  },
+  "shell.main.projectBeforeTask": {
+    "en": "A project can only be changed before starting the task.",
+    "zh-CN": "只能在开始任务之前更改项目。"
+  },
+  "shell.main.taskCount": {
+    "en": "{count} tasks",
+    "zh-CN": "{count} 个任务"
+  },
+  "shell.main.namedSettings": {
+    "en": "{name} settings",
+    "zh-CN": "{name} 设置"
+  },
+  "shell.main.offlineSince": {
+    "en": "{name} is offline · {lastSeen}",
+    "zh-CN": "{name} 已离线 · {lastSeen}"
+  },
+  "shell.main.channelActions": {
+    "en": "#{name} actions",
+    "zh-CN": "#{name} 操作"
+  },
+  "shell.main.botPausedNamed": {
+    "en": "{name} paused",
+    "zh-CN": "{name} 已暂停"
+  },
+  "shell.main.botResumedNamed": {
+    "en": "{name} resumed",
+    "zh-CN": "{name} 已恢复"
+  },
+  "shell.main.botCopy": {
+    "en": "{name} copy",
+    "zh-CN": "{name} 副本"
+  },
+  "shell.main.botPairing": {
+    "en": "{name} wants to talk to a bot. Approve code {code} in Bots.",
+    "zh-CN": "{name} 想与机器人对话。请在「机器人」中批准代码 {code}。"
+  },
+  "shell.main.themeDisabled": {
+    "en": "{name} turned off · PandaCode {theme}",
+    "zh-CN": "已关闭 {name} · PandaCode {theme}"
+  },
+  "shell.main.providerDefault": {
+    "en": "{name} default",
+    "zh-CN": "{name} 默认模型"
+  },
+  "shell.main.runsOn": {
+    "en": "Runs on {name}",
+    "zh-CN": "运行于 {name}"
+  },
+  "shell.main.runsOnCloud": {
+    "en": "Runs on a {name} cloud machine",
+    "zh-CN": "运行于 {name} 云机器"
+  },
+  "shell.main.botFixed": {
+    "en": "Bot: {name} (fixed for this task)",
+    "zh-CN": "机器人：{name}（此任务中固定）"
+  },
+  "shell.main.withBot": {
+    "en": "with {name}",
+    "zh-CN": "与 {name}"
+  },
+  "shell.main.diffViewerFailed": {
+    "en": "Unable to load the diff viewer. Close this window and try again. {error}",
+    "zh-CN": "无法加载差异查看器。请关闭此窗口后重试。{error}"
+  },
+  "shell.main.settled": {
+    "en": "Settled",
+    "zh-CN": "已结项"
+  },
+  "shell.main.browse": {
+    "en": "Browse…",
+    "zh-CN": "浏览…"
+  },
+  "shell.main.back": {
+    "en": "Back",
+    "zh-CN": "返回"
+  },
+  "shell.main.sourceOf": {
+    "en": "View source of ",
+    "zh-CN": "查看源文件："
+  },
+  "shell.main.attachedPrefix": {
+    "en": "Attached ",
+    "zh-CN": "已附加："
+  },
+  "shell.main.attachPrefix": {
+    "en": "Attach ",
+    "zh-CN": "附加 "
+  },
+  "shell.main.goalUpdated": {
+    "en": "Goal updated: ",
+    "zh-CN": "目标已更新："
+  },
+  "shell.main.approvalCount": {
+    "en": "{count} approvals",
+    "zh-CN": "{count} 项审批"
+  },
+  "shell.main.notPaired": {
+    "en": "{name} is no longer paired.",
+    "zh-CN": "{name} 已取消配对。"
+  },
+  "shell.main.botMoved": {
+    "en": "Moved {name} {direction} within {group}.",
+    "zh-CN": "已在{group}中将 {name} {direction}。"
+  },
+  "shell.main.initPrompt": {
+    "en": "Inspect this repository and create or update AGENTS.md with concise, accurate project instructions: setup, development commands, tests, architecture, and conventions. Preserve existing useful guidance.",
+    "zh-CN": "检查此仓库，创建或更新 AGENTS.md，提供简明准确的项目说明：环境配置、开发命令、测试、架构及约定。保留现有的有用指导。"
+  },
+  "shell.main.summarizePrompt": {
+    "en": "Summarize this conversation concisely: objective, changes, important decisions, validation, and remaining work.",
+    "zh-CN": "简要总结此对话：目标、更改、重要决定、验证情况和剩余工作。"
+  },
+  "shell.main.reviewAttachmentsPrompt": {
+    "en": "Please review the attached material.",
+    "zh-CN": "请查看附加的材料。"
+  },
+  "shell.main.continuePrompt": {
+    "en": "Continue where you left off.",
+    "zh-CN": "请从上次中断处继续。"
+  },
+  "shell.main.approvalBehavior": {
+    "en": "{mode} approvals",
+    "zh-CN": "{mode}审批"
+  }
+}
