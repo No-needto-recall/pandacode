@@ -34,6 +34,19 @@ test('Windows installs per user, bootstraps WebView2 and links the C++ runtime s
   assert.equal(buildPlan('linux-x86_64', { STATIC_VCRUNTIME: 'false' }, 'linux', 'x64').env.STATIC_VCRUNTIME, 'false');
 });
 
+test('Windows installers offer Simplified Chinese first and English on both architectures', () => {
+  for (const [target, arch] of [['windows-x86_64', 'x64'], ['windows-aarch64', 'arm64']]) {
+    const plan = buildPlan(target, {}, 'win32', arch);
+    assert.deepEqual(config(plan).bundle.windows.nsis, {
+      installMode: 'currentUser',
+      languages: ['SimpChinese', 'English'],
+      displayLanguageSelector: true,
+    });
+  }
+  assert.equal(config(buildPlan('darwin-aarch64', {}, 'darwin', 'arm64')).bundle.windows, undefined);
+  assert.equal(config(buildPlan('linux-x86_64', {}, 'linux', 'x64')).bundle.windows, undefined);
+});
+
 test('Linux bundles the external-link helper without changing Mac or Windows bundles', () => {
   const expected = { linux: { appimage: { files: { '/usr/bin/xdg-open': '/usr/bin/xdg-open' } } } };
   assert.deepEqual(appImageBundleOptions('linux-x86_64'), expected);

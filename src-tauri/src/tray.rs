@@ -33,14 +33,29 @@ fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(|e| e.into_inner())
 }
 
-pub(crate) fn setup(app: &AppHandle) -> tauri::Result<()> {
-    let menu = Menu::with_items(
+fn menu(app: &AppHandle, locale: crate::locale::Locale) -> tauri::Result<Menu<tauri::Wry>> {
+    Menu::with_items(
         app,
         &[
-            &MenuItem::with_id(app, "show", "Open PandaCode", true, None::<&str>)?,
-            &MenuItem::with_id(app, "quit", "Quit PandaCode", true, None::<&str>)?,
+            &MenuItem::with_id(
+                app, "show", locale.text("打开 PandaCode", "Open PandaCode"), true, None::<&str>,
+            )?,
+            &MenuItem::with_id(
+                app, "quit", locale.text("退出 PandaCode", "Quit PandaCode"), true, None::<&str>,
+            )?,
         ],
-    )?;
+    )
+}
+
+pub(crate) fn localize(app: &AppHandle, locale: crate::locale::Locale) -> tauri::Result<()> {
+    if let Some(tray) = app.tray_by_id(ID) {
+        tray.set_menu(Some(menu(app, locale)?))?;
+    }
+    Ok(())
+}
+
+pub(crate) fn setup(app: &AppHandle) -> tauri::Result<()> {
+    let menu = menu(app, crate::locale::current(app))?;
     TrayIconBuilder::with_id(ID)
         .icon(Image::from_bytes(include_bytes!("../icons/tray-template@2x.png"))?)
         .icon_as_template(true)

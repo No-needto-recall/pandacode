@@ -64,7 +64,7 @@ export function buildPlan(releaseTarget, inherited, platform = process.platform,
   if (releaseTarget.startsWith('windows-')) {
     // A local STATIC_VCRUNTIME=false must not produce an installer that only
     // starts on machines with the Visual C++ redistributable installed.
-    return plan(config, { ...env, STATIC_VCRUNTIME: 'true' }, 'unsigned', { ...shared, windows: { webviewInstallMode: { type: 'downloadBootstrapper', silent: true }, nsis: { installMode: 'currentUser' } } });
+    return plan(config, { ...env, STATIC_VCRUNTIME: 'true' }, 'unsigned', { ...shared, windows: { webviewInstallMode: { type: 'downloadBootstrapper', silent: true }, nsis: { installMode: 'currentUser', languages: ['SimpChinese', 'English'], displayLanguageSelector: true } } });
   }
   return plan(config, env, 'unsigned', shared);
 }

@@ -354,7 +354,7 @@ fn create_dock_window(app: AppHandle) -> crate::Result<()> {
         "agents-dock",
         tauri::WebviewUrl::App("agents-dock.html".into()),
     )
-    .title("Running agents")
+    .title(crate::locale::current(&app).dock_title())
     .inner_size(92.0, 92.0)
     .resizable(false)
     .decorations(false)

@@ -69,6 +69,7 @@ mod usage_ledger;
 mod workspace;
 mod jj;
 mod tray;
+mod locale;
 mod headless;
 mod headless_bots;
 
@@ -3476,6 +3477,7 @@ fn setup_common(app: &tauri::App) -> crate::Result<PathBuf> {
     }
     let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    locale::setup(app.handle(), &dir);
     secret_store::setup(&dir);
     provider_settings::setup(&dir)?;
     connections::setup(&dir)?;
@@ -3615,6 +3617,7 @@ pub fn run() {
         .invoke_handler(|invoke: tauri::ipc::Invoke<tauri::Wry>| {
             if invoke.message.webview_ref().label() == "launcher" {
                 let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
+                    locale::locale_get,
                     overlay::overlay_snapshot,
                     overlay::overlay_thread,
                     overlay::overlay_launch,
@@ -3632,6 +3635,7 @@ pub fn run() {
             }
             if invoke.message.webview_ref().label() == "tray" {
                 let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
+                    locale::locale_get,
                     tray::tray_snapshot,
                     tray::tray_open,
                     tray::tray_refresh_usage,
@@ -3644,6 +3648,7 @@ pub fn run() {
             }
             if invoke.message.webview_ref().label() == "agents-dock" {
                 let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
+                    locale::locale_get,
                     agents_dock::agents_dock_snapshot,
                     agents_dock::agents_dock_unpin,
                     agents_dock::agents_dock_set_expanded,
@@ -3658,6 +3663,8 @@ pub fn run() {
                 return true;
             }
             let handler: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
+                locale::locale_get,
+                locale::locale_set,
                 agents_dock::agents_dock_snapshot,
                 agents_dock::agents_dock_preferences,
                 agents_dock::agents_dock_save_preferences,
