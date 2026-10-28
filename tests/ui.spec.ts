@@ -445,6 +445,7 @@ for (const theme of ['light', 'dark']) {
     };
     await page.evaluate(preferences => {
       localStorage.clear();
+      localStorage.setItem('pandacode.locale', 'en');
       for (const [key, value] of Object.entries(preferences)) localStorage.setItem(`kingcode.${key}`, value);
       localStorage.setItem('another-app.theme', 'unrelated');
     }, preferences);
@@ -462,6 +463,7 @@ for (const theme of ['light', 'dark']) {
   test(`keeps existing PandaCode preferences and the ${theme} theme during migration`, async ({ page }) => {
     await page.evaluate(theme => {
       localStorage.clear();
+      localStorage.setItem('pandacode.locale', 'en');
       localStorage.setItem('kingcode.theme', theme === 'light' ? 'dark' : 'light');
       localStorage.setItem('kingcode.compact', 'true');
       localStorage.setItem('kingcode.projectFilter', 'project-2');
@@ -482,6 +484,7 @@ for (const theme of ['light', 'dark']) {
 test('does not restore removed PandaCode preferences from legacy storage on later launches', async ({ page }) => {
   await page.evaluate(() => {
     localStorage.clear();
+      localStorage.setItem('pandacode.locale', 'en');
     localStorage.setItem('kingcode.theme', 'light');
     localStorage.setItem('kingcode.compact', 'true');
   });

@@ -45,7 +45,7 @@ test('Rank models renders the seeded tiers, the unranked tray and unrated marker
   await expect(row(page, 'Unranked').locator('.tier-chip').first()).toBeVisible();
   await expect(chip(page, 'DeepSeek V4 Flash Vision Exp')).toHaveAccessibleName(/, Unranked, unrated$/);
   await expect(chip(page, 'DeepSeek V4 Flash Vision Exp').locator('.tier-unrated')).toHaveAttribute('data-tip', /lets the router use it/);
-  await expect(group(page).getByRole('img', { name: 'About ranking models' })).toHaveAttribute('data-tip', /an S model is tried before a B one/);
+  await expect(group(page).getByRole('img', { name: 'About ranking models' })).toHaveAttribute('data-tip', /70% its tier and 30% the router's own rating/);
 });
 
 test('dragging a chip to S saves the new tiers', async ({ page }) => {

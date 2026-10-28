@@ -43,12 +43,12 @@ async function installFailoverPreview(page: Page): Promise<void> {
     (window as any).__botMessageFixture = { markers: [] };
     (window as any).__persistBotFailoverFixture = () => sessionStorage.setItem(key, JSON.stringify((window as any).__botFailoverFixture));
   });
-  await page.route('**/src/preview.ts', async route => {
+  await page.route('**/src/preview.ts*', async route => {
     const response = await route.fetch();
     const body = await response.text();
     await route.fulfill({ response, body: `${body}\nwindow.__botEmit = emit; window.__botHasListener = name => Boolean(listeners.get(name)?.size);` });
   });
-  await page.route('**/src/preview-bots.ts', async route => {
+  await page.route('**/src/preview-bots.ts*', async route => {
     const response = await route.fetch();
     let body = await response.text();
     const replaceCase = (source: RegExp, replacement: string | ((match: string) => string)) => {
